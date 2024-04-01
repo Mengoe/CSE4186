@@ -5,13 +5,14 @@
       src="~assets/quasar-logo-vertical.svg"
       style="width: 200px; height: 200px"
     />
-    <RouterLink
-      id="signUp"
-      to="/signUp"
-      class="q-ml-xl text-h2 text-weight-bold"
-    >
-      회원가입 페이지로!
-    </RouterLink>
+    <div class="column q-gutter-y-xl">
+      <RouterLink to="/signUp" class="q-ml-xl text-h2 text-weight-bold">
+        회원가입 페이지로!
+      </RouterLink>
+      <RouterLink to="/cvUpload" class="q-ml-xl text-h2 text-weight-bold">
+        자기소개서 업로드하기!
+      </RouterLink>
+    </div>
   </q-page>
 </template>
 
