@@ -1,1 +1,31 @@
 /* app global css */
+.header-class {
+  background-color: white;
+  height: 60px;
+  width: auto;
+}
+
+.top-menu {
+  background-color: white;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.main-logo {
+  height: 55px;
+  width: auto;
+  display: block;
+}
+.tab-menu {
+  height: 90%;
+  width: 100%;
+}
+.login-form {
+  background-color: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 40px;
+}
