@@ -8,6 +8,10 @@ const routes = [
         path: "signUp",
         component: () => import("pages/SignUp.vue"),
       },
+      {
+        path: "cvUpload",
+        component: () => import("pages/CvUpload.vue"),
+      },
     ],
   },
 
