@@ -72,7 +72,7 @@ const dropdownMenus = [
   {
     label: "interview",
     subMenus: [
-      { label: "자소서 등록", to: "/" },
+      { label: "자소서 등록", to: "/cvUpload" },
       { label: "면접 보기", to: "/" },
       { label: "지난 면접 기록", to: "/" },
     ],

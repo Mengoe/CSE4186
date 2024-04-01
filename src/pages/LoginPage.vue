@@ -29,8 +29,10 @@
         </q-input>
       </div>
       <q-btn @click="onSubmit()">로그인</q-btn>
-      <a href="/members/join" style="text-decoration-color: black; color: black"
-        >회원가입</a
+      <RouterLink
+        to="/members/join"
+        style="text-decoration-color: black; color: black"
+        >회원가입</RouterLink
       >
     </div>
   </q-page>
@@ -39,6 +41,7 @@
 <script setup>
 import { ref } from "vue";
 import { useMemberStore } from "stores/member.js";
+import { RouterLink } from "vue-router";
 const email = ref("");
 const password = ref("");
 function onSubmit() {
