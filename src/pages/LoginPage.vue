@@ -52,7 +52,7 @@ function onSubmit() {
     password: this.password,
   };
   if (useMemberStore().login(loginObj)) {
-    router.push("/");
+    router.go(-1);
   } else {
     console.log("로그인 실패");
     router.push("/members/login");

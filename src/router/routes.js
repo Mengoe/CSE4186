@@ -6,7 +6,15 @@ const routes = [
     component: () => import("layouts/BasicLayout.vue"),
     children: [
       { path: "", component: () => import("pages/MainPage.vue") },
-      { path: "cvUpload", component: () => import("pages/CvUpload.vue") },
+      {
+        path: "cvUpload",
+        component: () => import("pages/CvUpload.vue"),
+        beforeEnter: (to, from, next) => {
+          const { isLogin } = storeToRefs(useMemberStore());
+          if (!isLogin.value) next("/members/login");
+          else next();
+        },
+      },
     ],
   },
   {
@@ -22,7 +30,7 @@ const routes = [
     beforeEnter: (to, from, next) => {
       const { isLogin } = storeToRefs(useMemberStore());
       if (!isLogin.value) next();
-      else return false;
+      else next("/");
     },
   },
 
@@ -33,5 +41,4 @@ const routes = [
     component: () => import("pages/ErrorNotFound.vue"),
   },
 ];
-
 export default routes;
