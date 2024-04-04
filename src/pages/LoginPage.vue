@@ -53,7 +53,7 @@ function onSubmit() {
     password: this.password,
   };
   if (useMemberStore().login(loginObj)) {
-    router.replace(route.query.redirect || "/");
+    router.push(route.query.redirect || "/");
   } else {
     console.log("로그인 실패");
     router.push("/members/login");
