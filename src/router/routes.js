@@ -11,7 +11,8 @@ const routes = [
         component: () => import("pages/CvUpload.vue"),
         beforeEnter: (to, from, next) => {
           const { isLogin } = storeToRefs(useMemberStore());
-          if (!isLogin.value) next("/members/login");
+          if (!isLogin.value)
+            next({ path: "/members/login", query: { redirect: to.fullPath } });
           else next();
         },
       },

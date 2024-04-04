@@ -41,8 +41,9 @@
 <script setup>
 import { ref } from "vue";
 import { useMemberStore } from "stores/member.js";
-import { RouterLink, useRouter } from "vue-router";
+import { RouterLink, useRouter, useRoute } from "vue-router";
 const router = useRouter();
+const route = useRoute();
 const email = ref("");
 const password = ref("");
 const isPwd = ref(false);
@@ -52,7 +53,7 @@ function onSubmit() {
     password: this.password,
   };
   if (useMemberStore().login(loginObj)) {
-    router.go(-1);
+    router.replace(route.query.redirect || "/");
   } else {
     console.log("로그인 실패");
     router.push("/members/login");
