@@ -206,7 +206,7 @@ function onSubmit() {
 }
 
 function toHome() {
-  Router.push("/");
+  router.push("/");
 }
 </script>
 
