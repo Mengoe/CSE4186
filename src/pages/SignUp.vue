@@ -189,8 +189,8 @@ function onSubmit() {
           store.password = savedData.password;
           store.nickName = savedData.nickName;
 
-          // route to main page(maybe login page)
-          router.push("/");
+          // route to login page
+          router.push("/members/login");
         }
       })
       .catch((error) => {
@@ -206,7 +206,7 @@ function onSubmit() {
 }
 
 function toHome() {
-  Router.push("/");
+  router.push("/");
 }
 </script>
 
