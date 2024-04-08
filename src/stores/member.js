@@ -14,7 +14,7 @@ export const useMemberStore = defineStore(
       sameSite: "Strict",
       httpOnly: false,
     };
-    function _login(loginObj) {
+    function login(loginObj) {
       const loginApi =
         "http://ec2-3-39-165-26.ap-northeast-2.compute.amazonaws.com:8080/login";
       console.log(loginObj);
@@ -28,13 +28,14 @@ export const useMemberStore = defineStore(
         })
         .then((res) => {
           if (res.status == 200 && res.data.result === "success") {
-            const token = response.headers["authorization"].split(" ")[1];
+            const token = res.headers["authorization"].split(" ")[1];
             const user_token = {
               userEmail: loginObj.email,
               userToken: token,
             };
             console.log(user_token);
             Cookies.set("access_token", token, options);
+            isLogin.value = true;
             return true;
           } else {
             console.log(res);
@@ -47,7 +48,7 @@ export const useMemberStore = defineStore(
         });
     }
 
-    function login(loginObj) {
+    function _login(loginObj) {
       if (loginObj.email == "asdf" && loginObj.password == "1234") {
         const user_token = {
           userEmail: loginObj.email,
