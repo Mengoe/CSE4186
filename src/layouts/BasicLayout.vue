@@ -74,7 +74,7 @@ const memberStore = useMemberStore();
 const { isLogin } = storeToRefs(memberStore);
 const router = useRouter();
 const tabMenus = [
-  { to: "/", label: "social" },
+  { to: "/board", label: "social" },
   { to: "/", label: "about" },
 ];
 const dropdownMenus = [
