@@ -6,6 +6,7 @@ const routes = [
     component: () => import("layouts/BasicLayout.vue"),
     children: [
       { path: "", component: () => import("pages/MainPage.vue") },
+      { path: "interview", component: () => import("pages/InterviewPage.vue") },
       {
         path: "cvUpload",
         component: () => import("pages/CvUpload.vue"),

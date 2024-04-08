@@ -34,8 +34,10 @@ export const useMemberStore = defineStore(
                 userEmail: loginObj.email,
                 userToken: token,
               };
-              Cookies.set("access_token", user_token, options);
+              console.log(user_token);
+              Cookies.set("access_token", token, options);
               isLogin.value = true;
+
               resolve(true);
             } else {
               reject("fail to login");
