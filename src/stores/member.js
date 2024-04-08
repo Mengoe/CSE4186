@@ -14,38 +14,39 @@ export const useMemberStore = defineStore(
       sameSite: "Strict",
       httpOnly: false,
     };
-    function login(loginObj) {
-      const loginApi =
-        "http://ec2-3-39-165-26.ap-northeast-2.compute.amazonaws.com:8080/login";
-      console.log(loginObj);
 
-      axios
-        .post(loginApi, JSON.stringify(loginObj), {
-          headers: {
-            "Content-Type": `application/json`,
-          },
-          withCredentials: true,
-        })
-        .then((res) => {
-          if (res.status == 200 && res.data.result === "success") {
-            const token = res.headers["authorization"].split(" ")[1];
-            const user_token = {
-              userEmail: loginObj.email,
-              userToken: token,
-            };
-            console.log(user_token);
-            Cookies.set("access_token", token, options);
-            isLogin.value = true;
-            return true;
-          } else {
-            console.log(res);
-            return false;
-          }
-        })
-        .catch((err) => {
-          console.log(err);
-          return false;
-        });
+    function login(loginObj) {
+      return new Promise((resolve, reject) => {
+        const loginApi =
+          "http://ec2-3-39-165-26.ap-northeast-2.compute.amazonaws.com:8080/login";
+        console.log(loginObj);
+
+        axios
+          .post(loginApi, JSON.stringify(loginObj), {
+            headers: {
+              "Content-Type": `application/json`,
+            },
+            withCredentials: true,
+          })
+          .then((res) => {
+            if (res.status == 200 && res.data.result === "success") {
+              const token = res.headers["authorization"].split(" ")[1];
+              const user_token = {
+                userEmail: loginObj.email,
+                userToken: token,
+              };
+              Cookies.set("access_token", token, options);
+              isLogin.value = true;
+              console.log(user_token);
+              resolve(true);
+            } else {
+              reject("fail to login");
+            }
+          })
+          .catch((err) => {
+            console.log(err);
+          });
+      });
     }
 
     function _login(loginObj) {

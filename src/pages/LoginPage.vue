@@ -47,15 +47,20 @@ const route = useRoute();
 const email = ref("");
 const password = ref("");
 const isPwd = ref(false);
-function onSubmit() {
+
+const memberStore = useMemberStore();
+
+async function onSubmit() {
   const loginObj = {
     email: this.email,
     password: this.password,
   };
-  if (useMemberStore().login(loginObj)) {
+
+  try {
+    await memberStore.login(loginObj);
     router.replace(route.query.redirect || "/");
-  } else {
-    console.log("로그인 실패");
+  } catch (err) {
+    console.log(err);
     router.push("/members/login");
   }
 }
