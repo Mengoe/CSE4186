@@ -1,7 +1,7 @@
 import { defineStore } from "pinia";
 import { Cookies } from "quasar";
-import axios from "axios";
 import { ref } from "vue";
+import axios from "axios";
 
 export const useMemberStore = defineStore(
   "member",
@@ -19,7 +19,6 @@ export const useMemberStore = defineStore(
       return new Promise((resolve, reject) => {
         const loginApi =
           "http://ec2-3-39-165-26.ap-northeast-2.compute.amazonaws.com:8080/login";
-        console.log(loginObj);
 
         axios
           .post(loginApi, JSON.stringify(loginObj), {
@@ -35,9 +34,8 @@ export const useMemberStore = defineStore(
                 userEmail: loginObj.email,
                 userToken: token,
               };
-              Cookies.set("access_token", token, options);
+              Cookies.set("access_token", user_token, options);
               isLogin.value = true;
-              console.log(user_token);
               resolve(true);
             } else {
               reject("fail to login");
@@ -50,7 +48,7 @@ export const useMemberStore = defineStore(
     }
 
     function _login(loginObj) {
-      if (loginObj.email == "asdf" && loginObj.password == "1234") {
+      if (loginObj.email == "asdf@gmail.com" && loginObj.password == "1234") {
         const user_token = {
           userEmail: loginObj.email,
           userToken: "token",
@@ -72,22 +70,32 @@ export const useMemberStore = defineStore(
       isLogin.value = false;
     }
     function autoLogin() {
-      const user_token = Cookies.has("access_token")
-        ? Cookies.get("access_token")
-        : null;
-      if (user_token.userToken != null) {
+      if (verifyTokenExpiration) isLogin.value = true;
+      if (verifyTokenExpiration) {
         isLogin.value = true;
       }
     }
-    function verifyToken() {
-      const user_token = Cookies.has("access_token")
-        ? Cookies.get("access_token")
+
+    const verifyTokenExpiration = () => {
+      const token = Cookies.has("access_token")
+        ? Cookies.get("access_token").userToken
         : null;
-      if (user_token.userToken == null) {
-        isLogin.value = false;
-        return false;
-      } else return true;
-    }
+      return token != null;
+      /*
+      if (token != null) {
+        let base64Payload = state.accessToken.split(".")[1];
+        base64Payload = base64Payload.replace(/-/g, "+").replace(/_/g, "/");
+        base64Payload = atob(base64Payload);
+        const payloadObject = JSON.parse(base64Payload);
+        const currentDate = new Date().getTime() / 1000;
+        if (payloadObject.exp <= currentDate) {
+          return false;
+        } else {
+          return true;
+        }
+      } else return false;
+      */
+    };
     return { login, logout, isLogin, autoLogin };
   },
   {
