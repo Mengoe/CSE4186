@@ -46,9 +46,13 @@
               class="text-black"
             />
           </q-tabs>
-
-          <q-btn label="login/join" class="text-black" to="/members/login" />
-          <q-btn label="logout" class="text-black" @click="logout" />
+          <q-btn
+            v-if="isLogin == false"
+            label="login/join"
+            class="text-black"
+            to="/members/login"
+          />
+          <q-btn v-else label="logout" class="text-black" @click="logOut()" />
         </q-toolbar>
       </div>
     </q-header>
@@ -61,11 +65,16 @@
 
 <script setup>
 import { useMemberStore } from "stores/member.js";
+import { storeToRefs } from "pinia";
+import { useRouter } from "vue-router";
 defineOptions({
   name: "BasicLayout",
 });
+const memberStore = useMemberStore();
+const { isLogin } = storeToRefs(memberStore);
+const router = useRouter();
 const tabMenus = [
-  { to: "/", label: "social" },
+  { to: "/board", label: "social" },
   { to: "/", label: "about" },
 ];
 const dropdownMenus = [
@@ -73,13 +82,13 @@ const dropdownMenus = [
     label: "interview",
     subMenus: [
       { label: "자소서 등록", to: "/cvUpload" },
-      { label: "면접 보기", to: "/" },
+      { label: "면접 보기", to: "/cvList" },
       { label: "지난 면접 기록", to: "/" },
     ],
   },
 ];
-const logout = () => {
-  useMemberStore.logout();
-  window.location.reload("/");
-};
+function logOut() {
+  useMemberStore().logout();
+  router.go(0);
+}
 </script>
