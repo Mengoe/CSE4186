@@ -91,16 +91,13 @@
 </template>
 
 <script setup>
-import { useUserStore } from "src/stores/user";
-import { ref, reactive } from "vue";
+import { ref } from "vue";
 import { useQuasar } from "quasar";
-import { useRouter, useRoute } from "vue-router";
-import { onMounted } from "vue";
+import { useRouter } from "vue-router";
 
 import axios from "axios";
 
 const router = useRouter();
-const route = useRoute();
 const $q = useQuasar();
 
 const emailPattern = /.+@.+\..+/;
@@ -115,8 +112,6 @@ const nickName = ref("");
 const isVisible = ref(true);
 
 const loading = ref(false);
-
-const store = useUserStore();
 
 const emailRules = [
   (val) => (val != null && val !== "") || "이메일을 작성해주세요.",
@@ -142,18 +137,18 @@ const passwordConfirmRules = [
 ];
 
 const joinAPI =
-  "https://259da068-0fdc-4898-8a3d-28d48fa2de21.mock.pstmn.io/join";
+  "http://ec2-3-39-165-26.ap-northeast-2.compute.amazonaws.com:8080/join"; // temporary api url
 
-//"http://ec2-3-39-165-26.ap-northeast-2.compute.amazonaws.com:8080/join"; // temporary api url
-
-// 닉네임 중복 처리는 백엔드 메시지로
 function onSubmit() {
   // axios post request
-  let savedData = {};
-  savedData.email = email.value;
-  savedData.password = password.value;
-  savedData.nickName = nickName.value;
+  let savedData = {
+    email: email.value,
+    password: password.value,
+    name: nickName.value,
+  };
+
   loading.value = true;
+  console.log(JSON.stringify(savedData));
 
   try {
     // send post request
@@ -164,14 +159,13 @@ function onSubmit() {
         },
       })
       .then((response) => {
-        console.log(response);
-        if (response.data.errorCode === 400) {
+        if (response.data.result === "fail") {
           // notify error message using $q
           $q.notify({
             position: "center",
             icon: "done",
             color: "negative",
-            message: `${response.data.errorMessage}`,
+            message: `${response.data.message}`,
             timeout: 800,
           });
         } else {
@@ -180,14 +174,9 @@ function onSubmit() {
             position: "center",
             icon: "done",
             color: "primary",
-            message: `${response.data.message}`,
+            message: "회원가입을 축하드립니다! 로그인 화면을 돌아갑니다.",
             timeout: 800,
           });
-
-          // save user's metadata to user store
-          store.email = savedData.email;
-          store.password = savedData.password;
-          store.nickName = savedData.nickName;
 
           // route to login page
           router.push("/members/login");

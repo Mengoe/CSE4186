@@ -41,18 +41,22 @@
 <script setup>
 import { ref } from "vue";
 import { useMemberStore } from "stores/member.js";
-import { RouterLink } from "vue-router";
+import { RouterLink, useRouter, useRoute } from "vue-router";
+const router = useRouter();
+const route = useRoute();
 const email = ref("");
 const password = ref("");
+const isPwd = ref(false);
 function onSubmit() {
   const loginObj = {
     email: this.email,
     password: this.password,
   };
-  if (useMemberStore.login(loginObj)) {
-    window.location.href = "/";
+  if (useMemberStore().login(loginObj)) {
+    router.replace(route.query.redirect || "/");
   } else {
-    location.reload();
+    console.log("로그인 실패");
+    router.push("/members/login");
   }
 }
 
