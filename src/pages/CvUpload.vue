@@ -39,13 +39,7 @@
         <div>자기소개서 등록하기!</div>
         <q-icon :name="outlinedAddCircle" right></q-icon>
       </q-btn>
-      <q-btn
-        v-else
-        color="primary"
-        text-color="white"
-        size="xl"
-        @click="toCvLists"
-      >
+      <q-btn v-else color="primary" text-color="white" size="xl" to="/cvList">
         면접 보러가기
       </q-btn>
     </q-form>
@@ -118,12 +112,6 @@ function onSubmit() {
     loading.value = false;
   }
 }
-
-function toCvLists() {
-  router.push("/cvList");
-}
 </script>
 
 <style lang="scss" scoped></style>
-
-cvUpload
