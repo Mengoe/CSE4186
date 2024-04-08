@@ -16,6 +16,10 @@ const routes = [
           else next();
         },
       },
+      {
+        path: "/interview",
+        component: () => import("components/WebCamera.vue"),
+      },
     ],
   },
   {
