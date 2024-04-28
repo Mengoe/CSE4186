@@ -62,8 +62,9 @@ export const useBoardStore = defineStore("board", {
           },
         })
         .then((res) => {
+          console.log(res.data);
           console.log("fetchAllPost succeed");
-          this.postList = res.data;
+          if (res.data.result === "success") this.postList = res.data.body;
         })
         .catch((err) => {
           console.log(err);
@@ -73,7 +74,7 @@ export const useBoardStore = defineStore("board", {
         });
     },
 
-    // fetch post of id
+    // fetch post with id
     fetchPost(id) {
       const getPostAPI = `http://ec2-3-39-165-26.ap-northeast-2.compute.amazonaws.com:8080/post/${id}`;
 
@@ -88,8 +89,8 @@ export const useBoardStore = defineStore("board", {
           },
         })
         .then((res) => {
-          console.log(res);
-          this.post = res.data;
+          console.log(res.data);
+          if (res.data.result === "success") this.post = res.data.body;
         })
         .catch((err) => {
           console.log(err);
@@ -109,7 +110,7 @@ export const useBoardStore = defineStore("board", {
       const postObj = {
         title,
         content,
-        userId: 12, // tmp user Id
+        userId: 2, // tmp user Id
       };
 
       console.log(postObj);
