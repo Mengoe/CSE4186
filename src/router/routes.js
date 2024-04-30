@@ -61,6 +61,10 @@ const routes = [
         path: "post",
         component: () => import("pages/AddPostPage.vue"),
       },
+      {
+        path: "edit",
+        component: () => import("pages/UpdatePostPage.vue"),
+      },
     ],
     beforeEnter: (to, from, next) => {
       const { isLogin } = storeToRefs(useMemberStore());
