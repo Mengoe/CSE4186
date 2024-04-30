@@ -6,6 +6,7 @@ import axios from "axios";
 export const useMemberStore = defineStore(
   "member",
   () => {
+    const userId = ref(null);
     const isLogin = ref(false);
     const timer = ref(null);
     const options = {
@@ -37,7 +38,8 @@ export const useMemberStore = defineStore(
               console.log(user_token);
               Cookies.set("access_token", token, options);
               isLogin.value = true;
-
+              userId.value = res.data.body.userId;
+              console.log(userId.value);
               resolve(true);
             } else {
               reject("fail to login");
@@ -98,7 +100,7 @@ export const useMemberStore = defineStore(
       } else return false;
       */
     };
-    return { login, logout, isLogin, autoLogin };
+    return { login, logout, isLogin, autoLogin, userId };
   },
   {
     persist: true,
