@@ -56,7 +56,8 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from "vue";
+import { onMounted, ref, computed } from "vue";
+import { useCvStore } from "src/stores/cv";
 import axios from "axios";
 import {
   outlinedFindInPage,
@@ -67,14 +68,24 @@ import LoaderComponent from "components/LoaderComponent.vue";
 import CvQuestion from "components/CvQuestion.vue";
 import CvDetails from "components/CvDetails.vue";
 
-const cvLists = ref(null);
+const cvStore = useCvStore();
+
+//const cvLists = computed(() => cvStore.cvLists);
+//const pageLoading = computed(() => cvStore.loading);
+const cvLists = ref([]);
+const pageLoading = ref(true);
+
 const showDialog = ref(null); // 특정 자소서에 대해 예상 질문 생성 dialog 띄워줌
 const showDetails = ref(null); // 특정 자소서 내용 dialog로 띄워줌
 
-const pageLoading = ref(true);
-
 // get user's cv lists
 onMounted(() => {
+  /*
+  cvStore.fetchAllCv();
+  showDialog.value = new Array(cvLists.value.length).fill(false);
+  showDetails.value = new Array(cvLists.value.length).fill(false);
+  */
+
   const cvGetAPI =
     "https://259da068-0fdc-4898-8a3d-28d48fa2de21.mock.pstmn.io/cv"; // temporary url
 

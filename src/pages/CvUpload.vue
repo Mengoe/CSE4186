@@ -47,7 +47,7 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { computed, ref } from "vue";
 import { useQuasar } from "quasar";
 import {
   outlinedAddCircle,
@@ -55,29 +55,45 @@ import {
 } from "@quasar/extras/material-icons-outlined";
 import { useRouter } from "vue-router";
 import axios from "axios";
+import { useCvStore } from "src/stores/cv";
 
 const $q = useQuasar();
-const router = useRouter();
-const cvRules = [(val) => (val && val !== "") || "내용을 입력해주세요!"];
+const cvStore = useCvStore();
 
+const cvRules = [(val) => (val && val !== "") || "내용을 입력해주세요!"];
 const title = ref("");
 const content = ref("");
-const loading = ref(false); // 등록 대기 flag
+
+//const loading = computed(() => cvStore.loading); // 등록 대기 flag
+const loading = ref(false);
+
 const isDoneRegister = ref(false); // 자기소개서 등록 완료 됐는지를 나타내는 flag
 
-const tmpUserId = 1;
-//const genAPI = `https://259da068-0fdc-4898-8a3d-28d48fa2de21.mock.pstmn.io/post/cv/${tmpUserId}`;
 const cvPostAPI =
   "https://259da068-0fdc-4898-8a3d-28d48fa2de21.mock.pstmn.io/post/cv";
 
 function onSubmit() {
-  loading.value = true;
+  /*
+    try {
+      await cvStore.addCv(title, content);
+      isDoneRegister.value = true;
+      $q.notify({
+        message: "자기소개서 등록 성공!",
+        color: $primary,
+      });
+    } catch (err) {
+      console.log(err);
+    }
+  */
 
+  // temp implementation. after fixing backend, this code will be replaced with above commented code
   try {
     let cvData = {};
     cvData.title = title.value;
     cvData.content = content.value;
     // 유저 id는 api 경로에 추가해서 보냄
+    loading.value = true;
+
     axios
       .post(cvPostAPI, JSON.stringify(cvData), {
         headers: {
