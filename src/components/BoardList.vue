@@ -1,6 +1,6 @@
 <template>
   <div class="container q-mt-lg q-gutter-y-lg">
-    <div class="post-container row flex-center q-gutter-y-lg q-gutter-x-md">
+    <div class="post-container row justify-start q-gutter-y-lg q-gutter-x-md">
       <q-card
         bordered
         v-for="post in postLists"
@@ -23,7 +23,7 @@
 </template>
 
 <script setup>
-import { useRouter, useRoute } from "vue-router";
+import { useRouter } from "vue-router";
 import { useBoardStore } from "src/stores/board";
 const props = defineProps({
   postLists: Array,
@@ -46,6 +46,8 @@ function toDetail(id) {
     .q-card {
       height: 30%;
       width: 30%;
+      overflow: hidden;
+      text-overflow: ellipsis;
       &:hover {
         background-color: $light-blue-1;
         cursor: pointer;

@@ -47,13 +47,12 @@ import { useBoardStore } from "src/stores/board";
 const props = defineProps({
   comments: Array,
   postId: Number,
-  userId: Number,
 });
 
 const boardStore = useBoardStore();
 const newComment = ref("");
 
 function addComment() {
-  boardStore.addComment(newComment.value, props.postId, props.userId);
+  boardStore.addComment(newComment.value, props.postId);
 }
 </script>

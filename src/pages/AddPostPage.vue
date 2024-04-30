@@ -2,7 +2,7 @@
   <q-page class="q-mt-xl">
     <BoardTitle title="게시글 등록" />
     <q-form
-      @submit="addPost(title, content)"
+      @submit="addPost"
       class="q-gutter-y-md column flex-center items-stretch"
       style="width: 50%"
     >
@@ -33,8 +33,7 @@
         text-color="white"
         size="xl"
       >
-        <div>게시글 등록</div>
-        <q-icon :name="outlinedAddCircle" right></q-icon>
+        <div>글쓰기</div>
       </q-btn>
     </q-form>
   </q-page>
@@ -59,8 +58,9 @@ const title = ref("");
 const content = ref("");
 const loading = computed(() => boardStore.loading);
 
-function addPost(title, content) {
-  boardStore.addPost(title, content);
+function addPost() {
+  console.log(title.value, content.value);
+  boardStore.addPost(title.value, content.value);
   alert("등록되었습니다. 게시글 목록으로 이동합니다.");
   router.push("/board");
 }
