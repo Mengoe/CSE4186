@@ -22,6 +22,7 @@ export const useBoardStore = defineStore("board", {
       ],
     },
     postList: [],
+    pageCount: 0,
     loading: false,
   }),
   getters: {},
@@ -50,9 +51,15 @@ export const useBoardStore = defineStore("board", {
     },
 
     // fetch all posts
-    fetchAllPosts() {
-      const getPostListAPI =
-        "http://ec2-3-39-165-26.ap-northeast-2.compute.amazonaws.com:8080/post/list";
+    fetchPosts(params) {
+      console.log(params);
+      const { page, size, searchBy, q } = params;
+
+      const getPostListAPI = searchBy
+        ? `http://ec2-3-39-165-26.ap-northeast-2.compute.amazonaws.com:8080/post/list?page=${page}&size=${size}&q=${q}&searchBy=${searchBy}`
+        : `http://ec2-3-39-165-26.ap-northeast-2.compute.amazonaws.com:8080/post/list?page=${page}&size=${size}`;
+
+      console.log(getPostListAPI);
       const accessToken = this.getToken();
       this.loading = true;
 
@@ -63,9 +70,12 @@ export const useBoardStore = defineStore("board", {
           },
         })
         .then((res) => {
-          console.log(res.data);
           console.log("fetchAllPost succeed");
-          if (res.data.result === "success") this.postList = res.data.body;
+          console.log(res.data);
+          if (res.data.result === "success") {
+            this.postList = res.data.body;
+            this.pageCount = res.data.pageCount;
+          }
         })
         .catch((err) => {
           console.log(err);
@@ -91,9 +101,12 @@ export const useBoardStore = defineStore("board", {
         .then((res) => {
           console.log(res.data);
           if (res.data.result === "success") this.post = res.data.body;
+          else throw new Error(res.data.message);
         })
         .catch((err) => {
           console.log(err);
+          alert(err);
+          this.router.push("/board");
         })
         .finally(() => {
           this.loading = false;
@@ -146,6 +159,7 @@ export const useBoardStore = defineStore("board", {
 
       console.log(updateObj);
 
+      this.loading = true;
       axios
         .put(updatePostAPI, JSON.stringify(updateObj), {
           headers: {
@@ -177,14 +191,16 @@ export const useBoardStore = defineStore("board", {
         .then((res) => {
           console.log(res);
           alert("삭제되었습니다.");
-          this.router.go(-1);
+          this.router.push("./");
         })
         .catch((err) => {
           console.log(err);
         });
     },
 
-    addComment(content, postId) {
+    addComment(content) {
+      const postId = this.post.id;
+
       const addCommentAPI = `http://ec2-3-39-165-26.ap-northeast-2.compute.amazonaws.com:8080/post/${postId}/comment`;
 
       const accessToken = this.getToken();
@@ -204,10 +220,66 @@ export const useBoardStore = defineStore("board", {
         })
         .then((res) => {
           console.log(res);
-          this.router.go(0); // reload page
+          this.router.go(0); // reload page to show added Comment
         })
         .catch((err) => {
           console.log(err);
+        });
+    },
+
+    deleteComment(postId, commentId) {
+      console.log(postId, commentId);
+      const deleteCommentAPI = `http://ec2-3-39-165-26.ap-northeast-2.compute.amazonaws.com:8080/post/${postId}/comment`;
+      const accessToken = this.getToken();
+
+      const commentObj = {
+        id: commentId,
+      };
+
+      console.log(commentObj);
+
+      axios
+        .delete(deleteCommentAPI, {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+          data: commentObj,
+        })
+        .then((res) => {
+          console.log(res);
+          alert("삭제되었습니다."); // reload page
+          this.router.go(0);
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    },
+
+    // 댓글 양식 확정되면 구현
+    updateComment(postId, commentId, content) {
+      const updateCommentAPI = `http://ec2-3-39-165-26.ap-northeast-2.compute.amazonaws.com:8080/post/${postId}/comment`;
+      const accessToken = this.getToken();
+
+      const updateObj = {
+        id: commentId,
+        content,
+      };
+
+      axios
+        .put(updateCommentAPI, JSON.stringify(updateObj), {
+          headers: {
+            "Content-Type": `application/json`,
+            Authorization: `Bearer ${accessToken}`,
+          },
+        })
+        .then((res) => {
+          console.log(res);
+        })
+        .catch((err) => {
+          console.log(err);
+        })
+        .finally(() => {
+          this.loading = false;
         });
     },
   },

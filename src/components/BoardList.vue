@@ -1,6 +1,6 @@
 <template>
   <div class="container q-mt-lg q-gutter-y-lg">
-    <div class="post-container row justify-start q-gutter-y-lg q-gutter-x-md">
+    <div class="post-container row justify-center q-gutter-y-lg q-gutter-x-md">
       <q-card
         bordered
         v-for="post in postLists"
@@ -40,7 +40,6 @@ function toDetail(id) {
 <style lang="scss" scoped>
 .container {
   width: 80%;
-  height: 700px;
   margin: 0 auto;
   .post-container {
     .q-card {
