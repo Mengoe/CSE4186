@@ -4,32 +4,22 @@
 
     <div v-else class="post full-height">
       <div class="post-details shadow-11 rounded-borders">
-        <PostHeader :title="post.title" />
+        <PostHeader
+          :title="post.title"
+          :postId="post.id"
+          :postUserId="post.userId"
+        />
+
         <q-separator />
+
         <PostBody :content="post.content" />
       </div>
-      <div>
+
+      <div class="q-mb-md">
         <PostComment :comments="post.comments" :postId="post.id" />
       </div>
-      <div class="row justify-end q-mt-sm q-gutter-x-sm">
-        <q-btn
-          v-if="post.userId == userId"
-          color="grey-7"
-          size="lg"
-          to="./edit"
-        >
-          수정
-        </q-btn>
-        <q-btn
-          v-if="post.userId == userId"
-          color="negative"
-          size="lg"
-          @click="deletePost(post.id)"
-        >
-          삭제
-        </q-btn>
-        <q-btn color="primary" size="lg" to="./">목록</q-btn>
-      </div>
+
+      <PostFooter />
     </div>
   </q-page>
 </template>
@@ -43,6 +33,7 @@ import LoaderComponent from "components/LoaderComponent.vue";
 import PostHeader from "components/PostHeader.vue";
 import PostBody from "components/PostBody.vue";
 import PostComment from "components/PostComment.vue";
+import PostFooter from "components/PostFooter.vue";
 
 const route = useRoute();
 const router = useRouter();
@@ -51,19 +42,12 @@ const memberStore = useMemberStore();
 
 const userId = memberStore.userId;
 
-const post = computed(() => boardStore.post);
+const post = computed(() => boardStore.post); // 특정 게시글 저장
 const loading = computed(() => boardStore.loading);
 
 onMounted(() => {
   boardStore.fetchPost(route.params.id);
 });
-
-function deletePost(postId) {
-  if (!confirm("삭제하시겠습니까?")) return;
-
-  console.log(postId);
-  boardStore.deletePost(postId);
-}
 </script>
 
 <style lang="scss" scoped>
