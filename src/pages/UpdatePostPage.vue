@@ -1,6 +1,6 @@
 <template>
   <q-page class="q-mt-xl">
-    <BoardTitle title="게시글 등록" />
+    <BoardHeader title="게시글 등록" />
     <q-form
       @submit="updatePost"
       class="q-gutter-y-md column flex-center items-stretch"
@@ -43,7 +43,7 @@
 import { ref, computed } from "vue";
 import { useRouter } from "vue-router";
 import { useBoardStore } from "src/stores/board";
-import BoardTitle from "components/BoardTitle.vue";
+import BoardHeader from "components/BoardHeader.vue";
 import {
   outlinedAddCircle,
   outlinedTitle,
