@@ -20,25 +20,20 @@
               @click="editFlags[idx] = true"
             ></q-icon>
             <div v-else class="row">
-              <q-icon
-                v-if="comment.userId == userId"
-                size="sm"
-                color="negative"
-                :name="outlinedDelete"
-                @click="deleteComment(comment.postId, comment.id)"
-              ></q-icon>
-              <q-icon
-                v-if="comment.userId == userId"
-                size="sm"
-                color="grey-5"
-                :name="outlinedEdit"
-              ></q-icon>
-              <q-icon
-                size="sm"
-                color="grey-5"
-                :name="outlinedClose"
-                @click="editFlags[idx] = false"
-              ></q-icon>
+              <div
+                v-for="editComponent in editComponents"
+                :key="editComponent.name"
+              >
+                <q-icon
+                  v-if="editComponent.isShow(comment.userId, userId)"
+                  :name="editComponent.name"
+                  :color="editComponent.color"
+                  :size="editComponent.size"
+                  @click="
+                    editComponent.onClick(comment.postId, comment.id, idx)
+                  "
+                ></q-icon>
+              </div>
             </div>
           </div>
         </div>
@@ -80,6 +75,46 @@ function deleteComment(postId, commentId) {
 
   boardStore.deleteComment(postId, commentId);
 }
+
+function editComment(postId, commentId) {
+  console.log("edit Comment!");
+}
+
+const editComponents = [
+  {
+    size: "sm",
+    color: "negative",
+    name: outlinedDelete,
+    isShow: (id1, id2) => {
+      return id1 == id2;
+    },
+    onClick: (postId, commentId, idx) => {
+      deleteComment(postId, commentId);
+    },
+  },
+  {
+    size: "sm",
+    color: "grey-5",
+    name: outlinedEdit,
+    isShow: (id1, id2) => {
+      return id1 == id2;
+    },
+    onClick: (postId, commentId, idx) => {
+      editComment(postId, commentId);
+    },
+  },
+  {
+    size: "sm",
+    color: "grey-5",
+    name: outlinedClose,
+    isShow: (id1, id2) => {
+      return true;
+    },
+    onClick: (postId, commentId, idx) => {
+      editFlags.value[idx] = false;
+    },
+  },
+];
 </script>
 <style lang="scss" scoped>
 .q-icon {
