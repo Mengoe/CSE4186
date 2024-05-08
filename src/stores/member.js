@@ -7,6 +7,7 @@ export const useMemberStore = defineStore(
   "member",
   () => {
     const userId = ref(null);
+    const loading = ref(false);
     const isLogin = ref(false);
     const timer = ref(null);
     const options = {
@@ -16,6 +17,23 @@ export const useMemberStore = defineStore(
       httpOnly: false,
     };
 
+    function duplicateCheck(params) {
+      return new Promise((resolve, reject) => {
+        const joinCheckAPI =
+          "http://ec2-3-39-165-26.ap-northeast-2.compute.amazonaws.com:8080/join/check";
+
+        axios
+          .post(joinCheckAPI, JSON.stringify(params), {
+            headers: {
+              "Content-Type": `application/json`,
+            },
+          })
+          .then((res) => {
+            if (res.data.result == "fail") reject(res.data.message);
+            else resolve(true);
+          });
+      });
+    }
     function login(loginObj) {
       return new Promise((resolve, reject) => {
         const loginApi =
@@ -80,6 +98,34 @@ export const useMemberStore = defineStore(
       }
     }
 
+    async function join(joinObj) {
+      const joinAPI =
+        "http://ec2-3-39-165-26.ap-northeast-2.compute.amazonaws.com:8080/join";
+
+      // second. send join request
+      try {
+        const joinResponse = await axios.post(
+          joinAPI,
+          JSON.stringify(joinObj),
+          {
+            headers: {
+              "Content-Type": `application/json`,
+            },
+          },
+        );
+
+        if (joinResponse.data.result == "fail")
+          throw new Error(response.data.message);
+
+        alert("회원가입을 축하드립니다! 로그인 화면으로 이동합니다.");
+        this.router.push("/members/login");
+      } catch (error) {
+        console.log(error);
+      } finally {
+        this.loading = false;
+      }
+    }
+
     const verifyTokenExpiration = () => {
       const token = Cookies.has("access_token")
         ? Cookies.get("access_token").userToken
@@ -100,7 +146,7 @@ export const useMemberStore = defineStore(
       } else return false;
       */
     };
-    return { login, logout, isLogin, autoLogin, userId };
+    return { login, logout, join, duplicateCheck, isLogin, autoLogin, userId };
   },
   {
     persist: true,
