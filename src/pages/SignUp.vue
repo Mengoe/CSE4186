@@ -203,6 +203,12 @@ async function emailDuplicateCheck() {
       password: "",
     });
 
+    $q.notify({
+      message: "사용 가능한 이메일입니다.",
+      color: "positive",
+      timeout: 300,
+      position: "center",
+    });
     isDoneEmailCheck.value = true;
   } catch (err) {
     console.log(err);
@@ -239,6 +245,12 @@ async function nameDuplicateCheck() {
     });
 
     isDoneNameCheck.value = true;
+    $q.notify({
+      message: "사용 가능한 닉네임입니다.",
+      color: "positive",
+      timeout: 300,
+      position: "center",
+    });
   } catch (err) {
     console.log(err);
     $q.notify({
