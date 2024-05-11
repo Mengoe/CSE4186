@@ -13,7 +13,11 @@ export const useBoardStore = defineStore("board", {
       comments: [
         {
           id: null,
-          content: "",
+          content: {
+            verbal: [],
+            nonverbal: [],
+            review: "",
+          },
           username: "",
           createdAt: "",
           userId: null,
@@ -36,7 +40,11 @@ export const useBoardStore = defineStore("board", {
         comments: [
           {
             id: null,
-            content: "",
+            content: {
+              verbal: [],
+              nonverbal: [],
+              review: "",
+            },
             username: "",
             createdAt: "",
           },
@@ -99,9 +107,15 @@ export const useBoardStore = defineStore("board", {
           },
         })
         .then((res) => {
-          console.log(res.data);
-          if (res.data.result === "success") this.post = res.data.body;
-          else throw new Error(res.data.message);
+          // console.log(res.data);
+
+          // console.log(JSON.parse(res.data.body.comments[1].content));
+          if (res.data.result === "success") {
+            this.post = res.data.body;
+
+            console.log(this.post);
+            // console.log(this.post.comments[i].content);
+          } else throw new Error(res.data.message);
         })
         .catch((err) => {
           console.log(err);
@@ -191,14 +205,14 @@ export const useBoardStore = defineStore("board", {
         .then((res) => {
           console.log(res);
           alert("삭제되었습니다.");
-          this.router.push("./");
+          this.router.push("/board");
         })
         .catch((err) => {
           console.log(err);
         });
     },
 
-    addComment(content) {
+    addComment(contentObj) {
       const postId = this.post.id;
 
       const addCommentAPI = `http://ec2-3-39-165-26.ap-northeast-2.compute.amazonaws.com:8080/post/${postId}/comment`;
@@ -207,9 +221,13 @@ export const useBoardStore = defineStore("board", {
       const userId = useMemberStore().userId;
 
       const commentObj = {
-        content,
+        content: JSON.stringify(contentObj),
         userId,
       };
+
+      // console.log(content);
+      // console.log(commentObj);
+      // console.log(JSON.stringify(commentObj));
 
       axios
         .post(addCommentAPI, JSON.stringify(commentObj), {
@@ -220,6 +238,7 @@ export const useBoardStore = defineStore("board", {
         })
         .then((res) => {
           console.log(res);
+          alert("등록되었습니다.");
           this.router.go(0); // reload page to show added Comment
         })
         .catch((err) => {
@@ -255,15 +274,16 @@ export const useBoardStore = defineStore("board", {
         });
     },
 
-    // 댓글 양식 확정되면 구현
-    updateComment(postId, commentId, content) {
+    updateComment(postId, commentId, contentObj) {
       const updateCommentAPI = `http://ec2-3-39-165-26.ap-northeast-2.compute.amazonaws.com:8080/post/${postId}/comment`;
       const accessToken = this.getToken();
 
       const updateObj = {
         id: commentId,
-        content,
+        content: JSON.stringify(contentObj),
       };
+
+      console.log(updateObj);
 
       axios
         .put(updateCommentAPI, JSON.stringify(updateObj), {
@@ -274,6 +294,8 @@ export const useBoardStore = defineStore("board", {
         })
         .then((res) => {
           console.log(res);
+          alert("수정되었습니다.");
+          this.router.go(0); // reload page to show added Comment
         })
         .catch((err) => {
           console.log(err);

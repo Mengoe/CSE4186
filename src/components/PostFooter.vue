@@ -9,13 +9,13 @@
       >피드백 남기기</q-btn
     >
     <q-dialog v-model="showCommentModal" backdrop-filter="blur(4px)" persistent>
-      <CommentForm />
+      <CommentPostForm />
     </q-dialog>
   </div>
 </template>
 <script setup>
 import { ref } from "vue";
-import CommentForm from "components/CommentForm.vue";
+import CommentPostForm from "components/CommentPostForm.vue";
 const showCommentModal = ref(false);
 </script>
 
