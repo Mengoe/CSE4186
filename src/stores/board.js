@@ -81,8 +81,8 @@ export const useBoardStore = defineStore("board", {
           console.log("fetchAllPost succeed");
           console.log(res.data);
           if (res.data.result === "success") {
-            this.postList = res.data.body;
-            this.pageCount = res.data.pageCount;
+            this.postList = res.data.body.list;
+            this.pageCount = res.data.body.pageCount;
           }
         })
         .catch((err) => {
