@@ -1,5 +1,5 @@
 <template>
-  <div class="pagination row flex-center q-mt-lg">
+  <div class="pagination row flex-center q-mt-sm">
     <q-pagination
       v-model="currentPageNumber"
       :max="props.pageCount"

@@ -1,13 +1,12 @@
 <template>
   <q-page class="q-mt-xl full-height">
-    <BoardTitle title="게시글 목록" />
+    <BoardHeader title="게시글 목록" />
     <LoaderComponent v-if="loading" :size="5" fixed />
-    <div v-else class="board-component">
+    <div v-else class="board-component full-height">
       <BoardList :postLists="postList" />
       <Pagination
         :pageCount="pageCount"
         v-model:currentPageNumber="currentPageNumber"
-        @update="valueUpdate(newValue)"
       />
       <BoardFooter />
     </div>
@@ -17,7 +16,7 @@
 import { ref, onMounted, computed, watch } from "vue";
 import { useBoardStore } from "stores/board.js";
 import { useRoute, useRouter } from "vue-router";
-import BoardTitle from "components/BoardTitle.vue";
+import BoardHeader from "components/BoardHeader.vue";
 import BoardList from "components/BoardList.vue";
 import Pagination from "components/PaginationComponent.vue";
 import LoaderComponent from "components/LoaderComponent.vue";
@@ -38,10 +37,10 @@ let searchBy;
 let q;
 let isSearchRequested;
 
-// 페이지 바뀔 때마다 해당 페이지 게시글 fetch
+// 페이지 바뀔 때마다 해당 페이지 게시글들 fetch
 watch(currentPageNumber, fetchPosts);
 
-// query parameter 변경 시 페이지 새로고침.
+// query parameter 변경(검색, 검색 후 뒤로가기)시 페이지 새로고침
 watch(
   () => route.query.q,
   () => {
@@ -53,6 +52,7 @@ watch(
 onMounted(() => {
   let params = { page: currentPageNumber.value, size: POST_PER_PAGE };
 
+  // 사용자가 검색한 경우, param에 검색조건(searchBy) 및 검색어(q) 추가
   if (route.query.searchBy || route.query.q) {
     isSearchRequested = true;
     searchBy = route.query.searchBy;
@@ -74,10 +74,5 @@ function fetchPosts() {
   }
 
   boardStore.fetchPosts(params);
-}
-
-function valueUpdate(newValue) {
-  console.log("new value!!");
-  console.log(newValue);
 }
 </script>

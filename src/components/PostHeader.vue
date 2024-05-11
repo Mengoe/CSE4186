@@ -1,5 +1,5 @@
 <template>
-  <div class="header text-h2 text-dark row">
+  <div class="header text-h4 text-dark row text-weight-bold">
     <div class="title">{{ props.title }}</div>
     <div
       v-if="isMyPost"

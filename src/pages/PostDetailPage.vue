@@ -18,7 +18,6 @@
       <div class="q-mb-md">
         <PostComment :comments="post.comments" :postId="post.id" />
       </div>
-
       <PostFooter />
     </div>
   </q-page>

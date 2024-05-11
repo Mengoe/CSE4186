@@ -1,6 +1,6 @@
 <template>
-  <div class="board-footer row justify-between q-mt-md">
-    <div class="column">
+  <div class="board-footer row justify-between">
+    <div class="column q-mt-lg">
       <div class="search-form row q-gutter-x-sm">
         <select style="width: 150px; cursor: pointer" v-model="searchBy">
           <option v-for="(opt, idx) in options" :key="idx">{{ opt }}</option>
@@ -19,7 +19,7 @@
         <input style="width: 150px" v-model="searchText" />
       </div>
     </div>
-    <div class="post-button">
+    <div class="post-button q-mt-lg">
       <q-btn size="md" color="primary" text-color="white" to="/board/post">
         글쓰기
       </q-btn>

@@ -1,45 +1,107 @@
 <template>
-  <div class="comment column q-mt-xl">
-    <q-list bordered separator>
+  <div class="comment column q-mt-xl full-width">
+    <q-list style="max-width: 100%" bordered separator>
       <q-item
         v-for="(comment, idx) in comments"
         :key="comment.id"
-        class="column q-gutter-y-xs"
+        style="position: relative; max-width: 100%; word-break: break-all"
       >
-        <div class="row">
+        <div class="row justify-start items-center">
           <div :class="{ mine: comment.userId == userId }">
             {{ comment.username }}
           </div>
-          <div class="text-grey q-ml-sm">{{ comment.createdAt }}</div>
-          <div class="edit-comp" style="margin-left: auto">
-            <q-icon
-              v-if="!editFlags[idx]"
-              size="sm"
-              color="grey-9"
-              :name="outlinedChevronLeft"
-              @click="editFlags[idx] = true"
-            ></q-icon>
-            <div v-else class="row">
-              <div
-                v-for="editComponent in editComponents"
-                :key="editComponent.name"
-              >
-                <q-icon
-                  v-if="editComponent.isShow(comment.userId, userId)"
-                  :name="editComponent.name"
-                  :color="editComponent.color"
-                  :size="editComponent.size"
-                  @click="
-                    editComponent.onClick(comment.postId, comment.id, idx)
+
+          <q-item-section class="column q-pl-lg q-gutter-y-sm">
+            <div class="comment-meta row no-wrap">
+              <div>
+                <q-rating
+                  :model-value="
+                    getAverageRating(
+                      comment.content.verbal,
+                      comment.content.nonverbal,
+                    )
                   "
+                  readonly
+                  size="2.0em"
+                  color="yellow"
+                  icon="star_border"
+                  icon-selected="star"
+                  icon-half="star_half"
+                  no-dimming
+                ></q-rating>
+              </div>
+              <div class="text-grey q-ml-sm q-pt-xs">
+                {{ comment.createdAt.split(" ")[0] }}
+              </div>
+              <div class="edit-comp q-pt-xs">
+                <q-icon
+                  v-if="!editFlags[idx]"
+                  size="sm"
+                  color="grey-9"
+                  class="cursor-pointer"
+                  :name="outlinedChevronLeft"
+                  @click="editFlags[idx] = true"
                 ></q-icon>
+                <div v-else class="row">
+                  <div
+                    v-for="editComponent in editComponents"
+                    class="cursor-pointer"
+                    :key="editComponent.name"
+                  >
+                    <q-icon
+                      v-if="editComponent.isShow(comment.userId, userId)"
+                      :name="editComponent.name"
+                      :color="editComponent.color"
+                      :size="editComponent.size"
+                      @click="
+                        editComponent.onClick(comment.postId, comment.id, idx)
+                      "
+                    ></q-icon>
+                    <q-dialog
+                      v-model="showEditModal[idx]"
+                      backdrop-filter="blur(4px)"
+                      persistent
+                    >
+                      <CommentEditForm
+                        :verbal="comment.content.verbal"
+                        :nonverbal="comment.content.nonverbal"
+                        :review="comment.content.review"
+                        :postId="comment.postId"
+                        :commentId="comment.id"
+                      />
+                    </q-dialog>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
+
+            <q-item-section>
+              <div>
+                {{ comment.content.review }}
+              </div>
+              <div class="q-mt-sm">
+                <q-btn
+                  @click="showDetailFlag[idx] = true"
+                  outline
+                  color="primary"
+                  size="sm"
+                >
+                  자세히
+                </q-btn>
+                <q-dialog
+                  v-model="showDetailFlag[idx]"
+                  backdrop-filter="blur(4px)"
+                >
+                  <CommentDetail
+                    :verbal="comment.content.verbal"
+                    :nonverbal="comment.content.nonverbal"
+                    :reviewText="comment.content.review"
+                  />
+                </q-dialog>
+              </div>
+            </q-item-section>
+          </q-item-section>
         </div>
-        <q-item-section>
-          {{ comment.content }}
-        </q-item-section>
       </q-item>
     </q-list>
   </div>
@@ -54,6 +116,9 @@ import {
   outlinedDelete,
   outlinedEdit,
 } from "@quasar/extras/material-icons-outlined";
+import CommentDetail from "./CommentDetail.vue";
+import CommentEditForm from "./CommentEditForm.vue";
+
 const props = defineProps({
   comments: Array,
   postId: Number,
@@ -62,12 +127,9 @@ const props = defineProps({
 const boardStore = useBoardStore();
 const userId = useMemberStore().userId;
 
-const newComment = ref("");
 const editFlags = ref(new Array(props.comments.length).fill(false));
-
-function addComment() {
-  boardStore.addComment(newComment.value);
-}
+const showEditModal = ref(new Array(props.comments.length).fill(false));
+const showDetailFlag = ref(new Array(props.comments.length).fill(false));
 
 function deleteComment(postId, commentId) {
   console.log(postId, commentId);
@@ -78,6 +140,14 @@ function deleteComment(postId, commentId) {
 
 function editComment(postId, commentId) {
   console.log("edit Comment!");
+}
+
+function getAverageRating(verb, nverb) {
+  let sum = 0;
+  for (let i = 0; i < verb.length; i++) sum += verb[i];
+  for (let i = 0; i < nverb.length; i++) sum += nverb[i];
+
+  return sum / (verb.length + nverb.length);
 }
 
 const editComponents = [
@@ -101,6 +171,7 @@ const editComponents = [
     },
     onClick: (postId, commentId, idx) => {
       editComment(postId, commentId);
+      showEditModal.value[idx] = true;
     },
   },
   {
@@ -117,11 +188,13 @@ const editComponents = [
 ];
 </script>
 <style lang="scss" scoped>
-.q-icon {
-  cursor: pointer;
-}
-
 .mine {
   color: $blue-4;
+}
+
+.edit-comp {
+  position: absolute;
+  top: 5%;
+  right: 1%;
 }
 </style>
