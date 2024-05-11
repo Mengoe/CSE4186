@@ -17,6 +17,8 @@ export const useCvStore = defineStore(
     }
 
     async function generateQuestions(questionNum, content) {
+      questions.value = [];
+
       const questionCreateAPI = `http://ec2-3-39-165-26.ap-northeast-2.compute.amazonaws.com:8080/question/create`;
       const accessToken = Cookies.get("access_token");
       count.value = count.value + 1;
@@ -99,6 +101,8 @@ export const useCvStore = defineStore(
     }
 
     function fetchAllCv() {
+      cvLists.value = [];
+
       const userId = useMemberStore().userId;
       const getCvListAPI = `http://ec2-3-39-165-26.ap-northeast-2.compute.amazonaws.com:8080/selfIntroduction/List/${userId}`;
 
@@ -164,6 +168,7 @@ export const useCvStore = defineStore(
       });
     }
 
+    /* reset 필요하면 만들어야 됨. */
     return {
       questions,
       cvLists,
