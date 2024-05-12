@@ -115,6 +115,7 @@ import {
   outlinedClose,
   outlinedDelete,
   outlinedEdit,
+  outlinedWarning,
 } from "@quasar/extras/material-icons-outlined";
 import CommentDetail from "./CommentDetail.vue";
 import CommentEditForm from "./CommentEditForm.vue";
@@ -140,6 +141,14 @@ function deleteComment(postId, commentId) {
 
 function editComment(postId, commentId) {
   console.log("edit Comment!");
+}
+
+function submitReport(commentId) {
+  boardStore.submitReport({
+    reportType: "comment",
+    userId,
+    targetId: commentId,
+  });
 }
 
 function getAverageRating(verb, nverb) {
@@ -172,6 +181,19 @@ const editComponents = [
     onClick: (postId, commentId, idx) => {
       editComment(postId, commentId);
       showEditModal.value[idx] = true;
+    },
+  },
+  {
+    size: "sm",
+    color: "negative",
+    name: outlinedWarning,
+    isShow: (id1, id2) => {
+      return id1 !== id2;
+    },
+    onClick: (postId, commentId, idx) => {
+      if (!confirm("신고하시겠습니까?")) return;
+
+      submitReport(commentId);
     },
   },
   {

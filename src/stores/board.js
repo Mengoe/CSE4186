@@ -304,5 +304,26 @@ export const useBoardStore = defineStore("board", {
           this.loading = false;
         });
     },
+
+    submitReport(reportObj) {
+      const reportAPI = `http://ec2-3-39-165-26.ap-northeast-2.compute.amazonaws.com:8080/report`;
+      const accessToken = this.getToken();
+
+      axios
+        .post(reportAPI, JSON.stringify(reportObj), {
+          headers: {
+            "Content-Type": `application/json`,
+            Authorization: `Bearer ${accessToken}`,
+          },
+        })
+        .then((res) => {
+          console.log(res);
+          alert("신고되었습니다.");
+          this.router.go(0);
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    },
   },
 });

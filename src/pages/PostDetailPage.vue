@@ -12,7 +12,7 @@
 
         <q-separator />
 
-        <PostBody :content="post.content" />
+        <PostBody :content="post.content" :postId="post.id" />
       </div>
 
       <div class="q-mb-md">
