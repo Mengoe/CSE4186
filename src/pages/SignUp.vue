@@ -198,7 +198,7 @@ async function emailDuplicateCheck() {
 
   try {
     await memberStore.duplicateCheck({
-      name: "",
+      name: ".............",
       email: email.value,
       password: "",
     });
@@ -240,7 +240,7 @@ async function nameDuplicateCheck() {
   try {
     await memberStore.duplicateCheck({
       name: nickName.value,
-      email: "",
+      email: "heuristic",
       password: "",
     });
 
