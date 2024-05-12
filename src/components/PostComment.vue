@@ -188,7 +188,7 @@ const editComponents = [
     color: "negative",
     name: outlinedWarning,
     isShow: (id1, id2) => {
-      return id1 !== id2;
+      return id1 != id2;
     },
     onClick: (postId, commentId, idx) => {
       if (!confirm("신고하시겠습니까?")) return;
