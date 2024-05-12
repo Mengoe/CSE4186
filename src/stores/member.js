@@ -64,7 +64,8 @@ export const useMemberStore = defineStore(
             }
           })
           .catch((err) => {
-            console.log(err);
+            if (err.response.data.message === "해당 계정은 정지된 계정입니다.")
+              alert("해당 계정은 정지된 계정입니다.");
           });
       });
     }
