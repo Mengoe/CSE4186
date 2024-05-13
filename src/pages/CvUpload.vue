@@ -65,27 +65,23 @@ const title = ref("");
 const content = ref("");
 
 //const loading = computed(() => cvStore.loading); // 등록 대기 flag
-const loading = ref(false);
+const loading = computed(() => cvStore.loading);
 
 const isDoneRegister = ref(false); // 자기소개서 등록 완료 됐는지를 나타내는 flag
 
-const cvPostAPI =
-  "https://259da068-0fdc-4898-8a3d-28d48fa2de21.mock.pstmn.io/post/cv";
+async function onSubmit() {
+  try {
+    await cvStore.addCv(title.value, content.value);
+    isDoneRegister.value = true;
+    $q.notify({
+      message: "자기소개서 등록 성공!",
+      color: $primary,
+    });
+  } catch (err) {
+    console.log(err);
+  }
 
-function onSubmit() {
   /*
-    try {
-      await cvStore.addCv(title, content);
-      isDoneRegister.value = true;
-      $q.notify({
-        message: "자기소개서 등록 성공!",
-        color: $primary,
-      });
-    } catch (err) {
-      console.log(err);
-    }
-  */
-
   // temp implementation. after fixing backend, this code will be replaced with above commented code
   try {
     let cvData = {};
@@ -127,6 +123,7 @@ function onSubmit() {
     console.log(error);
     loading.value = false;
   }
+  */
 }
 </script>
 
