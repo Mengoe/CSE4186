@@ -1,7 +1,7 @@
 <template>
   <q-page class="flex flex-center">
     <div class="login-form">
-      <b>로그인</b>
+      <strong>이메일로 로그인</strong>
       <div class="q-pa-md">
         <q-input
           v-model="email"
@@ -16,7 +16,6 @@
           :error="validateEmail != 0 && emailBlurred"
           :error-message="emailError"
           style="width: 400px"
-          maxlength="30"
           autofocus
         >
           <template v-slot:error> </template>
@@ -27,7 +26,6 @@
           :type="isPwd ? 'password' : 'text'"
           label="Password"
           style="width: 400px"
-          maxlength="15"
           @blur="
             () => {
               passwordBlurred = true;
@@ -50,6 +48,7 @@
         :disable="!validatePassword || validateEmail != 0"
         >로그인</q-btn
       >
+      <SocialLoginButton />
       <RouterLink
         to="/members/join"
         style="text-decoration-color: black; color: black"
@@ -63,6 +62,8 @@
 import { ref, computed } from "vue";
 import { useMemberStore } from "stores/member.js";
 import { RouterLink, useRouter, useRoute } from "vue-router";
+import SocialLoginButton from "components/SocialLogin.vue";
+
 const router = useRouter();
 const route = useRoute();
 const email = ref("");
@@ -91,14 +92,17 @@ async function onSubmit() {
     email: this.email,
     password: this.password,
   };
-  console.log(loginObj);
-  try {
-    await useMemberStore().login(loginObj);
-    router.push(route.query.redirect || "/");
-  } catch (err) {
-    console.log("로그인에 실패하셨습니다.");
-    router.push("/members/login");
-  }
+  useMemberStore()
+    .login(loginObj)
+    .then(() => {
+      router.push(route.query.redirect || "/");
+    })
+    .catch((err) => {
+      console.log("here");
+      alert("로그인에 실패하셨습니다.다시 시도해주세요.");
+      console.log(err);
+      router.push("/members/login");
+    });
 }
 
 defineOptions({

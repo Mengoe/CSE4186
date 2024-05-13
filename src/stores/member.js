@@ -2,6 +2,8 @@ import { defineStore } from "pinia";
 import { Cookies } from "quasar";
 import { ref } from "vue";
 import axios from "axios";
+import { api } from "boot/axios.js";
+import { setToken, removeToken } from "src/utils/cookies.js";
 
 export const useMemberStore = defineStore(
   "member",
@@ -9,13 +11,6 @@ export const useMemberStore = defineStore(
     const userId = ref(null);
     const loading = ref(false);
     const isLogin = ref(false);
-    const timer = ref(null);
-    const options = {
-      expires: "1d",
-      path: "/",
-      sameSite: "Strict",
-      httpOnly: false,
-    };
 
     function duplicateCheck(params) {
       return new Promise((resolve, reject) => {
@@ -34,62 +29,24 @@ export const useMemberStore = defineStore(
           });
       });
     }
-    function login(loginObj) {
-      return new Promise((resolve, reject) => {
-        const loginApi =
-          "http://ec2-3-39-165-26.ap-northeast-2.compute.amazonaws.com:8080/login";
 
-        axios
-          .post(loginApi, JSON.stringify(loginObj), {
-            headers: {
-              "Content-Type": `application/json`,
-            },
-            withCredentials: true,
-          })
-          .then((res) => {
-            if (res.status == 200 && res.data.result === "success") {
-              const token = res.headers["authorization"].split(" ")[1];
-              const user_token = {
-                userEmail: loginObj.email,
-                userToken: token,
-              };
-              console.log(user_token);
-              Cookies.set("access_token", token, options);
-              isLogin.value = true;
-              userId.value = res.data.body.userId;
-              console.log(userId.value);
-              resolve(true);
-            } else {
-              reject("fail to login");
-            }
-          })
-          .catch((err) => {
-            if (err.response.data.message === "해당 계정은 정지된 계정입니다.")
-              alert("해당 계정은 정지된 계정입니다.");
-          });
-      });
-    }
+    const login = async (loginObj) => {
+      const res = await api.post("/login", JSON.stringify(loginObj));
+      if (res.status == 200) {
+        if (res.data.result === "success") {
+          const token = res.headers["authorization"].split(" ")[1];
+          setToken(loginObj.email, token);
+          userId.value = res.data.body.userId;
+          console.log(userId);
+          isLogin.value = true;
+        } else if (res.data.result === "fail") {
+          return Promise.reject("wrong info");
+        } else return Promise.reject("invalid resposne");
+      } else return Promise.reject("invalid resposne");
+    };
 
-    function _login(loginObj) {
-      if (loginObj.email == "asdf@gmail.com" && loginObj.password == "1234") {
-        const user_token = {
-          userEmail: loginObj.email,
-          userToken: "token",
-        };
-        Cookies.set("access_token", user_token, options);
-        isLogin.value = true;
-        return true;
-      } else return false;
-    }
-
-    function logout() {
-      if (Cookies.has("access_token")) {
-        try {
-          Cookies.remove("access_token", options);
-        } catch (err) {
-          console.log("로그아웃 에러");
-        }
-      }
+    async function logout() {
+      removeToken();
       isLogin.value = false;
     }
     function autoLogin() {
@@ -132,20 +89,6 @@ export const useMemberStore = defineStore(
         ? Cookies.get("access_token").userToken
         : null;
       return token != null;
-      /*
-      if (token != null) {
-        let base64Payload = state.accessToken.split(".")[1];
-        base64Payload = base64Payload.replace(/-/g, "+").replace(/_/g, "/");
-        base64Payload = atob(base64Payload);
-        const payloadObject = JSON.parse(base64Payload);
-        const currentDate = new Date().getTime() / 1000;
-        if (payloadObject.exp <= currentDate) {
-          return false;
-        } else {
-          return true;
-        }
-      } else return false;
-      */
     };
     return { login, logout, join, duplicateCheck, isLogin, autoLogin, userId };
   },

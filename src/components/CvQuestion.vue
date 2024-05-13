@@ -199,7 +199,7 @@ function startCv() {
             closeBtn: true,
           });
 
-          router.push("/"); // 면접 보는 화면으로 넘어감.
+          router.push("/interview"); // 면접 보는 화면으로 넘어감.
         }
       })
       .catch((err) => {

@@ -88,7 +88,10 @@ const dropdownMenus = [
   },
 ];
 function logOut() {
-  useMemberStore().logout();
-  router.go(0);
+  useMemberStore()
+    .logout()
+    .then(() => {
+      router.go(0);
+    });
 }
 </script>

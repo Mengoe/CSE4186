@@ -8,6 +8,10 @@ const routes = [
       { path: "", component: () => import("pages/MainPage.vue") },
       { path: "interview", component: () => import("pages/InterviewPage.vue") },
       {
+        path: "interview/finish",
+        component: () => import("pages/FinishInterviewPage.vue"),
+      },
+      {
         path: "cvUpload",
         component: () => import("pages/CvUpload.vue"),
         beforeEnter: (to, from, next) => {
@@ -38,6 +42,10 @@ const routes = [
         component: () => import("pages/LoginPage.vue"),
       },
       { path: "join", component: () => import("pages/SignUp.vue") },
+      {
+        path: "callback",
+        component: () => import("pages/SocialLoginLoadingPage.vue"),
+      },
     ],
     beforeEnter: (to, from, next) => {
       const { isLogin } = storeToRefs(useMemberStore());
