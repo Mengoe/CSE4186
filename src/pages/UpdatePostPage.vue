@@ -2,7 +2,7 @@
   <q-page class="q-mt-xl">
     <BoardHeader title="게시글 등록" />
     <q-form
-      @submit="addPost"
+      @submit="updatePost"
       class="q-gutter-y-md column flex-center items-stretch"
       style="width: 50%"
     >
@@ -40,29 +40,30 @@
 </template>
 
 <script setup>
-import { useBoardStore } from "src/stores/board";
 import { ref, computed } from "vue";
 import { useRouter } from "vue-router";
+import { useBoardStore } from "src/stores/board";
+import BoardHeader from "components/BoardHeader.vue";
 import {
   outlinedAddCircle,
   outlinedTitle,
 } from "@quasar/extras/material-icons-outlined";
-import BoardHeader from "src/components/BoardHeader.vue";
 
 const boardStore = useBoardStore();
 const router = useRouter();
 
 const rules = [(val) => (val && val !== "") || "내용을 입력해주세요."];
 
-const title = ref("");
-const content = ref("");
+const title = ref(boardStore.post.title);
+const content = ref(boardStore.post.content);
+
+const postId = boardStore.post.id;
 const loading = computed(() => boardStore.loading);
 
-function addPost() {
-  console.log(title.value, content.value);
-  boardStore.addPost(title.value, content.value);
-  alert("등록되었습니다. 게시글 목록으로 이동합니다.");
-  router.push("/board");
+function updatePost() {
+  boardStore.updatePost(postId, title.value, content.value);
+  alert("수정되었습니다.");
+  router.push(`./${postId}`);
 }
 </script>
 
