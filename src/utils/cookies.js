@@ -3,7 +3,7 @@ import { Cookies } from "quasar";
 const options = {
   expires: "3d",
   path: "/",
-  sameSite: "None",
+  sameSite: "Lax",
   httpOnly: false,
 };
 
