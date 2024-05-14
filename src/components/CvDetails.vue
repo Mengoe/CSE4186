@@ -1,13 +1,15 @@
 <template>
   <q-card
     class="q-mt-sm column flex-center items-stretch no-wrap"
-    style="height: 80%; width: 100%"
+    style="height: 100%; width: 100%"
   >
     <q-card-section>
-      <div class="text-primary text-h1 text-center">
+      <div class="text-primary text-h3 text-center">
         {{ props.title }}
       </div>
     </q-card-section>
+
+    <q-separator inset />
 
     <q-scroll-area style="height: 80%">
       <q-card-section>

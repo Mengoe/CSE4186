@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
-import { Cookies } from "quasar";
 import { useMemberStore } from "./member";
+import { getToken } from "src/utils/cookies.js";
 import axios from "axios";
 
 export const useBoardStore = defineStore("board", {
@@ -52,12 +52,6 @@ export const useBoardStore = defineStore("board", {
       };
     },
 
-    // return access Token
-    getToken() {
-      const accessToken = Cookies.get("access_token");
-      return accessToken;
-    },
-
     // fetch all posts
     fetchPosts(params) {
       console.log(params);
@@ -68,8 +62,10 @@ export const useBoardStore = defineStore("board", {
         : `http://ec2-3-39-165-26.ap-northeast-2.compute.amazonaws.com:8080/post/list?page=${page}&size=${size}`;
 
       console.log(getPostListAPI);
-      const accessToken = this.getToken();
+      const accessToken = getToken();
       this.loading = true;
+
+      console.log(accessToken);
 
       axios
         .get(getPostListAPI, {
@@ -97,7 +93,7 @@ export const useBoardStore = defineStore("board", {
     fetchPost(postId) {
       const getPostAPI = `http://ec2-3-39-165-26.ap-northeast-2.compute.amazonaws.com:8080/post/${postId}`;
 
-      const accessToken = this.getToken();
+      const accessToken = getToken();
       this.loading = true;
 
       axios
@@ -131,7 +127,7 @@ export const useBoardStore = defineStore("board", {
       const addPostAPI =
         "http://ec2-3-39-165-26.ap-northeast-2.compute.amazonaws.com:8080/post";
 
-      const accessToken = this.getToken();
+      const accessToken = getToken();
       const userId = useMemberStore().userId;
       console.log(accessToken);
 
@@ -164,7 +160,7 @@ export const useBoardStore = defineStore("board", {
 
     updatePost(postId, title, content) {
       const updatePostAPI = `http://ec2-3-39-165-26.ap-northeast-2.compute.amazonaws.com:8080/post/${postId}`;
-      const accessToken = this.getToken();
+      const accessToken = getToken();
 
       const updateObj = {
         title,
@@ -194,7 +190,7 @@ export const useBoardStore = defineStore("board", {
 
     deletePost(postId) {
       const deletePostAPI = `http://ec2-3-39-165-26.ap-northeast-2.compute.amazonaws.com:8080/post/${postId}`;
-      const accessToken = this.getToken();
+      const accessToken = getToken();
 
       axios
         .delete(deletePostAPI, {
@@ -217,7 +213,7 @@ export const useBoardStore = defineStore("board", {
 
       const addCommentAPI = `http://ec2-3-39-165-26.ap-northeast-2.compute.amazonaws.com:8080/post/${postId}/comment`;
 
-      const accessToken = this.getToken();
+      const accessToken = getToken();
       const userId = useMemberStore().userId;
 
       const commentObj = {
@@ -249,7 +245,7 @@ export const useBoardStore = defineStore("board", {
     deleteComment(postId, commentId) {
       console.log(postId, commentId);
       const deleteCommentAPI = `http://ec2-3-39-165-26.ap-northeast-2.compute.amazonaws.com:8080/post/${postId}/comment`;
-      const accessToken = this.getToken();
+      const accessToken = getToken();
 
       const commentObj = {
         id: commentId,
@@ -276,7 +272,7 @@ export const useBoardStore = defineStore("board", {
 
     updateComment(postId, commentId, contentObj) {
       const updateCommentAPI = `http://ec2-3-39-165-26.ap-northeast-2.compute.amazonaws.com:8080/post/${postId}/comment`;
-      const accessToken = this.getToken();
+      const accessToken = getToken();
 
       const updateObj = {
         id: commentId,
@@ -307,7 +303,7 @@ export const useBoardStore = defineStore("board", {
 
     submitReport(reportObj) {
       const reportAPI = `http://ec2-3-39-165-26.ap-northeast-2.compute.amazonaws.com:8080/report`;
-      const accessToken = this.getToken();
+      const accessToken = getToken();
 
       axios
         .post(reportAPI, JSON.stringify(reportObj), {

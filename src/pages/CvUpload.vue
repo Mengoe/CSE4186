@@ -53,8 +53,6 @@ import {
   outlinedAddCircle,
   outlinedTitle,
 } from "@quasar/extras/material-icons-outlined";
-import { useRouter } from "vue-router";
-import axios from "axios";
 import { useCvStore } from "src/stores/cv";
 
 const $q = useQuasar();
@@ -64,9 +62,7 @@ const cvRules = [(val) => (val && val !== "") || "내용을 입력해주세요!"
 const title = ref("");
 const content = ref("");
 
-//const loading = computed(() => cvStore.loading); // 등록 대기 flag
 const loading = computed(() => cvStore.loading);
-
 const isDoneRegister = ref(false); // 자기소개서 등록 완료 됐는지를 나타내는 flag
 
 async function onSubmit() {
@@ -75,55 +71,13 @@ async function onSubmit() {
     isDoneRegister.value = true;
     $q.notify({
       message: "자기소개서 등록 성공!",
-      color: $primary,
+      color: "positive",
+      position: "center",
+      timeout: 300,
     });
   } catch (err) {
     console.log(err);
   }
-
-  /*
-  // temp implementation. after fixing backend, this code will be replaced with above commented code
-  try {
-    let cvData = {};
-    cvData.title = title.value;
-    cvData.content = content.value;
-    // 유저 id는 api 경로에 추가해서 보냄
-    loading.value = true;
-
-    axios
-      .post(cvPostAPI, JSON.stringify(cvData), {
-        headers: {
-          "Content-Type": `application/json`,
-        },
-      })
-      .then((response) => {
-        console.log(response);
-        // fail 처리 해야 됨
-        if (response.data.message === "fail") {
-        } else {
-          // 성공
-          $q.notify({
-            position: "center",
-            icon: "done",
-            color: "primary",
-            message: `${response.data.message}`,
-            timeout: 800,
-          });
-
-          isDoneRegister.value = true;
-        }
-      })
-      .catch((error) => {
-        console.log(error);
-      })
-      .finally(() => {
-        loading.value = false;
-      });
-  } catch (error) {
-    console.log(error);
-    loading.value = false;
-  }
-  */
 }
 </script>
 
