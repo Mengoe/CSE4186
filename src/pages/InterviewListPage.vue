@@ -11,13 +11,6 @@
               <q-item-label caption>{{ interview.updatedAt }}</q-item-label>
               <q-item-label caption>{{ interview.link }}</q-item-label>
             </q-item-section>
-            <q-item-section side top>
-              <q-btn
-                color="primary"
-                label="Details"
-                @click="showDetails(interview.id)"
-              />
-            </q-item-section>
           </q-item>
         </q-list>
       </q-card-section>
@@ -45,9 +38,6 @@ function fetchInterviews() {
     .catch((error) => {
       console.error("Error fetching interviews:", error);
     });
-}
-function showDetails(interviewId) {
-  console.log("Show details for interview:", interviewId);
 }
 fetchInterviews();
 </script>

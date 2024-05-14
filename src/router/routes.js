@@ -31,6 +31,16 @@ const routes = [
           else next();
         },
       },
+      {
+        path: "interview/list",
+        component: () => import("pages/InterviewListPage.vue"),
+        beforeEnter: (to, from, next) => {
+          const { isLogin } = storeToRefs(useMemberStore());
+          if (!isLogin.value)
+            next({ path: "/members/login", query: { redirect: to.fullPath } });
+          else next();
+        },
+      },
     ],
   },
   {
