@@ -13,9 +13,11 @@
 
     <q-scroll-area style="height: 80%">
       <q-card-section>
-        <div class="text-center text-dark text-body1">
-          {{ props.content }}
-        </div>
+        <div
+          class="text-center text-dark text-body1"
+          style="white-space: pre-wrap"
+          v-html="props.content"
+        />
       </q-card-section>
     </q-scroll-area>
   </q-card>

@@ -51,12 +51,18 @@
           </q-item>
         </q-list>
       </div>
+      <div class="q-mt-md">
+        <Pagination
+          :pageCount="pageCount"
+          v-model:currentPageNumber="currentPageNumber"
+        />
+      </div>
     </div>
   </q-page>
 </template>
 
 <script setup>
-import { onMounted, ref, computed } from "vue";
+import { onMounted, ref, computed, watch } from "vue";
 import { useCvStore } from "src/stores/cv";
 import {
   outlinedFindInPage,
@@ -66,21 +72,32 @@ import {
 import LoaderComponent from "components/LoaderComponent.vue";
 import CvQuestion from "components/CvQuestion.vue";
 import CvDetails from "components/CvDetails.vue";
+import Pagination from "components/PaginationComponent.vue";
 
 const cvStore = useCvStore();
 
 const cvLists = computed(() => cvStore.cvLists);
 const pageLoading = computed(() => cvStore.pageLoading);
+const pageCount = computed(() => cvStore.pageCount);
 
 const showDialog = ref([]); // 특정 자소서에 대해 예상 질문 생성 dialog 띄워줌
 const showDetails = ref([]); // 특정 자소서 내용 dialog로 띄워줌
 
+const currentPageNumber = ref(1);
+const CV_PER_PAGE = 8;
+
+watch(currentPageNumber, fetchCvs);
+
 // get user's cv lists
-onMounted(async () => {
-  await cvStore.fetchAllCv();
+onMounted(() => {
+  fetchCvs();
+});
+
+function fetchCvs() {
+  cvStore.fetchAllCv(currentPageNumber.value, CV_PER_PAGE);
   showDialog.value = new Array(cvLists.value.length).fill(false);
   showDetails.value = new Array(cvLists.value.length).fill(false);
-});
+}
 </script>
 <style lang="scss" scoped>
 .q-item {
