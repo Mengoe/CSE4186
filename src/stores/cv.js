@@ -50,12 +50,7 @@ export const useCvStore = defineStore(
         console.log(json);
 
         if (json.result === "success") {
-          const questionPairs = JSON.parse(json.body);
-          questions.value = questionPairs.map((obj) => obj.question);
-          audios.value = questionPairs.map((obj) => obj.audio);
-
-          console.log(questions.value);
-          console.log(audios.value);
+          questions.value = JSON.parse(json.body);
         } else throw new Error("질문 생성 에러");
       } catch (error) {
         console.log(error);

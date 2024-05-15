@@ -48,6 +48,6 @@ const bringNextQuestion = () => {
     webcamera.value.finishInterview();
   }
 };
-const question = computed(() => questions[count.value]);
+const question = computed(() => questions[count.value].question);
 console.log(questions);
 </script>
