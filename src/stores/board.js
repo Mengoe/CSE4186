@@ -32,6 +32,7 @@ export const useBoardStore = defineStore("board", {
     postList: [],
     pageCount: 0,
     loading: false,
+    prefs: { like: 0, dislike: 0 },
   }),
   getters: {},
   actions: {
@@ -60,8 +61,8 @@ export const useBoardStore = defineStore("board", {
       };
     },
 
-    bearerToken(token) {
-      return "Bearer " + token;
+    bearerToken() {
+      return "Bearer " + getToken();
     },
 
     // fetch all posts
@@ -95,8 +96,9 @@ export const useBoardStore = defineStore("board", {
 
     // fetch post with id
     fetchPost(postId) {
-      const accessToken = this.bearerToken(getToken());
+      const accessToken = this.bearerToken();
       this.loading = true;
+      this.prefs = { like: 0, dislike: 0 };
 
       api
         .get(`/post/${postId}`, {
@@ -107,6 +109,8 @@ export const useBoardStore = defineStore("board", {
         .then((res) => {
           if (res.data.result === "success") {
             this.post = res.data.body;
+            this.prefs.like = this.post.like;
+            this.prefs.dislike = this.post.dislike;
             console.log(this.post);
           } else throw new Error(res.data.message);
         })
@@ -121,7 +125,7 @@ export const useBoardStore = defineStore("board", {
     },
 
     addPost(title, content) {
-      const accessToken = this.bearerToken(getToken());
+      const accessToken = this.bearerToken();
       const userId = useMemberStore().userId;
 
       const postObj = {
@@ -151,7 +155,7 @@ export const useBoardStore = defineStore("board", {
     },
 
     updatePost(postId, title, content) {
-      const accessToken = this.bearerToken(getToken());
+      const accessToken = this.bearerToken();
 
       const updateObj = {
         title,
@@ -177,7 +181,7 @@ export const useBoardStore = defineStore("board", {
     },
 
     deletePost(postId) {
-      const accessToken = this.bearerToken(getToken());
+      const accessToken = this.bearerToken();
 
       api
         .delete(`/post/${postId}`, {
@@ -198,7 +202,7 @@ export const useBoardStore = defineStore("board", {
     addComment(contentObj) {
       const postId = this.post.id;
 
-      const accessToken = this.bearerToken(getToken());
+      const accessToken = this.bearerToken();
       const userId = useMemberStore().userId;
 
       const commentObj = {
@@ -223,7 +227,7 @@ export const useBoardStore = defineStore("board", {
     },
 
     deleteComment(postId, commentId) {
-      const accessToken = this.bearerToken(getToken());
+      const accessToken = this.bearerToken();
 
       const commentObj = {
         id: commentId,
@@ -247,7 +251,7 @@ export const useBoardStore = defineStore("board", {
     },
 
     updateComment(postId, commentId, contentObj) {
-      const accessToken = this.bearerToken(getToken());
+      const accessToken = this.bearerToken();
 
       const updateObj = {
         id: commentId,
@@ -274,7 +278,7 @@ export const useBoardStore = defineStore("board", {
     },
 
     submitReport(reportObj) {
-      const accessToken = this.bearerToken(getToken());
+      const accessToken = this.bearerToken();
 
       api
         .post("/report", JSON.stringify(reportObj), {
@@ -290,6 +294,49 @@ export const useBoardStore = defineStore("board", {
         .catch((err) => {
           console.log(err);
         });
+    },
+
+    async reflectLikeOrDislike(postId, preference) {
+      const accessToken = this.bearerToken();
+      const userId = useMemberStore().userId;
+
+      try {
+        const res = await api.post(
+          `/post/${postId}/` + preference,
+          JSON.stringify({ userId }),
+          {
+            headers: {
+              Authorization: accessToken,
+            },
+          },
+        );
+
+        if (res.status === 200 && res.data.result === "success") {
+          switch (res.data.body) {
+            case "좋아요 성공":
+              this.post.checkLikeOrDislike = "like";
+              this.prefs["like"]++;
+              break;
+            case "좋아요 취소":
+              this.post.checkLikeOrDislike = "none";
+              this.prefs["like"]--;
+              break;
+            case "싫어요 성공":
+              this.post.checkLikeOrDislike = "dislike";
+              this.prefs["dislike"]++;
+              break;
+            case "싫어요 취소":
+              this.post.checkLikeOrDislike = "none";
+              this.prefs["dislike"]--;
+              break;
+            default:
+              throw new Error("pref error");
+          }
+        }
+        console.log(res);
+      } catch (err) {
+        console.log(err);
+      }
     },
   },
 });
