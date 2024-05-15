@@ -1,5 +1,4 @@
 import axios from "axios";
-import { api } from "boot/axios.js";
 import { useMemberStore } from "stores/member.js";
 import { useRouter } from "vue-router";
 import { getToken, getRefreshToken, setToken } from "cookies.js";

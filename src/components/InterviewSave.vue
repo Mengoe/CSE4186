@@ -6,7 +6,7 @@
           <div>면접 영상 저장 및 종료</div>
         </q-card-section>
         <q-card-section>
-          <q-input :v-model="title" type="text" label="제목" />
+          <q-input v-model="title" type="text" label="제목" />
         </q-card-section>
         <q-card-section>
           <video ref="videoPreview" controls width="500px">

@@ -8,24 +8,30 @@
 <script setup>
 import { ref } from "vue";
 import { api } from "boot/axios.js";
+import { useMemberStore } from "stores/member.js";
+import { useRouter } from "vue-router";
 const authCode = ref(null);
+const router = useRouter();
 
 const getAuthCode = () => {
   const urlParams = new URLSearchParams(window.location.search);
   authCode.value = urlParams.get("code");
-  if (authCode.value) {
-    requestAccessToken(authCode.value);
-  }
+  requestAccessToken(authCode.value);
 };
 
 async function requestAccessToken(code) {
   try {
-    //await api.post();
+    const res = await api.post("/oauth2/google", { code: code });
+    const data = {
+      email: "googleUser",
+      password: null,
+    };
+    await useMemberStore().addLoginInfo(res, data);
+    router.push("/");
   } catch (error) {
-    console.error(
-      "Failed to exchange authorization code for access token",
-      error,
-    );
+    console.log(error);
+    alert("구글 로그인 인증 과정 중 실패했습니다.");
+    router.push("/members/login");
   }
 }
 getAuthCode();

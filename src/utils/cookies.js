@@ -3,8 +3,7 @@ import { Cookies } from "quasar";
 const options = {
   expires: "3d",
   path: "/",
-  sameSite: "None",
-  httpOnly: false,
+  sameSite: "Lax",
 };
 
 const setToken = (userEmail, userToken) => {

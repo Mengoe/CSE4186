@@ -8,6 +8,10 @@ const routes = [
       { path: "", component: () => import("pages/MainPage.vue") },
       { path: "interview", component: () => import("pages/InterviewPage.vue") },
       {
+        path: "interview/list",
+        component: () => import("pages/InterviewListPage.vue"),
+      },
+      {
         path: "interview/finish",
         component: () => import("pages/FinishInterviewPage.vue"),
       },

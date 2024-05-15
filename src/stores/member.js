@@ -5,6 +5,12 @@ import axios from "axios";
 import { api } from "boot/axios.js";
 import { setToken, removeToken } from "src/utils/cookies.js";
 
+const options = {
+  expires: "3d",
+  path: "/",
+  sameSite: "Lax",
+};
+
 export const useMemberStore = defineStore(
   "member",
   () => {
@@ -30,19 +36,23 @@ export const useMemberStore = defineStore(
       });
     }
 
-    const login = async (loginObj) => {
-      const res = await api.post("/login", JSON.stringify(loginObj));
+    const addLoginInfo = async (res, loginObj) => {
       if (res.status == 200) {
         if (res.data.result === "success") {
           const token = res.headers["authorization"].split(" ")[1];
           setToken(loginObj.email, token);
           userId.value = res.data.body.userId;
-          console.log(userId);
           isLogin.value = true;
+          console.log(userId.value);
         } else if (res.data.result === "fail") {
           return Promise.reject("wrong info");
         } else return Promise.reject("invalid resposne");
       } else return Promise.reject("invalid resposne");
+    };
+
+    const login = async (loginObj) => {
+      const res = await api.post("/login", JSON.stringify(loginObj));
+      await addLoginInfo(res, loginObj);
     };
 
     async function logout() {
@@ -90,7 +100,16 @@ export const useMemberStore = defineStore(
         : null;
       return token != null;
     };
-    return { login, logout, join, duplicateCheck, isLogin, autoLogin, userId };
+    return {
+      addLoginInfo,
+      login,
+      logout,
+      join,
+      duplicateCheck,
+      isLogin,
+      autoLogin,
+      userId,
+    };
   },
   {
     persist: true,
