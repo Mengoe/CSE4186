@@ -2,7 +2,7 @@
   <LoaderComponent v-if="cvLoading" fixed :zIndex="999" :size="5" />
   <q-card
     class="column flex-center items-stretch no-wrap"
-    style="height: 80%; width: 100%"
+    style="height: 100%; width: 100%"
   >
     <q-card-section class="column flex-center q-gutter-y-md">
       <div class="text-primary text-h5 text-weight-bold">
@@ -107,10 +107,9 @@ import {
   outlinedEdit,
   outlinedInfo,
 } from "@quasar/extras/material-icons-outlined";
-import { ref } from "vue";
+import { computed, ref } from "vue";
 import { useQuasar, QSpinnerGrid } from "quasar";
 import { useRouter } from "vue-router";
-import axios from "axios";
 
 import LoaderComponent from "./LoaderComponent.vue";
 
@@ -118,17 +117,14 @@ const props = defineProps({
   content: String, // 예상 질문 생성 위한 자기소개서의 내용
 });
 
-const store = useCvStore();
+const cvStore = useCvStore();
 const $q = useQuasar();
 const router = useRouter();
 
 const newQuestion = ref("");
 const questions = ref([]);
 const questionCount = ref(null); // 몇 개의 질문 생성하고자 하는지. 최대 30개
-const cvLoading = ref(false);
-
-const genAPI =
-  "https://259da068-0fdc-4898-8a3d-28d48fa2de21.mock.pstmn.io/api/getQuestions"; // 예상질문 생성 api, 임시
+const cvLoading = computed(() => cvStore.loading);
 
 // 질문 추가 함수. 최대 20개까지 등록 가능
 function addQuestion() {
@@ -155,7 +151,7 @@ function removeQuestion(index) {
 }
 
 // 면접 시작 함수
-function startCv() {
+async function startCv() {
   if (questionCount.value < 1 || questionCount.value > 30) {
     $q.notify({
       message: "질문 개수에 올바른 값을 입력해주세요!",
@@ -167,50 +163,22 @@ function startCv() {
     return;
   }
 
-  let cvData = {};
-  cvData.content = props.content;
-
-  cvLoading.value = true;
-
-  try {
-    axios
-      .post(genAPI, JSON.stringify(cvData), {
-        headers: {
-          "Content-Type": `application/json`,
-        },
-      })
-      .then((response) => {
-        console.log(response);
-        if (response.result === "fail") {
-          // handle fail message
-        } else {
-          // 생성된 예상 질문 및 사용자가 추가한 질문 store에 추가.
-          store.questions = response.data.questions;
-          store.mergeAdditionalQuestions(questions.value); // 질문 개수 접근할 땐 length 이용
-
-          cvLoading.value = false;
-          // 면접 시작 페이지로 라우팅
-          $q.notify({
-            spinner: QSpinnerGrid,
-            message: "면접이 시작됩니다.",
-            color: "primary",
-            position: "center",
-            timeout: 300,
-            closeBtn: true,
-          });
-
-          router.push("/interview"); // 면접 보는 화면으로 넘어감.
-        }
-      })
-      .catch((err) => {
-        console.log(err);
-      })
-      .finally(() => {
-        cvLoading.value = false;
+  cvStore
+    .generateQuestions(questionCount.value, props.content, questions.value) // number,
+    .then(() => {
+      $q.notify({
+        spinner: QSpinnerGrid,
+        message: "면접이 시작됩니다.",
+        color: "primary",
+        position: "center",
+        timeout: 300,
+        closeBtn: true,
       });
-  } catch (error) {
-    console.log(error);
-    cvLoading.value = false;
-  }
+
+      router.push("/interview"); // 면접 보는 화면으로 넘어감.
+    })
+    .catch((err) => {
+      console.log(err);
+    });
 }
 </script>

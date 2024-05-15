@@ -4,6 +4,7 @@ const options = {
   expires: "3d",
   path: "/",
   sameSite: "Lax",
+  httpOnly: false,
 };
 
 const setToken = (userEmail, userToken) => {

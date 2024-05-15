@@ -30,7 +30,7 @@ export const useMemberStore = defineStore(
             },
           })
           .then((res) => {
-            if (res.data.result == "fail") reject(res.data.message);
+            if (res.data.body == true) reject(res.data.result);
             else resolve(true);
           });
       });
