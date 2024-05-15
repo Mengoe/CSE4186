@@ -1,8 +1,8 @@
 import { defineStore } from "pinia";
 import { useMemberStore } from "./member";
-import { Cookies } from "quasar";
+import { getToken } from "src/utils/cookies";
+import { api } from "boot/axios.js";
 import { ref } from "vue";
-import axios from "axios";
 
 export const useCvStore = defineStore(
   "cv",
@@ -12,6 +12,11 @@ export const useCvStore = defineStore(
     const cvLists = ref([]);
     const loading = ref(false);
     const pageLoading = ref(false);
+    const pageCount = ref(0);
+
+    function bearerToken(token) {
+      return "Bearer " + token;
+    }
 
     async function generateQuestions(
       questionNum,
@@ -22,7 +27,7 @@ export const useCvStore = defineStore(
       audios.value = [];
 
       const questionCreateAPI = `http://ec2-3-39-165-26.ap-northeast-2.compute.amazonaws.com:8080/question/create`;
-      const accessToken = Cookies.get("access_token");
+      const accessToken = bearerToken(getToken());
 
       const cvObj = {
         questionNum,
@@ -35,13 +40,12 @@ export const useCvStore = defineStore(
       };
 
       loading.value = true;
-
       try {
         const response = await fetch(questionCreateAPI, {
           method: "POST",
           headers: {
             "Content-Type": `application/json`,
-            Authorization: `Bearer ${accessToken}`,
+            Authorization: accessToken,
           },
           body: JSON.stringify(cvObj),
         });
@@ -59,39 +63,38 @@ export const useCvStore = defineStore(
       }
     }
 
-    const fetchAllCv = async () => {
+    async function fetchAllCv(page, size) {
       cvLists.value = [];
-
-      const getCvListAPI = `http://ec2-3-39-165-26.ap-northeast-2.compute.amazonaws.com:8080/selfIntroduction/list`;
-
-      const accessToken = Cookies.get("access_token");
+      const accessToken = bearerToken(getToken());
 
       pageLoading.value = true;
+      try {
+        const res = await api.get(
+          `/selfIntroduction/list?page=${page}&size=${size}`,
+          {
+            headers: {
+              Authorization: accessToken,
+            },
+          },
+        );
 
-      const res = await axios.get(getCvListAPI, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
-
-      pageLoading.value = false;
-      console.log(res);
-
-      if (res.data.result === "success") {
-        if (res.status === 200) {
-          cvLists.value = res.data.body;
-        } else return Promise.reject("fetch fail");
-      } else return Promise.reject("fetch fail");
-    };
+        if (res.data.result === "success" && res.status === 200) {
+          console.log(res);
+          cvLists.value = res.data.body.list;
+          pageCount.value = res.data.body.pageCount;
+          console.log(pageCount.value);
+        } else throw new Error("fetch Cv erorr");
+      } catch (err) {
+        console.log(err);
+      } finally {
+        pageLoading.value = false;
+      }
+    }
 
     function addCv(title, content) {
-      console.log(title, content);
-
       return new Promise((resolve, reject) => {
         const userId = useMemberStore().userId;
-        const addCvAPI = `http://ec2-3-39-165-26.ap-northeast-2.compute.amazonaws.com:8080/selfIntroduction/save`;
-
-        const accessToken = Cookies.get("access_token");
+        const accessToken = bearerToken(getToken());
 
         const cvObj = {
           title,
@@ -99,16 +102,10 @@ export const useCvStore = defineStore(
           content,
         };
 
-        console.log(cvObj);
-
         loading.value = true;
-
-        axios
-          .post(addCvAPI, JSON.stringify(cvObj), {
-            headers: {
-              "Content-Type": `application/json`,
-              Authorization: `Bearer ${accessToken}`,
-            },
+        api
+          .post("/selfIntroduction/save", JSON.stringify(cvObj), {
+            headers: { Authorization: accessToken },
           })
           .then((res) => {
             console.log(res);
@@ -129,6 +126,7 @@ export const useCvStore = defineStore(
       questions,
       cvLists,
       loading,
+      pageCount,
       generateQuestions,
       fetchAllCv,
       addCv,
