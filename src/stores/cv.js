@@ -8,6 +8,7 @@ export const useCvStore = defineStore(
   "cv",
   () => {
     const questions = ref([]);
+    const audios = ref([]);
     const cvLists = ref([]);
     const loading = ref(false);
     const pageLoading = ref(false);
@@ -18,6 +19,7 @@ export const useCvStore = defineStore(
       additionalQuestions,
     ) {
       questions.value = [];
+      audios.value = [];
 
       const questionCreateAPI = `http://ec2-3-39-165-26.ap-northeast-2.compute.amazonaws.com:8080/question/create`;
       const accessToken = Cookies.get("access_token");
@@ -48,9 +50,7 @@ export const useCvStore = defineStore(
         console.log(json);
 
         if (json.result === "success") {
-          const questionPairs = JSON.parse(json.body);
-          questions.value = questionPairs.map((obj) => obj.question);
-          console.log(questions.value);
+          questions.value = JSON.parse(json.body);
         } else throw new Error("질문 생성 에러");
       } catch (error) {
         console.log(error);
@@ -62,10 +62,8 @@ export const useCvStore = defineStore(
     const fetchAllCv = async () => {
       cvLists.value = [];
 
-      const userId = useMemberStore().userId;
-      const getCvListAPI = `http://ec2-3-39-165-26.ap-northeast-2.compute.amazonaws.com:8080/selfIntroduction/list/${userId}`;
+      const getCvListAPI = `http://ec2-3-39-165-26.ap-northeast-2.compute.amazonaws.com:8080/selfIntroduction/list`;
 
-      console.log(userId);
       const accessToken = Cookies.get("access_token");
 
       pageLoading.value = true;
