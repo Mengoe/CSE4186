@@ -1,7 +1,7 @@
 import { defineStore } from "pinia";
 import { useMemberStore } from "./member";
 import { getToken } from "src/utils/cookies.js";
-import axios from "axios";
+import { api } from "boot/axios.js";
 
 export const useBoardStore = defineStore("board", {
   state: () => ({
@@ -10,6 +10,10 @@ export const useBoardStore = defineStore("board", {
       title: "",
       content: "",
       userId: null,
+      like: null,
+      dislike: null,
+      viewCount: null,
+      checkLikeOrDislike: false,
       comments: [
         {
           id: null,
@@ -28,6 +32,7 @@ export const useBoardStore = defineStore("board", {
     postList: [],
     pageCount: 0,
     loading: false,
+    prefs: { like: 0, dislike: 0 },
   }),
   getters: {},
   actions: {
@@ -37,6 +42,10 @@ export const useBoardStore = defineStore("board", {
         title: "",
         content: "",
         userId: null,
+        like: null,
+        dislike: null,
+        viewCount: null,
+        checkLikeOrDislike: false,
         comments: [
           {
             id: null,
@@ -52,65 +61,57 @@ export const useBoardStore = defineStore("board", {
       };
     },
 
+    bearerToken() {
+      return "Bearer " + getToken();
+    },
+
     // fetch all posts
-    fetchPosts(params) {
+    async fetchPosts(params) {
       console.log(params);
       const { page, size, searchBy, q } = params;
 
       const getPostListAPI = searchBy
-        ? `http://ec2-3-39-165-26.ap-northeast-2.compute.amazonaws.com:8080/post/list?page=${page}&size=${size}&q=${q}&searchBy=${searchBy}`
-        : `http://ec2-3-39-165-26.ap-northeast-2.compute.amazonaws.com:8080/post/list?page=${page}&size=${size}`;
+        ? `/post/list?page=${page}&size=${size}&q=${q}&searchBy=${searchBy}`
+        : `/post/list?page=${page}&size=${size}`;
 
-      console.log(getPostListAPI);
-      const accessToken = getToken();
+      const accessToken = this.bearerToken(getToken());
       this.loading = true;
 
-      console.log(accessToken);
-
-      axios
-        .get(getPostListAPI, {
+      try {
+        const res = await api.get(getPostListAPI, {
           headers: {
-            Authorization: `Bearer ${accessToken}`,
+            Authorization: accessToken,
           },
-        })
-        .then((res) => {
-          console.log("fetchAllPost succeed");
-          console.log(res.data);
-          if (res.data.result === "success") {
-            this.postList = res.data.body.list;
-            this.pageCount = res.data.body.pageCount;
-          }
-        })
-        .catch((err) => {
-          console.log(err);
-        })
-        .finally(() => {
-          this.loading = false;
         });
+        if (res.data.result === "success") {
+          this.postList = res.data.body.list;
+          this.pageCount = res.data.body.pageCount;
+        } else throw new Error("fetchPosts error");
+      } catch (err) {
+        console.log(err);
+      } finally {
+        this.loading = false;
+      }
     },
 
     // fetch post with id
     fetchPost(postId) {
-      const getPostAPI = `http://ec2-3-39-165-26.ap-northeast-2.compute.amazonaws.com:8080/post/${postId}`;
-
-      const accessToken = getToken();
+      const accessToken = this.bearerToken();
       this.loading = true;
+      this.prefs = { like: 0, dislike: 0 };
 
-      axios
-        .get(getPostAPI, {
+      api
+        .get(`/post/${postId}`, {
           headers: {
-            Authorization: `Bearer ${accessToken}`,
+            Authorization: accessToken,
           },
         })
         .then((res) => {
-          // console.log(res.data);
-
-          // console.log(JSON.parse(res.data.body.comments[1].content));
           if (res.data.result === "success") {
             this.post = res.data.body;
-
+            this.prefs.like = this.post.like;
+            this.prefs.dislike = this.post.dislike;
             console.log(this.post);
-            // console.log(this.post.comments[i].content);
           } else throw new Error(res.data.message);
         })
         .catch((err) => {
@@ -124,12 +125,8 @@ export const useBoardStore = defineStore("board", {
     },
 
     addPost(title, content) {
-      const addPostAPI =
-        "http://ec2-3-39-165-26.ap-northeast-2.compute.amazonaws.com:8080/post";
-
-      const accessToken = getToken();
+      const accessToken = this.bearerToken();
       const userId = useMemberStore().userId;
-      console.log(accessToken);
 
       const postObj = {
         title,
@@ -140,11 +137,10 @@ export const useBoardStore = defineStore("board", {
       console.log(postObj);
       this.loading = true;
 
-      axios
-        .post(addPostAPI, JSON.stringify(postObj), {
+      api
+        .post("/post", JSON.stringify(postObj), {
           headers: {
-            "Content-Type": `application/json`,
-            Authorization: `Bearer ${accessToken}`,
+            Authorization: accessToken,
           },
         })
         .then((res) => {
@@ -159,22 +155,18 @@ export const useBoardStore = defineStore("board", {
     },
 
     updatePost(postId, title, content) {
-      const updatePostAPI = `http://ec2-3-39-165-26.ap-northeast-2.compute.amazonaws.com:8080/post/${postId}`;
-      const accessToken = getToken();
+      const accessToken = this.bearerToken();
 
       const updateObj = {
         title,
         content,
       };
 
-      console.log(updateObj);
-
       this.loading = true;
-      axios
-        .put(updatePostAPI, JSON.stringify(updateObj), {
+      api
+        .put(`/post/${postId}`, JSON.stringify(updateObj), {
           headers: {
-            "Content-Type": `application/json`,
-            Authorization: `Bearer ${accessToken}`,
+            Authorization: accessToken,
           },
         })
         .then((res) => {
@@ -189,13 +181,12 @@ export const useBoardStore = defineStore("board", {
     },
 
     deletePost(postId) {
-      const deletePostAPI = `http://ec2-3-39-165-26.ap-northeast-2.compute.amazonaws.com:8080/post/${postId}`;
-      const accessToken = getToken();
+      const accessToken = this.bearerToken();
 
-      axios
-        .delete(deletePostAPI, {
+      api
+        .delete(`/post/${postId}`, {
           headers: {
-            Authorization: `Bearer ${accessToken}`,
+            Authorization: accessToken,
           },
         })
         .then((res) => {
@@ -211,9 +202,7 @@ export const useBoardStore = defineStore("board", {
     addComment(contentObj) {
       const postId = this.post.id;
 
-      const addCommentAPI = `http://ec2-3-39-165-26.ap-northeast-2.compute.amazonaws.com:8080/post/${postId}/comment`;
-
-      const accessToken = getToken();
+      const accessToken = this.bearerToken();
       const userId = useMemberStore().userId;
 
       const commentObj = {
@@ -221,15 +210,10 @@ export const useBoardStore = defineStore("board", {
         userId,
       };
 
-      // console.log(content);
-      // console.log(commentObj);
-      // console.log(JSON.stringify(commentObj));
-
-      axios
-        .post(addCommentAPI, JSON.stringify(commentObj), {
+      api
+        .post(`/post/${postId}/comment`, JSON.stringify(commentObj), {
           headers: {
-            "Content-Type": `application/json`,
-            Authorization: `Bearer ${accessToken}`,
+            Authorization: accessToken,
           },
         })
         .then((res) => {
@@ -243,20 +227,16 @@ export const useBoardStore = defineStore("board", {
     },
 
     deleteComment(postId, commentId) {
-      console.log(postId, commentId);
-      const deleteCommentAPI = `http://ec2-3-39-165-26.ap-northeast-2.compute.amazonaws.com:8080/post/${postId}/comment`;
-      const accessToken = getToken();
+      const accessToken = this.bearerToken();
 
       const commentObj = {
         id: commentId,
       };
 
-      console.log(commentObj);
-
-      axios
-        .delete(deleteCommentAPI, {
+      api
+        .delete(`/post/${postId}/comment`, {
           headers: {
-            Authorization: `Bearer ${accessToken}`,
+            Authorization: accessToken,
           },
           data: commentObj,
         })
@@ -271,21 +251,17 @@ export const useBoardStore = defineStore("board", {
     },
 
     updateComment(postId, commentId, contentObj) {
-      const updateCommentAPI = `http://ec2-3-39-165-26.ap-northeast-2.compute.amazonaws.com:8080/post/${postId}/comment`;
-      const accessToken = getToken();
+      const accessToken = this.bearerToken();
 
       const updateObj = {
         id: commentId,
         content: JSON.stringify(contentObj),
       };
 
-      console.log(updateObj);
-
-      axios
-        .put(updateCommentAPI, JSON.stringify(updateObj), {
+      api
+        .put(`/post/${postId}/comment`, JSON.stringify(updateObj), {
           headers: {
-            "Content-Type": `application/json`,
-            Authorization: `Bearer ${accessToken}`,
+            Authorization: accessToken,
           },
         })
         .then((res) => {
@@ -302,14 +278,12 @@ export const useBoardStore = defineStore("board", {
     },
 
     submitReport(reportObj) {
-      const reportAPI = `http://ec2-3-39-165-26.ap-northeast-2.compute.amazonaws.com:8080/report`;
-      const accessToken = getToken();
+      const accessToken = this.bearerToken();
 
-      axios
-        .post(reportAPI, JSON.stringify(reportObj), {
+      api
+        .post("/report", JSON.stringify(reportObj), {
           headers: {
-            "Content-Type": `application/json`,
-            Authorization: `Bearer ${accessToken}`,
+            Authorization: accessToken,
           },
         })
         .then((res) => {
@@ -320,6 +294,49 @@ export const useBoardStore = defineStore("board", {
         .catch((err) => {
           console.log(err);
         });
+    },
+
+    async reflectLikeOrDislike(postId, preference) {
+      const accessToken = this.bearerToken();
+      const userId = useMemberStore().userId;
+
+      try {
+        const res = await api.post(
+          `/post/${postId}/` + preference,
+          JSON.stringify({ userId }),
+          {
+            headers: {
+              Authorization: accessToken,
+            },
+          },
+        );
+
+        if (res.status === 200 && res.data.result === "success") {
+          switch (res.data.body) {
+            case "좋아요 성공":
+              this.post.checkLikeOrDislike = "like";
+              this.prefs["like"]++;
+              break;
+            case "좋아요 취소":
+              this.post.checkLikeOrDislike = "none";
+              this.prefs["like"]--;
+              break;
+            case "싫어요 성공":
+              this.post.checkLikeOrDislike = "dislike";
+              this.prefs["dislike"]++;
+              break;
+            case "싫어요 취소":
+              this.post.checkLikeOrDislike = "none";
+              this.prefs["dislike"]--;
+              break;
+            default:
+              throw new Error("pref error");
+          }
+        }
+        console.log(res);
+      } catch (err) {
+        console.log(err);
+      }
     },
   },
 });

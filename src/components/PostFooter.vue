@@ -1,5 +1,5 @@
 <template>
-  <div class="footer row">
+  <div class="footer row q-mt-md">
     <q-btn color="primary" size="md" to="/board">목록으로</q-btn>
     <q-btn
       color="primary"
