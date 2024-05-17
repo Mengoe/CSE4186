@@ -7,7 +7,7 @@
       />
     </div>
     <div class="text-comp text-h5 text-dark q-mt-lg q-ml-lg">
-      <div class="text-h5">{{ props.content }}</div>
+      <div class="text-h5" v-html="props.content"></div>
       <div
         class="cursor-pointer note text-dark text-subtitle2 absolute-bottom-right"
         @click="submitReport"
