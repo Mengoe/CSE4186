@@ -77,6 +77,7 @@
 <script setup>
 import { ref, watch, onUnmounted } from "vue";
 import { useRouter } from "vue-router";
+import { useCvStore } from "stores/cv.js";
 import { useInterviewStore } from "stores/interview.js";
 import { useMemberStore } from "stores/member.js";
 import { storeToRefs } from "pinia";
@@ -108,12 +109,19 @@ const {
   isSaved,
   saveFinished,
   title,
+  count,
 } = storeToRefs(interviewStore);
 
 interviewStore.$reset();
 
 const memberStore = useMemberStore();
 const { userId } = storeToRefs(memberStore);
+
+const cvStore = useCvStore();
+const { questions } = storeToRefs(cvStore);
+const audioContext = new AudioContext();
+const questionStreamDestination = audioContext.createMediaStreamDestination();
+const audioBufferSource = null;
 
 const emit = defineEmits(["CamStreamChanged"]);
 watch(CamStream, () => {
@@ -353,11 +361,13 @@ const startInterview = () => {
 };
 
 const resumeInterview = () => {
+  mediaStream.getTracks.forEach((track) => (track.enabled = false));
   recorder.resume();
   isStopped.value = false;
 };
 
 const pauseInterview = () => {
+  mediaStream.getTracks.forEach((track) => (track.enabled = false));
   recorder.pause();
   isStopped.value = true;
 };
@@ -371,6 +381,7 @@ const finishInterview = () => {
   mediaStream.getTracks().forEach(function (track) {
     track.stop();
   });
+  audioContext.close();
   isStarted.value = false;
   isStopped.value = false;
 };
@@ -378,6 +389,38 @@ const finishInterview = () => {
 const startFinishInterview = () => {
   isStarted.value ? finishInterview() : startInterview();
 };
+
+function base64ToUint8Array(base64) {
+  const binary_string = window.atob(base64);
+  const len = binary_string.length;
+  const bytes = new Uint8Array(len);
+  for (var i = 0; i < len; i++) {
+    bytes[i] = binary_string.charCodeAt(i);
+  }
+  return bytes;
+}
+
+watch((count, isStarted), () => {
+  if (isStarted.value) {
+    const audioData = base64ToUint8Array(questions.value[count.value].audio);
+    audioContext.decodeAudioData(audioData).then((audioBuffer) => {
+      audioBufferSource = audioContext.createBufferSource();
+      audioBufferSource.buffer = audioBuffer;
+      audioBufferSource.connect(mediaStreamDestination);
+      audioBufferSource.connect(audioContext.destination);
+      const questionAudioTrack =
+        mediaStreamDestination.stream.getAudioTracks()[0];
+      mediaStream.removeTrack(mediaStream.getAudioTracks()[0]);
+      mediaStream.addTrack(questionAudioTrack);
+      audioBufferSource.onended = () => {
+        mediaStream.removeTrack(mediaStream.getAudioTracks()[0]);
+        mediaStream.addTrack(MicStream.value.getAudioTracks()[0]);
+        audioBufferSource = null;
+      };
+      audioBufferSource.start();
+    });
+  }
+});
 
 defineOptions({
   name: "InterviewPage",

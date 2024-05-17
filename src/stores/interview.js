@@ -8,6 +8,7 @@ export const useInterviewStore = defineStore("interview", () => {
   const isSaved = ref(false);
   const saveFinished = ref(false);
   const title = ref("");
+  const count = ref(0);
 
   function $reset() {
     videoUrl.value = null;
@@ -17,6 +18,7 @@ export const useInterviewStore = defineStore("interview", () => {
     isSaved.value = false;
     saveFinished.value = false;
     title.value = "";
+    count.value = 0;
   }
 
   return {
@@ -28,5 +30,6 @@ export const useInterviewStore = defineStore("interview", () => {
     saveFinished,
     $reset,
     title,
+    count,
   };
 });

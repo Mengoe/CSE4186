@@ -30,9 +30,8 @@ import { computed, ref, watch } from "vue";
 
 const cvStore = useCvStore();
 const interviewStore = useInterviewStore();
-const count = ref(0);
-const questions = cvStore.questions;
-const { isStarted, isFinished } = storeToRefs(interviewStore);
+const { questions } = storeToRefs(cvStore);
+const { isStarted, isFinished, count } = storeToRefs(interviewStore);
 const timer = ref(null);
 const webcamera = ref(null);
 
@@ -48,6 +47,5 @@ const bringNextQuestion = () => {
     webcamera.value.finishInterview();
   }
 };
-const question = computed(() => questions[count.value].question);
-console.log(questions);
+const question = computed(() => questions.value[count.value].question);
 </script>
