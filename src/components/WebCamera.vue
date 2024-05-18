@@ -99,6 +99,8 @@ let recorded = [];
 const router = useRouter();
 let finalBlob = null;
 const video = ref(null);
+const audioSrc = ref(null);
+const audio = ref(null);
 
 const interviewStore = useInterviewStore();
 const {
@@ -119,9 +121,9 @@ const { userId } = storeToRefs(memberStore);
 
 const cvStore = useCvStore();
 const { questions } = storeToRefs(cvStore);
-const audioContext = new AudioContext();
-const questionStreamDestination = audioContext.createMediaStreamDestination();
-const audioBufferSource = null;
+//const audioContext = new AudioContext();
+//const questionStreamDestination = audioContext.createMediaStreamDestination();
+//const audioBufferSource = null;
 
 const emit = defineEmits(["CamStreamChanged"]);
 watch(CamStream, () => {
@@ -175,6 +177,7 @@ watch(isSaved, async () => {
     }
   }
 });
+
 const handleMicButton = () => {
   if (!isAccessed.value.mic) {
     navigator.mediaDevices
@@ -346,8 +349,10 @@ const setRecorder = async () => {
     });
     videoUrl.value = URL.createObjectURL(finalBlob);
     isFinished.value = true;
+    console.log(videoUrl.value);
   };
 };
+
 const startInterview = () => {
   setRecorder()
     .then(() => {
@@ -361,13 +366,13 @@ const startInterview = () => {
 };
 
 const resumeInterview = () => {
-  mediaStream.getTracks.forEach((track) => (track.enabled = false));
+  mediaStream.getTracks().forEach((track) => (track.enabled = true));
   recorder.resume();
   isStopped.value = false;
 };
 
 const pauseInterview = () => {
-  mediaStream.getTracks.forEach((track) => (track.enabled = false));
+  mediaStream.getTracks().forEach((track) => (track.enabled = false));
   recorder.pause();
   isStopped.value = true;
 };
@@ -381,7 +386,7 @@ const finishInterview = () => {
   mediaStream.getTracks().forEach(function (track) {
     track.stop();
   });
-  audioContext.close();
+  //audioContext.close();
   isStarted.value = false;
   isStopped.value = false;
 };
@@ -390,19 +395,19 @@ const startFinishInterview = () => {
   isStarted.value ? finishInterview() : startInterview();
 };
 
-function base64ToUint8Array(base64) {
+function base64ToArrayBuffer(base64) {
   const binary_string = window.atob(base64);
   const len = binary_string.length;
   const bytes = new Uint8Array(len);
   for (var i = 0; i < len; i++) {
     bytes[i] = binary_string.charCodeAt(i);
   }
-  return bytes;
+  return bytes.buffer;
 }
-
+/*
 watch((count, isStarted), () => {
   if (isStarted.value) {
-    const audioData = base64ToUint8Array(questions.value[count.value].audio);
+    const audioData = base64ToArrayBuffer(questions.value[count.value].audio);
     audioContext.decodeAudioData(audioData).then((audioBuffer) => {
       audioBufferSource = audioContext.createBufferSource();
       audioBufferSource.buffer = audioBuffer;
@@ -421,6 +426,7 @@ watch((count, isStarted), () => {
     });
   }
 });
+*/
 
 defineOptions({
   name: "InterviewPage",

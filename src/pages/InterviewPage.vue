@@ -40,12 +40,13 @@ const handleTimerEnd = () => {
 };
 
 const bringNextQuestion = () => {
-  if (count.value < questions.length - 1) {
+  if (count.value < questions.value.length - 1) {
     count.value++;
     timer.value.resetTimer();
   } else {
     webcamera.value.finishInterview();
   }
 };
+
 const question = computed(() => questions.value[count.value].question);
 </script>
