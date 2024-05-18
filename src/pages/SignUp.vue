@@ -131,7 +131,7 @@ const router = useRouter();
 const $q = useQuasar();
 const memberStore = useMemberStore();
 
-const emailPattern = /.+@.+\..+/;
+const emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/i;
 const passwordPatternForNumber = /(?=.*\d)/;
 const passwordPatternForSpec = /([!@$%])/;
 const passwordPatternForChar = /[a-zA-Z]/;
