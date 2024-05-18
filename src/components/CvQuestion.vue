@@ -12,11 +12,11 @@
         v-model.number="questionCount"
         type="number"
         outlined
-        label="1부터 30사이의 숫자를 입력하세요."
+        label="5부터 20사이의 숫자를 입력하세요."
         input-style="width: 200px"
         :rules="[
           (val) =>
-            (1 <= val && val <= 30) || '1 ~ 30까지의 숫자만 입력 가능합니다.',
+            (1 <= val && val <= 20) || '5 ~ 20까지의 숫자만 입력 가능합니다.',
         ]"
       />
     </q-card-section>
