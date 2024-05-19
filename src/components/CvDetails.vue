@@ -17,7 +17,7 @@
           {{ detail.title }}
         </div>
         <div
-          class="text-start text-dark text-body1"
+          class="text-start text-dark text-body1 q-pb-md"
           style="white-space: pre-wrap"
           v-html="detail.content"
         ></div>
