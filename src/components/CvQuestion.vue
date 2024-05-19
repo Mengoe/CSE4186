@@ -16,7 +16,7 @@
         input-style="width: 200px"
         :rules="[
           (val) =>
-            (1 <= val && val <= 20) || '5 ~ 20까지의 숫자만 입력 가능합니다.',
+            (5 <= val && val <= 20) || '5 ~ 20까지의 숫자만 입력 가능합니다.',
         ]"
       />
     </q-card-section>
@@ -114,7 +114,7 @@ import { useRouter } from "vue-router";
 import LoaderComponent from "./LoaderComponent.vue";
 
 const props = defineProps({
-  content: String, // 예상 질문 생성 위한 자기소개서의 내용
+  detailList: Array, // 예상 질문 생성 위한 자기소개서의 내용
 });
 
 const cvStore = useCvStore();
