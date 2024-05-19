@@ -199,7 +199,7 @@ export const useBoardStore = defineStore("board", {
         });
     },
 
-    addComment(contentObj) {
+    async addComment(contentObj) {
       const postId = this.post.id;
 
       const accessToken = this.bearerToken();
@@ -218,11 +218,13 @@ export const useBoardStore = defineStore("board", {
         })
         .then((res) => {
           console.log(res);
-          alert("등록되었습니다.");
-          this.router.go(0); // reload page to show added Comment
+          this.post.comments.push(res.data.body);
+          return Promise.resolve(true);
+          // this.router.go(0); // reload page to show added Comment
         })
         .catch((err) => {
           console.log(err);
+          return Promise.reject("comment form error");
         });
     },
 

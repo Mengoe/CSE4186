@@ -94,6 +94,7 @@ export const useCvStore = defineStore(
           },
         );
 
+        pageLoading.value = false;
         if (res.data.result === "success" && res.status === 200) {
           console.log(res);
           cvLists.value = res.data.body.list;
@@ -101,9 +102,8 @@ export const useCvStore = defineStore(
           console.log(pageCount.value);
         } else throw new Error("fetch Cv erorr");
       } catch (err) {
-        console.log(err);
-      } finally {
         pageLoading.value = false;
+        console.log(err);
       }
     }
 
@@ -142,6 +142,7 @@ export const useCvStore = defineStore(
       questions,
       cvLists,
       loading,
+      pageLoading,
       pageCount,
       generateQuestions,
       fetchAllCv,
