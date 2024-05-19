@@ -115,6 +115,7 @@ import LoaderComponent from "./LoaderComponent.vue";
 
 const props = defineProps({
   detailList: Array, // 예상 질문 생성 위한 자기소개서의 내용
+  cvId: Number,
 });
 
 const cvStore = useCvStore();
@@ -163,8 +164,15 @@ async function startCv() {
     return;
   }
 
+  // 백엔드 /question/create 수정 전까진 content 만들어서 보냄, 자소서 id 받도록 수정되면 제거
+  const content = props.detailList
+    .map((elem) => `${elem.title} ${elem.content}`)
+    .join(" ");
+  // console.log(content);
+  console.log(props.cvId);
+
   cvStore
-    .generateQuestions(questionCount.value, props.content, questions.value) // number,
+    .generateQuestions(questionCount.value, content, questions.value) // number,
     .then(() => {
       $q.notify({
         spinner: QSpinnerGrid,

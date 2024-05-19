@@ -12,12 +12,16 @@
     <q-separator inset />
 
     <q-scroll-area style="height: 80%">
-      <q-card-section>
+      <q-card-section v-for="(detail, idx) in detailList" :key="idx">
+        <div class="text-weight-bold text-h6">
+          {{ detail.title }}
+        </div>
         <div
-          class="text-center text-dark text-body1"
+          class="text-start text-dark text-body1"
           style="white-space: pre-wrap"
-          v-html="props.content"
-        />
+          v-html="detail.content"
+        ></div>
+        <q-separator />
       </q-card-section>
     </q-scroll-area>
   </q-card>
@@ -25,6 +29,6 @@
 <script setup>
 const props = defineProps({
   title: String,
-  content: String, // 예상 질문 생성 위한 자기소개서의 내용
+  detailList: Array, // 예상 질문 생성 위한 자기소개서의 내용
 });
 </script>

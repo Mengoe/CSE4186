@@ -107,20 +107,14 @@ export const useCvStore = defineStore(
       }
     }
 
-    function addCv(title, content) {
+    function addCv(params) {
       return new Promise((resolve, reject) => {
         const userId = useMemberStore().userId;
         const accessToken = bearerToken(getToken());
 
-        const cvObj = {
-          title,
-          userId,
-          content,
-        };
-
         loading.value = true;
         api
-          .post("/selfIntroduction/save", JSON.stringify(cvObj), {
+          .post("/selfIntroduction/save", JSON.stringify(params), {
             headers: { Authorization: accessToken },
           })
           .then((res) => {
@@ -136,8 +130,6 @@ export const useCvStore = defineStore(
           });
       });
     }
-
-    /* reset 필요하면 만들어야 됨. */
     return {
       questions,
       cvLists,
