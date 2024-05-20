@@ -24,7 +24,7 @@
         v-for="(detail, idx) in detailList"
         :key="idx"
       >
-        <div class="text-subtitle2 text-primary absolute-top-left">
+        <div class="text-subtitle2 text-primary absolute-top-left q-ml-md">
           {{ detail.type }}
         </div>
         <div class="text-weight-bold text-h6">

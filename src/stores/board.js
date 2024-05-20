@@ -28,8 +28,10 @@ export const useBoardStore = defineStore("board", {
           postId: null,
         },
       ],
+      videoList: [],
     },
     postList: [],
+    videos: [],
     pageCount: 0,
     loading: false,
     prefs: { like: 0, dislike: 0 },
@@ -74,7 +76,7 @@ export const useBoardStore = defineStore("board", {
         ? `/post/list?page=${page}&size=${size}&q=${q}&searchBy=${searchBy}`
         : `/post/list?page=${page}&size=${size}`;
 
-      const accessToken = this.bearerToken(getToken());
+      const accessToken = this.bearerToken();
       this.loading = true;
 
       try {
@@ -124,14 +126,17 @@ export const useBoardStore = defineStore("board", {
         });
     },
 
-    addPost(title, content) {
+    addPost(title, content, videoId) {
+      console.log(videoId);
       const accessToken = this.bearerToken();
       const userId = useMemberStore().userId;
+      const videoIdList = videoId !== null ? [videoId] : [];
 
       const postObj = {
         title,
         content,
         userId,
+        videoIdList,
       };
 
       console.log(postObj);
@@ -220,7 +225,6 @@ export const useBoardStore = defineStore("board", {
           console.log(res);
           this.post.comments.push(res.data.body);
           return Promise.resolve(true);
-          // this.router.go(0); // reload page to show added Comment
         })
         .catch((err) => {
           console.log(err);
@@ -338,6 +342,28 @@ export const useBoardStore = defineStore("board", {
         console.log(res);
       } catch (err) {
         console.log(err);
+      }
+    },
+
+    async fetchVideos() {
+      const accessToken = this.bearerToken();
+      this.videos = [];
+
+      try {
+        const res = await api.get("/video/list", {
+          headers: {
+            Authorization: accessToken,
+          },
+        });
+
+        if (res.status === 200 && res.data.result === "success") {
+          console.log(res);
+          this.videos = res.data.body.list;
+          return Promise.resolve(true);
+        } else return Promise.reject("fetch video err");
+      } catch (err) {
+        console.log(err);
+        return Promise.reject("fetch video err");
       }
     },
   },
