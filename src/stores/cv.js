@@ -37,6 +37,7 @@ export const useCvStore = defineStore(
     async function generateQuestions(
       questionNum,
       content,
+      job,
       additionalQuestions,
     ) {
       questions.value = [];
@@ -48,7 +49,7 @@ export const useCvStore = defineStore(
       const cvObj = {
         questionNum,
         content,
-        job: "sw개발", // tmp job scope
+        job, // tmp job scope
         additionalQuestions,
         additionalQuestionsSequence: additionalQuestions.map(
           (elem, index) => index, // tmp index
@@ -130,6 +131,27 @@ export const useCvStore = defineStore(
           });
       });
     }
+
+    function deleteCv(cvId) {
+      const accessToken = bearerToken(getToken());
+
+      api
+        .delete(`/selfIntroduction/${cvId}`, {
+          headers: {
+            Authorization: accessToken,
+          },
+          data: { id: cvId },
+        })
+        .then((res) => {
+          console.log(res);
+          alert("삭제되었습니다."); // reload page
+          this.router.go(0);
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    }
+
     return {
       questions,
       cvLists,
@@ -139,6 +161,7 @@ export const useCvStore = defineStore(
       generateQuestions,
       fetchAllCv,
       addCv,
+      deleteCv,
     };
   },
   {

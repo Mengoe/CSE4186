@@ -1,8 +1,15 @@
 <template>
   <q-card
-    class="q-mt-sm column flex-center items-stretch no-wrap"
+    class="q-mt-sm column flex-center items-stretch no-wrap relative-position"
     style="height: 100%; width: 100%"
   >
+    <q-icon
+      color="negative"
+      size="sm"
+      class="cursor-pointer absolute-top-right"
+      :name="outlinedDelete"
+      @click="deleteCv"
+    />
     <q-card-section>
       <div class="text-primary text-h3 text-center">
         {{ props.title }}
@@ -27,8 +34,17 @@
   </q-card>
 </template>
 <script setup>
+import { outlinedDelete } from "@quasar/extras/material-icons-outlined";
+import { useCvStore } from "src/stores/cv";
 const props = defineProps({
   title: String,
   detailList: Array, // 예상 질문 생성 위한 자기소개서의 내용
+  cvId: Number,
 });
+
+function deleteCv() {
+  if (!confirm("삭제하시겠습니까?")) return;
+
+  useCvStore().deleteCv(props.cvId);
+}
 </script>

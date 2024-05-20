@@ -4,6 +4,21 @@
     class="column flex-center items-stretch no-wrap"
     style="height: 100%; width: 100%"
   >
+    <q-card-section class="column flex-center">
+      <div class="text-h5 text-primary text-center text-weight-bold">
+        어떤 직무이신가요?
+      </div>
+      <div class="row flex-center">
+        <q-select
+          :options="jobGroups"
+          v-model="selectedJob"
+          outlined
+        ></q-select>
+      </div>
+    </q-card-section>
+
+    <q-separator inset />
+
     <q-card-section class="column flex-center q-gutter-y-md">
       <div class="text-primary text-h5 text-weight-bold">
         몇 개의 예상 질문을 생성할까요?
@@ -24,7 +39,7 @@
     <q-separator inset />
 
     <q-card-section class="text-h5 text-primary text-center text-weight-bold">
-      혹시 추가로 받고 싶으신<br />
+      추가로 받고 싶으신<br />
       질문이 있으시면 등록해주세요!
     </q-card-section>
 
@@ -35,15 +50,12 @@
       </div>
       <div class="input-form row q-gutter-x-sm no-wrap">
         <q-form @submit="addQuestion" class="row no-wrap q-gutter-x-sm">
-          <!-- to prevent default enter submit 엔터칠때 두번 제출되는 오류 해결해야됨 -->
-
           <q-input
             v-model="newQuestion"
             outlined
             label="질문을 입력해주세요"
             input-style="width: 200px;"
             autofocus
-            lazy-rules
           >
             <template v-slot:prepend>
               <q-icon :name="outlinedEdit" />
@@ -124,18 +136,33 @@ const router = useRouter();
 
 const newQuestion = ref("");
 const questions = ref([]);
-const questionCount = ref(null); // 몇 개의 질문 생성하고자 하는지. 최대 30개
+const questionCount = ref(null);
 const cvLoading = computed(() => cvStore.loading);
 
-// 질문 추가 함수. 최대 20개까지 등록 가능
+const jobGroups = [
+  "백엔드/서버개발",
+  "프론트엔드",
+  "앱개발",
+  "게임개발",
+  "데이터 사이언티스트",
+  "빅 데이터 개발",
+  "데브옵스 개발",
+  "임베디드 소프트웨어 개발",
+  "정보보안",
+  "기타",
+];
+
+const selectedJob = ref("백엔드/서버개발");
+
+// 질문 추가 함수. 최대 10개까지 등록 가능
 function addQuestion() {
   if (newQuestion.value === "") return;
 
-  if (questions.value.length > 20) {
+  if (questions.value.length >= 10) {
     $q.notify({
       color: "negative",
       position: "center",
-      message: "추가 질문은 최대 20개 입니다!",
+      message: "추가 질문은 최대 10개 입니다!",
       timeout: 300,
     });
 
@@ -152,7 +179,7 @@ function removeQuestion(index) {
 }
 
 // 면접 시작 함수
-async function startCv() {
+function startCv() {
   if (questionCount.value < 1 || questionCount.value > 30) {
     $q.notify({
       message: "질문 개수에 올바른 값을 입력해주세요!",
@@ -172,7 +199,12 @@ async function startCv() {
   console.log(props.cvId);
 
   cvStore
-    .generateQuestions(questionCount.value, content, questions.value) // number,
+    .generateQuestions(
+      questionCount.value,
+      content,
+      selectedJob.value,
+      questions.value,
+    )
     .then(() => {
       $q.notify({
         spinner: QSpinnerGrid,

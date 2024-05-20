@@ -18,7 +18,11 @@
             @click="showDetails[index] = true"
           >
             <q-dialog v-model="showDetails[index]" backdrop-filter="blur(4px);">
-              <CvDetails :detailList="cv.detailList" :title="cv.title" />
+              <CvDetails
+                :cvId="cv.id"
+                :detailList="cv.detailList"
+                :title="cv.title"
+              />
             </q-dialog>
 
             <q-item-section avatar>
