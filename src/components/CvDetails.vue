@@ -19,12 +19,19 @@
     <q-separator inset />
 
     <q-scroll-area style="height: 80%">
-      <q-card-section v-for="(detail, idx) in detailList" :key="idx">
+      <q-card-section
+        class="relative-position q-mt-sm"
+        v-for="(detail, idx) in detailList"
+        :key="idx"
+      >
+        <div class="text-subtitle2 text-primary absolute-top-left">
+          {{ detail.type }}
+        </div>
         <div class="text-weight-bold text-h6">
           {{ detail.title }}
         </div>
         <div
-          class="text-start text-dark text-body1 q-pb-md"
+          class="text-start text-dark text-body1"
           style="white-space: pre-wrap"
           v-html="detail.content"
         ></div>

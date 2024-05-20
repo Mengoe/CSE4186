@@ -110,7 +110,6 @@ export const useCvStore = defineStore(
 
     function addCv(params) {
       return new Promise((resolve, reject) => {
-        const userId = useMemberStore().userId;
         const accessToken = bearerToken(getToken());
 
         loading.value = true;
