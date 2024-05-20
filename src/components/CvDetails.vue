@@ -11,7 +11,7 @@
       @click="deleteCv"
     />
     <q-card-section>
-      <div class="text-primary text-h3 text-center">
+      <div class="text-dark text-h4 text-center">
         {{ props.title }}
       </div>
     </q-card-section>
