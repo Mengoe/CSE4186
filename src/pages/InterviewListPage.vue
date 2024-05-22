@@ -24,8 +24,7 @@ import { getToken } from "src/utils/cookies.js";
 const interviews = [];
 function fetchInterviews() {
   const accessToken = "Bearer " + getToken();
-  console.log(accessToken);
-  const data = { page: 0, size: 5, sort: ["string"] };
+
   api
     .get("/video/list?page=1&size=5", {
       headers: {
@@ -34,7 +33,6 @@ function fetchInterviews() {
     })
     .then((response) => {
       console.log(response);
-      //this.interviews = response.body.list
     })
     .catch((error) => {
       console.error("Error fetching interviews:", error);

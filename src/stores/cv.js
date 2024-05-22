@@ -17,7 +17,7 @@ export const useCvStore = defineStore(
     function bearerToken(token) {
       return "Bearer " + token;
     }
-    /*
+
     async function generateQuestions(
       questionNum,
       content,
@@ -32,7 +32,7 @@ export const useCvStore = defineStore(
         },
       ];
     }
-    */
+    /*
 
     async function generateQuestions(
       questionNum,
@@ -79,6 +79,7 @@ export const useCvStore = defineStore(
         loading.value = false;
       }
     }
+    */
 
     async function fetchAllCv(page, size) {
       cvLists.value = [];
