@@ -145,23 +145,19 @@ function addComment() {
   };
 
   // api call
-  boardStore.addComment(contentObj);
+  boardStore
+    .addComment(contentObj)
+    .then(() => {
+      alert("등록되었습니다.");
+      showCommentModal.value = false;
+    })
+    .catch(() => {
+      alert("댓글 등록에 실패하였습니다. 다시 시도해주세요.");
+      showCommentModal.value = false;
+    });
 }
 
-/*
-"
-[
-  verbal: {
-  "a":1,
-  "b":2,
-},
-non: {
-  "c":2
-},
-review : "sdfsdffd"
-]
-"
-*/
+const showCommentModal = defineModel("showCommentModal"); // from BoardPage component
 
 const verbalCriteria = [
   "답변시간은 적절했나요?",

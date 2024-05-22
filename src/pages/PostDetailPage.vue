@@ -12,7 +12,11 @@
 
         <q-separator />
 
-        <PostBody :content="post.content" :postId="post.id" />
+        <PostBody
+          :content="post.content"
+          :videoList="post.videoList"
+          :postId="post.id"
+        />
       </div>
       <div class="q-mt-md row flex-center q-gutter-x-sm">
         <q-btn
