@@ -6,8 +6,8 @@
       class=""
       style="position: relative; max-width: 100%; word-break: break-all"
     >
-      <div class="full-width row justify-start items-center">
-        <div :class="{ mine: comment.userId == userId }">
+      <div class="full-width row flex-center">
+        <div :class="{ mine: comment.userId == userId }" class="col-1">
           {{ comment.username }}
         </div>
 
