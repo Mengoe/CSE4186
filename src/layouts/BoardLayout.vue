@@ -4,12 +4,14 @@
       <div class="top-menu">
         <a href="/">
           <img
-            src="../assets/ai-interview-logo.jpg"
+            src="../assets/main-logo.png"
             alt="AI Interview Logo"
             class="main-logo"
           />
         </a>
-        <span class="text-weight-bold" style="color: black; white-space: nowrap"
+        <span
+          class="text-weight-bold q-ml-md"
+          style="color: black; white-space: nowrap"
           >커뮤니티</span
         >
         <q-toolbar>
