@@ -369,5 +369,23 @@ export const useBoardStore = defineStore("board", {
         return Promise.reject("fetch video err");
       }
     },
+
+    fetchJobFields() {
+      const accessToken = this.bearerToken();
+
+      api
+        .get("/field/list", {
+          headers: {
+            Authorization: accessToken,
+          },
+        })
+        .then((res) => {
+          if (res.status === 200 && res.data.result === "success")
+            this.jobFields = res.data.body;
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    },
   },
 });

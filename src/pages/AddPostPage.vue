@@ -4,7 +4,7 @@
       <div class="row justify-end q-mb-md relative-position q-gutter-x-xs">
         <select v-model="selectedJob" class="absolute-left text-weight-bold">
           <option value="" v-if="selectedJob === ''">직무</option>
-          <option v-for="job in jobGroups" :key="job">{{ job }}</option>
+          <option v-for="job in jobFields" :key="job">{{ job.field }}</option>
         </select>
         <q-btn color="grey" size="md" to="/board">취소</q-btn>
         <q-btn
@@ -125,10 +125,17 @@ const videoTitle = ref(null);
 const videoId = ref(null);
 
 function addPost() {
-  const selectedJobId = jobGroups.indexOf(selectedJob.value) + 1;
+  const jobId =
+    jobFields.value.findIndex((ele) => ele.field == selectedJob.value) + 1;
+
+  console.log(jobId);
+  if (jobId < 1) {
+    console.log("job find error");
+    return;
+  }
 
   console.log(title.value, content.value, videoId.value);
-  boardStore.addPost(title.value, content.value, videoId.value, selectedJobId);
+  boardStore.addPost(title.value, content.value, videoId.value, jobId);
   alert("등록되었습니다. 게시글 목록으로 이동합니다.");
   router.push("/board");
 }
@@ -161,6 +168,10 @@ function selectedVideo(meta) {
   console.log(videoTitle.value);
   console.log(videoLink.value);
 }
+
+onMounted(() => {
+  boardStore.fetchJobFields();
+});
 </script>
 
 <style lang="scss" scoped>
