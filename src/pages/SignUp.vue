@@ -1,20 +1,22 @@
 <template>
-  <q-page class="row flex-center">
-    <div class="container relative-position shadow-11">
-      <q-btn
-        class="absolute-top-right q-mt-xl q-mr-xl"
-        size="lg"
-        outline
-        color="primary"
-        label="홈으로"
-        to="/"
-      ></q-btn>
-      <div id="title" class="text-h4 text-left text-primary">
-        회원 정보를<br />
-        입력해주세요.
+  <q-page class="relative-position">
+    <div class="container absolute-center">
+      <div class="q-ml-lg row items-center text-weight-bold text-subtitle1">
+        <q-icon
+          class="cursor-pointer"
+          :name="outlinedArrowBack"
+          @click="toHome"
+        />
+        <button @click="toHome" class="h-btn">돌아가기</button>
+      </div>
+      <div
+        id="title"
+        class="text-h4 text-center text-weight-bold text-primary q-mt-md"
+      >
+        회원가입
       </div>
       <div id="input-form" class="q-mt-xl column flex-center">
-        <q-form class="q-gutter-y-md" @submit="onSubmit">
+        <q-form class="q-gutter-y-lg" @submit="onSubmit">
           <div class="email-region row no-wrap">
             <q-input
               class="col-10"
@@ -27,12 +29,14 @@
               :rules="emailRules"
               :readonly="isDoneEmailCheck"
               icon="check"
+              no-error-icon
             >
             </q-input>
             <q-btn
               :loading="emailCheckLoading"
               class="col-2 q-ml-xs check-button"
               outline
+              style="border: none"
               color="primary"
               @click="emailDuplicateCheck"
               :disable="isDoneEmailCheck"
@@ -108,7 +112,7 @@
               size="xl"
               :loading="loading"
               ripple
-              label="회원가입"
+              label="가입하기"
               type="submit"
               outline
               color="primary"
@@ -126,7 +130,7 @@ import { computed, ref } from "vue";
 import { useQuasar } from "quasar";
 import { useRouter } from "vue-router";
 import { useMemberStore } from "src/stores/member";
-
+import { outlinedArrowBack } from "@quasar/extras/material-icons-outlined";
 const router = useRouter();
 const $q = useQuasar();
 const memberStore = useMemberStore();
@@ -172,6 +176,10 @@ const nickNameRules = [
 const passwordConfirmRules = [
   (val) => val === password.value || "비밀번호가 일치하지 않습니다.",
 ];
+
+function toHome() {
+  router.push("/members/login");
+}
 
 async function emailDuplicateCheck() {
   const rules = [
@@ -284,25 +292,20 @@ function onSubmit() {
 </script>
 
 <style lang="scss" scoped>
-#title {
-  line-height: 1.2;
-  font-weight: 600;
-}
-.q-field__control {
-  width: 500px;
-}
-
-.q-field__messages {
-  font-weight: bold;
-  font-family: sans-serif;
-  color: $dark;
-}
-
 .container {
-  padding: 100px;
+  width: 50%;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .check-button {
   height: 56px;
+}
+
+.h-btn {
+  color: $grey-7;
+  cursor: pointer;
+  background-color: white;
+  border: none;
 }
 </style>
