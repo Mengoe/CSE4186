@@ -8,5 +8,4 @@ defineOptions({
   name: "App",
 });
 const { autoLogin } = useMemberStore();
-autoLogin();
 </script>

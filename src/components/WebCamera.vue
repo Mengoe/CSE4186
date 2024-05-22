@@ -1,10 +1,8 @@
 <template>
-  <div>
-    <div>
-      <video id="video" ref="video" width="400px">
-        Video stream not available.
-      </video>
-    </div>
+  <div class="flex-center">
+    <video id="video" ref="video" width="500px">
+      Video stream not available.
+    </video>
     <div>
       <q-btn-group>
         <q-btn-dropdown

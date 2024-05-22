@@ -136,20 +136,20 @@ const websiteFeatures = [
     label: "자소서 등록하기",
     icon: "description",
     description: "AI가 면접 질문을 생성할 수 있도록 자소서를 등록해주세요",
-    link: "cv/upload",
+    link: "/cv/upload",
   },
   {
     label: "맞춤형 면접 보기",
     icon: "interpreter_mode",
     description: "직무, 면접 질문 수 등을 입력하고 실전 면접에 돌입해보세요",
-    link: "cv/list",
+    link: "/cv/list",
   },
   {
     label: "면접 피드백/공유하기",
     icon: "reviews",
     description:
       "본인의 면접을 평가받고 다른 사람의 면접을 보며 피드백해보세요",
-    link: "board/list",
+    link: "/board/list",
   },
 ];
 const isFocused = ref([false, false, false]);
