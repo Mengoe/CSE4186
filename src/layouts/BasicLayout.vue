@@ -4,7 +4,7 @@
       <div class="top-menu">
         <a href="/">
           <img
-            src="../assets/ai-interview-logo.jpg"
+            src="../assets/main-logo.png"
             alt="AI Interview Logo"
             class="main-logo"
           />
