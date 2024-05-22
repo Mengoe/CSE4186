@@ -9,7 +9,7 @@
       <RouterLink to="/signUp" class="q-ml-xl text-h2 text-weight-bold">
         회원가입 페이지로!
       </RouterLink>
-      <RouterLink to="/cvUpload" class="q-ml-xl text-h2 text-weight-bold">
+      <RouterLink to="/cv/upload" class="q-ml-xl text-h2 text-weight-bold">
         자기소개서 업로드하기!
       </RouterLink>
     </div>

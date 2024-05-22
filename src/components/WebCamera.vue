@@ -121,9 +121,10 @@ const { userId } = storeToRefs(memberStore);
 
 const cvStore = useCvStore();
 const { questions } = storeToRefs(cvStore);
-//const audioContext = new AudioContext();
-//const questionStreamDestination = audioContext.createMediaStreamDestination();
-//const audioBufferSource = null;
+const audioContext = new AudioContext();
+const questionStreamDestination = audioContext.createMediaStreamDestination();
+let audioBufferSource = null;
+let questionRecorder = null;
 
 const emit = defineEmits(["CamStreamChanged"]);
 watch(CamStream, () => {
@@ -330,6 +331,8 @@ async function init() {
 
 const handleDataAvailable = (event) => {
   if (event.data.size > 0) {
+    console.log("pushed!");
+    console.log(event.data.size);
     recorded.push(event.data);
   }
 };
@@ -344,19 +347,50 @@ const setRecorder = async () => {
   });
   recorder.ondataavailable = handleDataAvailable;
   recorder.onstop = () => {
-    finalBlob = new Blob(recorded, {
-      type: "video/webm",
+    combineBlobs(recorded).then((finalBlob) => {
+      videoUrl.value = URL.createObjectURL(finalBlob);
+
+      isFinished.value = true;
+      const a = document.createElement("a");
+      a.href = videoUrl.value;
+      a.download = finalBlob;
+
+      // 링크를 클릭하여 다운로드 시작
+      document.body.appendChild(a);
+      a.click();
+
+      // 링크 엘리먼트 제거
+      document.body.removeChild(a);
+      mediaStream.getTracks().forEach(function (track) {
+        track.stop();
+      });
+      audioContext.close();
+      isStarted.value = false;
+      isStopped.value = false;
     });
-    videoUrl.value = URL.createObjectURL(finalBlob);
-    isFinished.value = true;
-    console.log(videoUrl.value);
   };
+  recorder.onpause = () => {
+    recorder.requestData();
+  };
+  let questionStream = new MediaStream([
+    questionStreamDestination.stream.getAudioTracks()[0],
+    CamStream.value.getVideoTracks()[0],
+  ]);
+  questionRecorder = new MediaRecorder(questionStream, {
+    mimeType: "video/webm",
+  });
+  questionRecorder.ondataavailable = handleDataAvailable;
+  questionRecorder.onpause = () => {
+    questionRecorder.requestData();
+  };
+
+  audioContext.resume();
 };
 
 const startInterview = () => {
   setRecorder()
     .then(() => {
-      recorder.start();
+      //recorder.start();
       isStopped.value = false;
       isStarted.value = true;
     })
@@ -383,13 +417,24 @@ const resumePauseInterview = () => {
 
 const finishInterview = () => {
   recorder.stop();
-  mediaStream.getTracks().forEach(function (track) {
-    track.stop();
-  });
-  //audioContext.close();
-  isStarted.value = false;
-  isStopped.value = false;
+  questionRecorder.stop();
 };
+async function combineBlobs(blobs) {
+  const arrayBuffers = await Promise.all(
+    blobs.map((blob) => blob.arrayBuffer()),
+  );
+  const totalByteLength = arrayBuffers.reduce(
+    (acc, curr) => acc + curr.byteLength,
+    0,
+  );
+  const combinedArrayBuffer = new Uint8Array(totalByteLength);
+  let offset = 0;
+  arrayBuffers.forEach((buffer) => {
+    combinedArrayBuffer.set(new Uint8Array(buffer), offset);
+    offset += buffer.byteLength;
+  });
+  return new Blob([combinedArrayBuffer], { type: "video/webm" });
+}
 
 const startFinishInterview = () => {
   isStarted.value ? finishInterview() : startInterview();
@@ -404,29 +449,32 @@ function base64ToArrayBuffer(base64) {
   }
   return bytes.buffer;
 }
-/*
+
+function createAudioBufferSource(audioBuffer) {
+  audioBufferSource = audioContext.createBufferSource();
+  audioBufferSource.buffer = audioBuffer;
+  audioBufferSource.connect(questionStreamDestination);
+  audioBufferSource.connect(audioContext.destination);
+  audioBufferSource.onended = () => {
+    questionRecorder.pause();
+    recorder.state === "inactive" ? recorder.start() : recorder.resume();
+  };
+  return audioBufferSource;
+}
+
 watch((count, isStarted), () => {
   if (isStarted.value) {
     const audioData = base64ToArrayBuffer(questions.value[count.value].audio);
     audioContext.decodeAudioData(audioData).then((audioBuffer) => {
-      audioBufferSource = audioContext.createBufferSource();
-      audioBufferSource.buffer = audioBuffer;
-      audioBufferSource.connect(mediaStreamDestination);
-      audioBufferSource.connect(audioContext.destination);
-      const questionAudioTrack =
-        mediaStreamDestination.stream.getAudioTracks()[0];
-      mediaStream.removeTrack(mediaStream.getAudioTracks()[0]);
-      mediaStream.addTrack(questionAudioTrack);
-      audioBufferSource.onended = () => {
-        mediaStream.removeTrack(mediaStream.getAudioTracks()[0]);
-        mediaStream.addTrack(MicStream.value.getAudioTracks()[0]);
-        audioBufferSource = null;
-      };
+      let audioBufferSource = createAudioBufferSource(audioBuffer);
+      if (recorder.state != "inactive") recorder.pause();
+      questionRecorder.state === "inactive"
+        ? questionRecorder.start()
+        : questionRecorder.resume();
       audioBufferSource.start();
     });
   }
 });
-*/
 
 defineOptions({
   name: "InterviewPage",

@@ -60,10 +60,7 @@ export const useMemberStore = defineStore(
       isLogin.value = false;
     }
     function autoLogin() {
-      if (verifyTokenExpiration) isLogin.value = true;
-      if (verifyTokenExpiration) {
-        isLogin.value = true;
-      }
+      if (verifyTokenExpiration()) isLogin.value = true;
     }
 
     async function join(joinObj) {

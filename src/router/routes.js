@@ -1,22 +1,33 @@
 import { useMemberStore } from "stores/member.js";
 import { storeToRefs } from "pinia";
+
 const routes = [
   {
     path: "/",
+    component: () => import("layouts/HomePageLayout.vue"), // MainPage를 위한 다른 레이아웃
+    children: [{ path: "", component: () => import("pages/MainPage.vue") }],
+  },
+  {
+    path: "/interview",
     component: () => import("layouts/BasicLayout.vue"),
     children: [
-      { path: "", component: () => import("pages/MainPage.vue") },
-      { path: "interview", component: () => import("pages/InterviewPage.vue") },
+      { path: "", component: () => import("pages/InterviewPage.vue") },
       {
-        path: "interview/list",
+        path: "list",
         component: () => import("pages/InterviewListPage.vue"),
       },
       {
-        path: "interview/finish",
+        path: "finish",
         component: () => import("pages/FinishInterviewPage.vue"),
       },
+    ],
+  },
+  {
+    path: "/cv",
+    component: () => import("layouts/BasicLayout.vue"),
+    children: [
       {
-        path: "cvUpload",
+        path: "upload",
         component: () => import("pages/CvUpload.vue"),
         beforeEnter: (to, from, next) => {
           const { isLogin } = storeToRefs(useMemberStore());
@@ -26,18 +37,8 @@ const routes = [
         },
       },
       {
-        path: "cvList",
+        path: "list",
         component: () => import("pages/CvList.vue"),
-        beforeEnter: (to, from, next) => {
-          const { isLogin } = storeToRefs(useMemberStore());
-          if (!isLogin.value)
-            next({ path: "/members/login", query: { redirect: to.fullPath } });
-          else next();
-        },
-      },
-      {
-        path: "interview/list",
-        component: () => import("pages/InterviewListPage.vue"),
         beforeEnter: (to, from, next) => {
           const { isLogin } = storeToRefs(useMemberStore());
           if (!isLogin.value)
@@ -102,4 +103,5 @@ const routes = [
     component: () => import("pages/ErrorNotFound.vue"),
   },
 ];
+
 export default routes;
