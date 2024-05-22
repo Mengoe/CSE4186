@@ -9,7 +9,7 @@
       >피드백 남기기</q-btn
     >
     <q-dialog v-model="showCommentModal" backdrop-filter="blur(4px)" persistent>
-      <CommentPostForm />
+      <CommentPostForm v-model:showCommentModal="showCommentModal" />
     </q-dialog>
   </div>
 </template>

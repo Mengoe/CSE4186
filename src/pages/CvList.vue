@@ -1,6 +1,6 @@
 <template>
   <q-page class="column items-center">
-    <LoaderComponent v-if="pageLoading" :size="7" :fixed="true" />
+    <LoaderComponent v-if="pageLoading" :size="5" :fixed="true" />
     <div
       v-else
       style="width: 50%; height: 80%"
@@ -18,7 +18,11 @@
             @click="showDetails[index] = true"
           >
             <q-dialog v-model="showDetails[index]" backdrop-filter="blur(4px);">
-              <CvDetails :content="cv.content" :title="cv.title" />
+              <CvDetails
+                :cvId="cv.id"
+                :detailList="cv.detailList"
+                :title="cv.title"
+              />
             </q-dialog>
 
             <q-item-section avatar>
@@ -45,7 +49,7 @@
                 v-model="showDialog[index]"
                 backdrop-filter="blur(4px);"
               >
-                <CvQuestion :content="cv.content" />
+                <CvQuestion :cvId="cv.id" :detailList="cv.detailList" />
               </q-dialog>
             </q-item-section>
           </q-item>
