@@ -8,16 +8,12 @@
         @click="toDetail(post.id)"
         class="column"
       >
-        <q-video
-          style="height: 75%"
-          loading="lazy"
-          src="https://www.youtube.com/embed/U34kLXjdw90"
-        />
-
         <q-card-section>
           <div class="text-weight-bold text-center">
             {{ post.title }}
           </div>
+          <q-separator />
+          <div v-html="post.content"></div>
         </q-card-section>
       </q-card>
     </div>
@@ -46,7 +42,7 @@ function toDetail(id) {
   border-radius: 20px;
   .post-container {
     .q-card {
-      height: 250px;
+      height: 200px;
       width: 30%;
       overflow: hidden;
       text-overflow: ellipsis;

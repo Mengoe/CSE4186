@@ -1,20 +1,20 @@
 <template>
   <q-page>
     <div>
-      <WebCamera ref="webcamera" />
-    </div>
-    <div>
-      <InterviewTimer @timerEnd="handleTimerEnd" ref="timer" />
-      <div v-if="isStarted">
-        {{ question }}
+      <WebCamera ref="webcamera" class="webcam" />
+      <div>
+        <InterviewTimer @timerEnd="handleTimerEnd" ref="timer" />
+        <div v-if="isStarted">
+          {{ question }}
+        </div>
+        <q-btn
+          color="primary"
+          icon="navigate_next"
+          label="다음 문제 넘기기"
+          @click="bringNextQuestion"
+        />
+        <InterviewSave />
       </div>
-      <q-btn
-        color="primary"
-        icon="navigate_next"
-        label="다음 문제 넘기기"
-        @click="bringNextQuestion"
-      />
-      <InterviewSave />
     </div>
   </q-page>
 </template>
@@ -50,3 +50,5 @@ const bringNextQuestion = () => {
 
 const question = computed(() => questions.value[count.value].question);
 </script>
+
+<style scoped></style>

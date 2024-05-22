@@ -17,7 +17,7 @@ export const useCvStore = defineStore(
     function bearerToken(token) {
       return "Bearer " + token;
     }
-    /*
+
     async function generateQuestions(
       questionNum,
       content,
@@ -32,11 +32,12 @@ export const useCvStore = defineStore(
         },
       ];
     }
-    */
+    /*
 
     async function generateQuestions(
       questionNum,
       content,
+      job,
       additionalQuestions,
     ) {
       questions.value = [];
@@ -48,7 +49,7 @@ export const useCvStore = defineStore(
       const cvObj = {
         questionNum,
         content,
-        job: "sw개발", // tmp job scope
+        job, // tmp job scope
         additionalQuestions,
         additionalQuestionsSequence: additionalQuestions.map(
           (elem, index) => index, // tmp index
@@ -78,6 +79,7 @@ export const useCvStore = defineStore(
         loading.value = false;
       }
     }
+    */
 
     async function fetchAllCv(page, size) {
       cvLists.value = [];
@@ -94,6 +96,7 @@ export const useCvStore = defineStore(
           },
         );
 
+        pageLoading.value = false;
         if (res.data.result === "success" && res.status === 200) {
           console.log(res);
           cvLists.value = res.data.body.list;
@@ -101,26 +104,18 @@ export const useCvStore = defineStore(
           console.log(pageCount.value);
         } else throw new Error("fetch Cv erorr");
       } catch (err) {
-        console.log(err);
-      } finally {
         pageLoading.value = false;
+        console.log(err);
       }
     }
 
-    function addCv(title, content) {
+    function addCv(params) {
       return new Promise((resolve, reject) => {
-        const userId = useMemberStore().userId;
         const accessToken = bearerToken(getToken());
-
-        const cvObj = {
-          title,
-          userId,
-          content,
-        };
 
         loading.value = true;
         api
-          .post("/selfIntroduction/save", JSON.stringify(cvObj), {
+          .post("/selfIntroduction/save", JSON.stringify(params), {
             headers: { Authorization: accessToken },
           })
           .then((res) => {
@@ -137,15 +132,36 @@ export const useCvStore = defineStore(
       });
     }
 
-    /* reset 필요하면 만들어야 됨. */
+    function deleteCv(cvId) {
+      const accessToken = bearerToken(getToken());
+
+      api
+        .delete(`/selfIntroduction/${cvId}`, {
+          headers: {
+            Authorization: accessToken,
+          },
+          data: { id: cvId },
+        })
+        .then((res) => {
+          console.log(res);
+          alert("삭제되었습니다."); // reload page
+          this.router.go(0);
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    }
+
     return {
       questions,
       cvLists,
       loading,
+      pageLoading,
       pageCount,
       generateQuestions,
       fetchAllCv,
       addCv,
+      deleteCv,
     };
   },
   {
