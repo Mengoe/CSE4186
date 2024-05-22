@@ -1,34 +1,21 @@
 <template>
   <q-card class="comment-form">
-    <q-card-section class="column">
-      <div class="row">
-        <q-img src="~assets/interview_icon.png" width="8%" height="8%" />
-        <div class="text-h4 text-dark text-weight-bolder q-ml-sm">
-          면접 리뷰
-        </div>
-      </div>
-    </q-card-section>
-
-    <q-separator inset />
-
-    <q-card-section class="row flex-center">
-      <div class="col-3 text-subtitle1 text-dark text-weight-bold">
-        면접 내용
-      </div>
-      <div class="q-pl-xl col-9 column q-gutter-y-lg">
+    <!-- 별점 부분 -->
+    <q-card-section horizontal class="flex-center">
+      <q-card-section class="col-6 full-height">
         <div
           class="review-content column text-weight-regular text-body2"
           v-for="(score, idx) in props.verbal"
           :key="idx"
         >
-          <div class="criteria-name text-weight-bold">
+          <div class="criteria-name text-weight-bold text-wsfont">
             {{ verbalCriteria[idx] }}
           </div>
-          <div class="star-content row">
+          <div class="star-content row q-mb-sm">
             <q-rating
               :model-value="score"
               size="2.5em"
-              color="yellow"
+              color="primary"
               icon="star_border"
               icon-selected="star"
               no-dimming
@@ -36,16 +23,8 @@
             ></q-rating>
           </div>
         </div>
-      </div>
-    </q-card-section>
-
-    <q-separator inset />
-
-    <q-card-section class="row flex-center">
-      <div class="col-3 text-subtitle1 text-dark text-weight-bold">
-        비언어적 표현
-      </div>
-      <div class="q-pl-xl col-9 column q-gutter-y-lg">
+      </q-card-section>
+      <q-card-section class="col-6 full-height">
         <div
           class="review-content column text-weight-regular text-body2"
           v-for="(score, idx) in props.nonverbal"
@@ -54,11 +33,11 @@
           <div class="criteria-name text-weight-bold">
             {{ nonVerbalCriteria[idx] }}
           </div>
-          <div class="star-content row">
+          <div class="star-content row q-mb-sm">
             <q-rating
               :model-value="score"
               size="2.5em"
-              color="yellow"
+              color="primary"
               icon="star_border"
               icon-selected="star"
               no-dimming
@@ -66,15 +45,12 @@
             ></q-rating>
           </div>
         </div>
-      </div>
+      </q-card-section>
     </q-card-section>
 
-    <q-separator inset />
-
-    <q-card-section class="row flex-center">
-      <div class="col-3 text-subtitle1 text-dark text-weight-bold">
-        상세 의견
-      </div>
+    <q-separator />
+    <!-- 코멘트 부분 -->
+    <q-card-section>
       <div class="col-9 text-review q-gutter-y-sm">
         <q-input
           v-model="rev"
@@ -115,8 +91,7 @@ const rev = ref(props.reviewText);
 </script>
 <style lang="scss" scoped>
 .q-card {
-  height: 100%;
-  width: 80%;
+  height: 70%;
 }
 
 .submit-button {

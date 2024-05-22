@@ -23,7 +23,7 @@
                 "
                 readonly
                 size="2.0em"
-                color="yellow"
+                color="primary"
                 icon="star_border"
                 icon-selected="star"
                 icon-half="star_half"

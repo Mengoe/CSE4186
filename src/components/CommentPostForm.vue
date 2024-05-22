@@ -83,11 +83,6 @@ import { ref } from "vue";
 import { useQuasar } from "quasar";
 import { useBoardStore } from "src/stores/board";
 
-// 추후 사용될 수도. 자연/인문계열에 따라서 평가 항목 다르게 할지?
-const props = defineProps({
-  isEngineering: Boolean,
-});
-
 const $q = useQuasar();
 const boardStore = useBoardStore();
 
