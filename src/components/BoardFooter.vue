@@ -1,29 +1,8 @@
 <template>
-  <div class="board-footer row justify-between">
-    <div class="column q-mt-lg">
-      <div class="search-form row q-gutter-x-sm">
-        <select style="width: 150px; cursor: pointer" v-model="searchBy">
-          <option v-for="(opt, idx) in options" :key="idx">{{ opt }}</option>
-        </select>
-        <q-btn
-          outline
-          class="my-btn"
-          color="white"
-          text-color="dark"
-          @click="searchRequest"
-        >
-          검색
-        </q-btn>
-      </div>
-      <div>
-        <input style="width: 150px" v-model="searchText" />
-      </div>
-    </div>
-    <div class="post-button q-mt-lg">
-      <q-btn size="md" color="primary" text-color="white" to="/board/post">
-        글쓰기
-      </q-btn>
-    </div>
+  <div class="board-footer row justify-end">
+    <q-btn size="md" color="primary" text-color="white" to="/board/post">
+      글쓰기
+    </q-btn>
   </div>
 </template>
 <script setup>

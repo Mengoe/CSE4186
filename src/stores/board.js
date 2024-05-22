@@ -35,6 +35,7 @@ export const useBoardStore = defineStore("board", {
     pageCount: 0,
     loading: false,
     prefs: { like: 0, dislike: 0 },
+    jobFields: [],
   }),
   getters: {},
   actions: {
@@ -88,6 +89,7 @@ export const useBoardStore = defineStore("board", {
         if (res.data.result === "success") {
           this.postList = res.data.body.list;
           this.pageCount = res.data.body.pageCount;
+          console.log(this.postList);
         } else throw new Error("fetchPosts error");
       } catch (err) {
         console.log(err);
@@ -118,7 +120,7 @@ export const useBoardStore = defineStore("board", {
         })
         .catch((err) => {
           console.log(err);
-          alert(err);
+          alert("삭제된 게시글입니다.");
           this.router.push("/board");
         })
         .finally(() => {
@@ -126,7 +128,7 @@ export const useBoardStore = defineStore("board", {
         });
     },
 
-    addPost(title, content, videoId) {
+    addPost(title, content, videoId, jobFieldId) {
       console.log(videoId);
       const accessToken = this.bearerToken();
       const userId = useMemberStore().userId;
@@ -136,6 +138,7 @@ export const useBoardStore = defineStore("board", {
         title,
         content,
         userId,
+        jobFieldId,
         videoIdList,
       };
 
@@ -365,6 +368,24 @@ export const useBoardStore = defineStore("board", {
         console.log(err);
         return Promise.reject("fetch video err");
       }
+    },
+
+    fetchJobFields() {
+      const accessToken = this.bearerToken();
+
+      api
+        .get("/field/list", {
+          headers: {
+            Authorization: accessToken,
+          },
+        })
+        .then((res) => {
+          if (res.status === 200 && res.data.result === "success")
+            this.jobFields = res.data.body;
+        })
+        .catch((err) => {
+          console.log(err);
+        });
     },
   },
 });

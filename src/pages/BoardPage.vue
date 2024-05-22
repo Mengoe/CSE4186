@@ -1,5 +1,5 @@
 <template>
-  <q-page class="q-mt-xl full-height">
+  <q-page class="q-mt-lg full-height">
     <BoardHeader title="게시글 목록" />
     <LoaderComponent v-if="loading" :size="5" fixed />
     <div v-else class="board-component full-height">
@@ -52,7 +52,6 @@ watch(
 onMounted(() => {
   let params = { page: currentPageNumber.value, size: POST_PER_PAGE };
 
-  // 사용자가 검색한 경우, param에 검색조건(searchBy) 및 검색어(q) 추가
   if (route.query.searchBy || route.query.q) {
     isSearchRequested = true;
     searchBy = route.query.searchBy;

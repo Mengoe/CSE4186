@@ -5,8 +5,7 @@
       :max="props.pageCount"
       :max-pages="5"
       :boundary-numbers="false"
-      boundary-links
-      outline
+      direction-links
       active-color="primary"
     >
     </q-pagination>
