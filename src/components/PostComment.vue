@@ -125,9 +125,14 @@ const boardStore = useBoardStore();
 const userId = useMemberStore().userId;
 const post = computed(() => boardStore.post);
 
-const editFlags = ref(new Array(post.value.comments.length).fill(false));
-const showEditModal = ref(new Array(post.value.comments.length).fill(false));
-const showDetailFlag = ref(new Array(post.value.comments.length).fill(false));
+const editFlags = ref(new Array(getCommentLength()).fill(false));
+const showEditModal = ref(new Array(getCommentLength()).fill(false));
+const showDetailFlag = ref(new Array(getCommentLength()).fill(false));
+
+function getCommentLength() {
+  if (post.value.comments) return post.value.comments.length;
+  else return 0;
+}
 
 function deleteComment(postId, commentId) {
   console.log(postId, commentId);

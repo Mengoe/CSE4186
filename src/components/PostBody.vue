@@ -58,8 +58,7 @@
       <span
         class="text-caption text-grey-8 q-pr-md text-weight-bold"
         style="float: right"
-        >{{ "좋아요 " + like }} &bull;
-        {{ "평가 " + post.comments.length }}</span
+        >{{ "좋아요 " + like }} &bull; {{ "평가 " + getCommentsLength() }}</span
       >
     </div>
   </div>
@@ -100,6 +99,12 @@ function togglePlayPause() {
 function getSrc(src) {
   console.log(src);
   return "https://cse4186.s3.ap-northeast-2.amazonaws.com/" + src;
+}
+
+function getCommentsLength() {
+  // console.log(post.value.comments);
+  if (post.value.comments) return post.value.comments.length;
+  else return 0;
 }
 </script>
 
