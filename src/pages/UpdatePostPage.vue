@@ -1,6 +1,5 @@
 <template>
   <q-page class="q-mt-xl">
-    <BoardHeader title="게시글 등록" />
     <q-form
       @submit="updatePost"
       class="q-gutter-y-md column flex-center items-stretch"

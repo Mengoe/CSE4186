@@ -149,7 +149,7 @@ const websiteFeatures = [
     icon: "reviews",
     description:
       "본인의 면접을 평가받고 다른 사람의 면접을 보며 피드백해보세요",
-    link: "/board/list",
+    link: "/board",
   },
 ];
 const isFocused = ref([false, false, false]);

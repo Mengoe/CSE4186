@@ -1,23 +1,24 @@
 <template>
   <q-page class="q-mt-xl">
-    <BoardHeader title="게시글 등록" />
-    <q-form
-      @submit="addPost"
-      class="q-gutter-y-md column flex-center items-stretch q-pa-sm"
-      style="width: 50%"
-    >
-      <div class="title-input">
-        <q-input
-          v-model="title"
-          outlined
-          label="게시글 제목을 입력해주세요."
-          lazy-rules
-          :rules="rules"
+    <div class="container q-mt-xl">
+      <div class="row justify-end q-mb-md relative-position q-gutter-x-xs">
+        <select v-model="selectedJob" class="absolute-left text-weight-bold">
+          <option value="" v-if="selectedJob === ''">직무</option>
+          <option v-for="job in jobFields" :key="job">{{ job.field }}</option>
+        </select>
+        <q-btn color="grey" size="md" to="/board">취소</q-btn>
+        <q-btn
+          color="primary"
+          size="md"
+          :disable="validateTitle || validateJob"
+          @click="addPost"
+          >작성</q-btn
         >
-          <template v-slot:prepend>
-            <q-icon :name="outlinedTitle"></q-icon>
-          </template>
-        </q-input>
+      </div>
+      <q-separator />
+
+      <div class="title-input">
+        <q-input v-model="title" label="제목" lazy-rules :rules="rules" />
       </div>
       <div class="content-input">
         <q-editor
@@ -25,35 +26,16 @@
           outlined
           type="textarea"
           placeholder="내용을 입력해주세요."
-          input-style="min-height:400px; max-height:400px; resize : none;"
+          input-style=" resize : none;"
+          min-height="50vh"
+          max-height="50vh"
           lazy-rules
           :rules="rules"
+          :definitions="{
+            additionalToolbarOption,
+          }"
+          :toolbar="toolbars"
         />
-      </div>
-      <div class="upload-button row justify-end">
-        <div
-          v-if="isSelectedVideo"
-          class="text-weight-bold row q-gutter-x-xs flex-center"
-        >
-          <div class="text-weight-bold">{{ videoTitle }}</div>
-          <div class="cursor-pointer">
-            <q-icon
-              color="negative"
-              @click="isSelectedVideo = false"
-              :name="outlinedCancel"
-            ></q-icon>
-          </div>
-        </div>
-        <div v-else>
-          <q-btn
-            color="primary"
-            text-color="white"
-            @click="fetchVideos"
-            :loading="videoFetchLoading"
-          >
-            면접 업로드
-          </q-btn>
-        </div>
         <q-dialog v-model="showVideoListModal" backdrop-filter="blur(4px);">
           <InterviewListModel
             v-model:showVideoListModal="showVideoListModal"
@@ -61,31 +43,15 @@
           />
         </q-dialog>
       </div>
-      <div class="submit-button">
-        <q-btn
-          class="fit"
-          :loading="loading"
-          type="submit"
-          color="primary"
-          text-color="white"
-          size="xl"
-        >
-          <div>글쓰기</div>
-        </q-btn>
-      </div>
-    </q-form>
+    </div>
   </q-page>
 </template>
 
 <script setup>
 import { useBoardStore } from "src/stores/board";
-import { ref, computed } from "vue";
+import { ref, computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
-import {
-  outlinedTitle,
-  outlinedCancel,
-} from "@quasar/extras/material-icons-outlined";
-import BoardHeader from "src/components/BoardHeader.vue";
+
 import InterviewListModel from "src/components/InterviewListModal.vue";
 
 const boardStore = useBoardStore();
@@ -95,8 +61,60 @@ const rules = [(val) => (val && val !== "") || "내용을 입력해주세요."];
 
 const title = ref("");
 const content = ref("");
+const selectedJob = ref("");
+
+const jobGroups = [
+  "백엔드/서버개발",
+  "프론트엔드",
+  "앱개발",
+  "게임개발",
+  "데이터 사이언티스트",
+  "빅 데이터 개발",
+  "데브옵스 개발",
+  "임베디드 소프트웨어 개발",
+  "정보보안",
+  "인공지능 개발",
+  "기타",
+];
 
 const loading = computed(() => boardStore.loading);
+const jobFields = computed(() => boardStore.jobFields);
+
+const validateTitle = computed(() => {
+  return title.value === "";
+}); // for submit button disabled
+
+const validateJob = computed(() => {
+  return selectedJob.value === "";
+});
+
+const toolbars = computed(() => {
+  return [
+    ["left", "center", "right", "justify"],
+    ["bold", "italic", "underline", "strike"],
+    ["additionalToolbarOption"],
+    ,
+  ];
+});
+
+const additionalToolbarOption = computed(() => {
+  return !isSelectedVideo.value
+    ? {
+        tip: "Upload my interview",
+        icon: "cloud_upload",
+        label: "면접 영상 업로드",
+        handler: fetchVideos,
+      }
+    : {
+        tip: "Cancel uploaded interview",
+        icon: "cancel",
+        color: "red",
+        label: videoTitle.value,
+        handler: () => {
+          isSelectedVideo.value = false;
+        },
+      };
+});
 
 const showVideoListModal = ref(false);
 const videoFetchLoading = ref(false); // 비디오 조회 API호출 후 로딩
@@ -107,8 +125,17 @@ const videoTitle = ref(null);
 const videoId = ref(null);
 
 function addPost() {
+  const jobId =
+    jobFields.value.findIndex((ele) => ele.field == selectedJob.value) + 1;
+
+  console.log(jobId);
+  if (jobId < 1) {
+    console.log("job find error");
+    return;
+  }
+
   console.log(title.value, content.value, videoId.value);
-  boardStore.addPost(title.value, content.value, videoId.value);
+  boardStore.addPost(title.value, content.value, videoId.value, jobId);
   alert("등록되었습니다. 게시글 목록으로 이동합니다.");
   router.push("/board");
 }
@@ -141,10 +168,27 @@ function selectedVideo(meta) {
   console.log(videoTitle.value);
   console.log(videoLink.value);
 }
+
+onMounted(() => {
+  boardStore.fetchJobFields();
+});
 </script>
 
 <style lang="scss" scoped>
-.q-form {
+.container {
+  width: 50%;
   margin: 0 auto;
+}
+
+select {
+  border-radius: 7px;
+  border-style: solid; /* 테두리 스타일을 실선으로 설정 */
+  border-width: 0.5px;
+  border-color: $grey-5;
+  transition: 0.4s;
+  cursor: pointer;
+  &:hover {
+    background-color: $grey-3;
+  }
 }
 </style>
