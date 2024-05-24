@@ -142,7 +142,7 @@ const { questions } = storeToRefs(cvStore);
 const audioContext = new AudioContext();
 const questionStreamDestination = audioContext.createMediaStreamDestination();
 let audioBufferSource = null;
-let questionRecorder = null;
+let answerRecorder = null;
 
 const emit = defineEmits(["CamStreamChanged"]);
 watch(CamStream, () => {
@@ -357,9 +357,14 @@ const handleDataAvailable = (event) => {
 
 const setRecorder = async () => {
   let videoTracks = CamStream.value.getVideoTracks();
-  let audioTracks = MicStream.value.getAudioTracks();
-  let questionTrack = questionStreamDestination.stream.getAudioTracks()[0];
-  let mediaTracks = [...videoTracks, ...audioTracks, questionTrack];
+  let micAudio = audioContext.createMediaStreamSource(MicStream.value);
+  micAudio.connect(questionStreamDestination);
+  console.log(micAudio);
+  console.log(questionStreamDestination.stream);
+  let mediaTracks = [
+    ...videoTracks,
+    questionStreamDestination.stream.getAudioTracks()[0],
+  ];
   mediaStream = new MediaStream(mediaTracks);
   recorder = new MediaRecorder(mediaStream, {
     mimeType: "video/webm",
@@ -427,8 +432,9 @@ function createAudioBufferSource(audioBuffer) {
   audioBufferSource.buffer = audioBuffer;
   audioBufferSource.connect(questionStreamDestination);
   audioBufferSource.connect(audioContext.destination);
+  console.log(questionStreamDestination.stream.getAudioTracks());
   audioBufferSource.onended = () => {
-    mediaStream.getAudioTracks()[0].enabled = true;
+    MicStream.value.getAudioTracks()[0].enabled = true;
   };
   return audioBufferSource;
 }
@@ -438,7 +444,7 @@ watch((count, isStarted), () => {
     const audioData = base64ToArrayBuffer(questions.value[count.value].audio);
     audioContext.decodeAudioData(audioData).then((audioBuffer) => {
       let audioBufferSource = createAudioBufferSource(audioBuffer);
-      mediaStream.getAudioTracks()[0].enabled = false;
+      MicStream.value.getAudioTracks()[0].enabled = false;
       audioBufferSource.start();
     });
   }
