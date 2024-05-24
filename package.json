@@ -22,6 +22,7 @@
     "quasar": "^2.6.0",
     "uuid": "^9.0.1",
     "vue": "^3.4.18",
+    "vue-circular-count-down-timer": "^2.0.0",
     "vue-router": "^4.0.0"
   },
   "devDependencies": {

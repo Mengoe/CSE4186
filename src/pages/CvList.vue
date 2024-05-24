@@ -49,7 +49,11 @@
                 v-model="showDialog[index]"
                 backdrop-filter="blur(4px);"
               >
-                <CvQuestion :cvId="cv.id" :detailList="cv.detailList" />
+                <CvQuestion
+                  :cvId="cv.id"
+                  :detailList="cv.detailList"
+                  :cvTitle="cv.title"
+                />
               </q-dialog>
             </q-item-section>
           </q-item>
