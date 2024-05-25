@@ -1,5 +1,5 @@
 <template>
-  <div class="comment column q-mt-xl q-mb-xl full-width shadow-3">
+  <div class="comment column q-mt-xl q-mb-xl full-width shadow-2">
     <q-item
       v-for="(comment, idx) in post.comments"
       :key="comment.id"
@@ -54,7 +54,12 @@
                     :color="editComponent.color"
                     :size="editComponent.size"
                     @click="
-                      editComponent.onClick(comment.postId, comment.id, idx)
+                      editComponent.onClick(
+                        comment.userId,
+                        comment.postId,
+                        comment.id,
+                        idx,
+                      )
                     "
                   ></q-icon>
                   <q-dialog
@@ -141,10 +146,10 @@ function deleteComment(postId, commentId) {
   boardStore.deleteComment(postId, commentId);
 }
 
-function submitReport(commentId) {
+function submitReport(uId, commentId) {
   boardStore.submitReport({
     reportType: "comment",
-    userId,
+    userId: uId,
     targetId: commentId,
   });
 }
@@ -165,7 +170,7 @@ const editComponents = [
     isShow: (id1, id2) => {
       return id1 == id2;
     },
-    onClick: (postId, commentId, idx) => {
+    onClick: (uId, postId, commentId, idx) => {
       deleteComment(postId, commentId);
     },
   },
@@ -176,7 +181,7 @@ const editComponents = [
     isShow: (id1, id2) => {
       return id1 == id2;
     },
-    onClick: (postId, commentId, idx) => {
+    onClick: (uId, postId, commentId, idx) => {
       showEditModal.value[idx] = true;
     },
   },
@@ -187,10 +192,10 @@ const editComponents = [
     isShow: (id1, id2) => {
       return id1 != id2;
     },
-    onClick: (postId, commentId, idx) => {
+    onClick: (uId, postId, commentId, idx) => {
       if (!confirm("신고하시겠습니까?")) return;
 
-      submitReport(commentId);
+      submitReport(uId, commentId);
     },
   },
   {
@@ -200,7 +205,7 @@ const editComponents = [
     isShow: (id1, id2) => {
       return true;
     },
-    onClick: (postId, commentId, idx) => {
+    onClick: (uId, postId, commentId, idx) => {
       editFlags.value[idx] = false;
     },
   },

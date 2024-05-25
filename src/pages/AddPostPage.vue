@@ -63,21 +63,6 @@ const title = ref("");
 const content = ref("");
 const selectedJob = ref("");
 
-const jobGroups = [
-  "백엔드/서버개발",
-  "프론트엔드",
-  "앱개발",
-  "게임개발",
-  "데이터 사이언티스트",
-  "빅 데이터 개발",
-  "데브옵스 개발",
-  "임베디드 소프트웨어 개발",
-  "정보보안",
-  "인공지능 개발",
-  "기타",
-];
-
-const loading = computed(() => boardStore.loading);
 const jobFields = computed(() => boardStore.jobFields);
 
 const validateTitle = computed(() => {

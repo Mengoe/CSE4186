@@ -9,11 +9,7 @@
             class="main-logo"
           />
         </a>
-        <span
-          class="text-weight-bold q-ml-md"
-          style="color: black; white-space: nowrap"
-          >커뮤니티</span
-        >
+
         <q-toolbar>
           <q-tabs
             indicator-color="transparent"
@@ -41,6 +37,15 @@
                 </q-item>
               </q-list>
             </q-btn-dropdown>
+
+            <q-route-tab
+              v-for="item in tabMenus"
+              :to="item.to"
+              text-color="black"
+              :label="item.label"
+              :key="item.label"
+              class="text-black"
+            />
           </q-tabs>
           <q-btn label="logout" class="text-black" @click="logOut()" />
         </q-toolbar>
@@ -53,21 +58,22 @@
   </q-layout>
 </template>
 <script setup>
-import EssentialLink from "components/EssentialLink.vue";
-import { ref } from "vue";
 import { useMemberStore } from "stores/member.js";
 import { useRouter } from "vue-router";
 
 const router = useRouter();
 
-const leftDrawerOpen = ref(false);
+const tabMenus = [
+  { to: "/board", label: "social" },
+  { to: "/", label: "about" },
+];
 
 const dropdownMenus = [
   {
     label: "interview",
     subMenus: [
-      { label: "자소서 등록", to: "/cvUpload" },
-      { label: "면접 보기", to: "/cvList" },
+      { label: "자소서 등록", to: "/cv/upload" },
+      { label: "면접 보기", to: "/cv/list" },
       { label: "지난 면접 기록", to: "/interview/list" },
     ],
   },
