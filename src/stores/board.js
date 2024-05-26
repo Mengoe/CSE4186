@@ -304,23 +304,33 @@ export const useBoardStore = defineStore("board", {
       }
     },
 
-    async fetchVideos() {
+    async fetchVideos(page, size) {
       const accessToken = this.bearerToken();
       this.videos = [];
 
+      this.loading = true;
+
+      const url = page
+        ? `/video/list?page=${page}&size=${size}`
+        : "/video/list";
+
       try {
-        const res = await api.get("/video/list", {
+        const res = await api.get(url, {
           headers: {
             Authorization: accessToken,
           },
         });
 
+        this.loading = false;
+
         if (res.status === 200 && res.data.result === "success") {
           console.log(res);
           this.videos = res.data.body.list;
+          this.pageCount = res.data.body.pageCount;
           return Promise.resolve(true);
         } else return Promise.reject("fetch video err");
       } catch (err) {
+        this.loading = false;
         console.log(err);
         return Promise.reject("fetch video err");
       }
@@ -336,9 +346,10 @@ export const useBoardStore = defineStore("board", {
           },
         })
         .then((res) => {
-          if (res.status === 200 && res.data.result === "success")
+          if (res.status === 200 && res.data.result === "success") {
             console.log(res.data);
-          this.jobFields = res.data.body;
+            this.jobFields = res.data.body;
+          }
         })
         .catch((err) => {
           console.log(err);
