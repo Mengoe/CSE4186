@@ -5,63 +5,19 @@ import { api } from "boot/axios.js";
 
 export const useBoardStore = defineStore("board", {
   state: () => ({
-    post: {
-      id: null,
-      title: "",
-      content: "",
-      userId: null,
-      like: null,
-      dislike: null,
-      viewCount: null,
-      checkLikeOrDislike: false,
-      comments: [
-        {
-          id: null,
-          content: {
-            verbal: [],
-            nonverbal: [],
-            review: "",
-          },
-          username: "",
-          createdAt: "",
-          userId: null,
-          postId: null,
-        },
-      ],
-      videoList: [],
-    },
+    post: null,
     postList: [],
     videos: [],
     pageCount: 0,
     loading: false,
     prefs: { like: 0, dislike: 0 },
     jobFields: [],
+    userName: "",
   }),
   getters: {},
   actions: {
     initPost() {
-      this.post = {
-        id: null,
-        title: "",
-        content: "",
-        userId: null,
-        like: null,
-        dislike: null,
-        viewCount: null,
-        checkLikeOrDislike: false,
-        comments: [
-          {
-            id: null,
-            content: {
-              verbal: [],
-              nonverbal: [],
-              review: "",
-            },
-            username: "",
-            createdAt: "",
-          },
-        ],
-      };
+      this.post = null;
     },
 
     bearerToken() {
@@ -87,6 +43,7 @@ export const useBoardStore = defineStore("board", {
           },
         });
         if (res.data.result === "success") {
+          console.log(res.data);
           this.postList = res.data.body.list;
           this.pageCount = res.data.body.pageCount;
           console.log(this.postList);
@@ -288,7 +245,6 @@ export const useBoardStore = defineStore("board", {
 
     submitReport(reportObj) {
       const accessToken = this.bearerToken();
-
       api
         .post("/report", JSON.stringify(reportObj), {
           headers: {
@@ -381,7 +337,8 @@ export const useBoardStore = defineStore("board", {
         })
         .then((res) => {
           if (res.status === 200 && res.data.result === "success")
-            this.jobFields = res.data.body;
+            console.log(res.data);
+          this.jobFields = res.data.body;
         })
         .catch((err) => {
           console.log(err);

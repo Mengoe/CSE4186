@@ -49,7 +49,7 @@
 
 <script setup>
 import { useBoardStore } from "src/stores/board";
-import { ref, computed, onMounted } from "vue";
+import { ref, computed } from "vue";
 import { useRouter } from "vue-router";
 
 import InterviewListModel from "src/components/InterviewListModal.vue";
@@ -154,9 +154,7 @@ function selectedVideo(meta) {
   console.log(videoLink.value);
 }
 
-onMounted(() => {
-  boardStore.fetchJobFields();
-});
+boardStore.fetchJobFields();
 </script>
 
 <style lang="scss" scoped>

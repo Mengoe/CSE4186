@@ -11,13 +11,13 @@
         <q-card-section horizontal style="height: 70%">
           <q-card-section class="q-pt-xs col-6">
             <div class="text-overline text-primary">
-              {{ jobFieldMap.get(post.jobField) }}
+              {{ getSymbol(post.jobField) }}
             </div>
             <div class="text-h5 q-mt-sm q-mb-xs text-weight-bold title-field">
               {{ post.title }}
             </div>
             <div class="text-caption text-grey-7 content-field">
-              {{ post.content.replace(/<[^>]*>/g, "")
+              {{ decodeHtmlEntities(post.content)
               }}<!-- replace html -> normal text -->
             </div>
           </q-card-section>
@@ -38,11 +38,10 @@
 
         <q-card-section class="row items-center justify-between">
           <q-avatar size="md" text-color="white" class="avt">{{
-            jobFieldMap.get(post.jobField)
+            getSymbol(post.jobField)
           }}</q-avatar>
           <div class="text-weight-bold">
-            {{ "Mengou" }}
-            <!--tmp-->
+            {{ post.userName }}
           </div>
           <div class="column">
             <div>
@@ -65,6 +64,7 @@
 <script setup>
 import { useRouter } from "vue-router";
 import { useBoardStore } from "src/stores/board";
+import { computed } from "vue";
 import {
   outlinedVisibility,
   outlinedChat,
@@ -74,33 +74,38 @@ const props = defineProps({
 });
 
 const router = useRouter();
+const boardStore = useBoardStore();
 
-const jobFieldMap = new Map();
+const jobFields = computed(() => boardStore.jobFields);
+
 function getSrc(src) {
   console.log(src);
   return "https://cse4186.s3.ap-northeast-2.amazonaws.com/" + src;
 }
 
+function decodeHtmlEntities(content) {
+  return content
+    .replace(/<[^>]*>/g, "")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'");
+}
+
 function toDetail(id) {
-  useBoardStore().initPost();
+  boardStore.initPost();
   router.push(`/board/${id}`);
 }
 
-function initMap() {
-  jobFieldMap.set("백엔드/서버", "BE");
-  jobFieldMap.set("프론트엔드", "FE");
-  jobFieldMap.set("앱개발", "AP");
-  jobFieldMap.set("게임개발", "GM");
-  jobFieldMap.set("데이터 사이언티스트", "DS");
-  jobFieldMap.set("빅데이터 개발", "BD");
-  jobFieldMap.set("데브옵스 개발", "DV");
-  jobFieldMap.set("임베디드 소프트웨어 개발", "EM");
-  jobFieldMap.set("정보보안", "SE");
-  jobFieldMap.set("인공지능 개발", "AI");
-  jobFieldMap.set("기타", "EC");
-}
+// fetch job Field
+boardStore.fetchJobFields();
 
-initMap();
+function getSymbol(field) {
+  const job = jobFields.value.find((element) => element.field === field);
+  return job ? job.symbol : null;
+}
 </script>
 
 <style lang="scss" scoped>
