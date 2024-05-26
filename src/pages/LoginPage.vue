@@ -107,8 +107,8 @@ const emailError = computed(() => {
 });
 async function onSubmit() {
   const loginObj = {
-    email: this.email,
-    password: this.password,
+    email: email.value,
+    password: password.value,
   };
   useMemberStore()
     .login(loginObj)
