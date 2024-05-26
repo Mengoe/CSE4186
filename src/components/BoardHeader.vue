@@ -12,7 +12,7 @@
       </q-btn>
     </div>
     <div class="search-container col-2 row q-gutter-x-sm q-pl-sm">
-      <div>
+      <div class="slt-box">
         <select
           class="search-form text-weight-bold"
           style=""
@@ -28,24 +28,15 @@
           :offset="[10, 10]"
           v-slot="scope"
           color="dark"
+          self="bottom end"
         >
           <q-input
             v-model="scope.value"
             dense
             autofocus
             @keyup.enter.stop="scope.set"
-            @keydown.enter.stop="searchRequest"
-          >
-            <template v-slot:after>
-              <q-btn
-                flat
-                dense
-                color="positive"
-                icon="check_circle"
-                @click="searchRequest"
-              />
-            </template>
-          </q-input>
+            @keydown.enter.stop="searchRequest(scope)"
+          />
         </q-popup-edit>
       </div>
     </div>
@@ -112,9 +103,11 @@ function selectJob(index) {
   } else router.push("/board");
 }
 
-function searchRequest() {
+function searchRequest(scope) {
+  scope.set(); // save text
+
   if (searchText.value === "") return;
-  console.log("came search?");
+
   router.push({
     path: "board",
     query: {
