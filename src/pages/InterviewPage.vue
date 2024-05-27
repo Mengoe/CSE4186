@@ -1,16 +1,18 @@
 <template>
   <q-page class="gradient-bg text-wsfont">
-    <img
-      src="../assets/main-logo.png"
-      alt="메인 로고"
-      style="
-        height: auto;
-        width: 60px;
-        position: absolute;
-        top: 20px;
-        left: 20px;
-      "
-    />
+    <a href="/">
+      <img
+        src="../assets/main-logo.png"
+        alt="메인 로고"
+        style="
+          height: auto;
+          width: 55px;
+          position: absolute;
+          top: 10px;
+          left: 10px;
+        "
+      />
+    </a>
     <div
       style="position: absolute; top: 100px; left: 60px"
       class="col justify-around flex-center"
