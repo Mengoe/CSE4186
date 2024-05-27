@@ -1,5 +1,5 @@
 <template>
-  <div class="board-header row q-gutter-x-md no-wrap">
+  <div class="board-header row q-gutter-x-md no-wrap q-pl-xl">
     <div class="button-container q-gutter-x-sm col-10">
       <q-btn
         v-for="(btn, index) in jobGroups"
@@ -11,40 +11,15 @@
         {{ btn.btx }}
       </q-btn>
     </div>
-    <div class="search-container col-2 row q-gutter-x-sm q-pl-sm">
-      <div class="slt-box">
-        <select
-          class="search-form text-weight-bold"
-          style=""
-          v-model="searchBy"
-        >
-          <option v-for="(opt, idx) in options" :key="idx">{{ opt }}</option>
-        </select>
-      </div>
-      <div class="cursor-pointer">
-        <q-icon :name="outlinedSearch" color="dark" size="md"></q-icon>
-        <q-popup-edit
-          v-model="searchText"
-          :offset="[10, 10]"
-          v-slot="scope"
-          color="dark"
-          self="bottom end"
-        >
-          <q-input
-            v-model="scope.value"
-            dense
-            autofocus
-            @keyup.enter.stop="scope.set"
-            @keydown.enter.stop="searchRequest(scope)"
-          />
-        </q-popup-edit>
-      </div>
+    <div class="write-btn col-2 q-pl-sm">
+      <q-btn size="md" color="primary" text-color="white" to="/board/post">
+        글쓰기
+      </q-btn>
     </div>
   </div>
 </template>
 <script setup>
 import { ref, onMounted } from "vue";
-import { outlinedSearch } from "@quasar/extras/material-icons-outlined";
 import { useRouter } from "vue-router";
 const props = defineProps({
   title: String,
@@ -67,7 +42,6 @@ const jobGroups = [
 
 const router = useRouter();
 
-const options = ["제목", "작성자"];
 const searchBy = ref("제목");
 const searchText = ref("");
 
@@ -164,5 +138,9 @@ function searchRequest(scope) {
   &:hover {
     background-color: $grey-3;
   }
+}
+
+.q-btn {
+  border-radius: 7px;
 }
 </style>

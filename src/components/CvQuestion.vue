@@ -192,17 +192,10 @@ function startCv() {
     return;
   }
 
-  // 백엔드 /question/create 수정 전까진 content 만들어서 보냄, 자소서 id 받도록 수정되면 제거
-  const content = props.detailList
-    .map((elem) => `${elem.title} ${elem.content}`)
-    .join(" ");
-  // console.log(content);
-  console.log(props.cvId);
-
   cvStore
     .generateQuestions(
       questionCount.value,
-      content,
+      props.cvId,
       selectedJob.value,
       questions.value,
     )
@@ -216,6 +209,7 @@ function startCv() {
         closeBtn: true,
       });
 
+      return;
       router.push("/interview"); // 면접 보는 화면으로 넘어감.
     })
     .catch((err) => {

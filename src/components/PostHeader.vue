@@ -4,7 +4,7 @@
       <div class="text-caption text-primary">{{ post.jobField }}</div>
       <div>{{ post.title }}</div>
       <div class="text-caption text-grey">
-        {{ getDate(post.createdAt) }}
+        <span>{{ post.userName }} &bull; {{ getDate(post.createdAt) }}</span>
       </div>
     </div>
     <div

@@ -105,7 +105,9 @@
               @click="nameDuplicateCheck"
               :disable="isDoneNameCheck"
             >
-              <div v-if="!isDoneNameCheck">중복확인</div>
+              <div v-if="!isDoneNameCheck" style="white-space: nowrap">
+                중복확인
+              </div>
               <div v-else><q-icon name="check"></q-icon></div>
             </q-btn>
           </div>

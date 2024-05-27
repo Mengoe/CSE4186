@@ -6,12 +6,13 @@
         v-for="post in postLists"
         :key="post.id"
         class="post cursor-pointer"
+        :class="post.userId == memberStore.userId ? 'self-post' : ''"
         @click="toDetail(post.id)"
       >
         <q-card-section horizontal style="height: 70%">
           <q-card-section class="q-pt-xs col-6">
-            <div class="text-overline text-primary">
-              {{ getSymbol(post.jobField) }}
+            <div class="text-overline text-primary" style="white-space: nowrap">
+              {{ post.jobField }}
             </div>
             <div class="text-h5 q-mt-sm q-mb-xs text-weight-bold title-field">
               {{ post.title }}
@@ -40,12 +41,7 @@
           <q-avatar size="md" text-color="white" class="avt">{{
             getSymbol(post.jobField)
           }}</q-avatar>
-          <div
-            class="text-weight-bold"
-            :class="
-              post.userId == memberStore.userId ? 'text-primary' : 'negative'
-            "
-          >
+          <div class="text-weight-bold">
             {{ post.userName }}
           </div>
           <div class="column">
@@ -123,6 +119,7 @@ function getSymbol(field) {
   border-radius: 20px;
   .post-container {
     padding-top: 20px;
+
     .post {
       height: 250px;
       width: 30%;
@@ -137,6 +134,12 @@ function getSymbol(field) {
       .post-meta {
         z-index: 100;
       }
+    }
+
+    .self-post {
+      border-style: solid;
+      border-color: $primary;
+      border-width: 1.5px;
     }
   }
 

@@ -5,7 +5,32 @@ import { api } from "boot/axios.js";
 
 export const useBoardStore = defineStore("board", {
   state: () => ({
-    post: null,
+    post: {
+      id: null,
+      title: "",
+      content: "",
+      jobField: "",
+      userId: null,
+      like: null,
+      dislike: null,
+      viewCount: null,
+      checkLikeOrDislike: false,
+      comments: [
+        {
+          id: null,
+          content: {
+            verbal: [],
+            nonverbal: [],
+            review: "",
+          },
+          username: "",
+          createdAt: "",
+          userId: null,
+          postId: null,
+        },
+      ],
+      videoList: [],
+    },
     postList: [],
     videos: [],
     pageCount: 0,
@@ -72,7 +97,7 @@ export const useBoardStore = defineStore("board", {
             this.post = res.data.body;
             this.prefs.like = this.post.like;
             this.prefs.dislike = this.post.dislike;
-            console.log(this.post);
+            localStorage.setItem("post", JSON.stringify(res.data.body));
           } else throw new Error(res.data.message);
         })
         .catch((err) => {
@@ -119,13 +144,18 @@ export const useBoardStore = defineStore("board", {
         });
     },
 
-    updatePost(postId, title, content) {
+    updatePost(postId, title, content, videoId, jobFieldId) {
       const accessToken = this.bearerToken();
+      const videoIdList = videoId !== null ? [videoId] : [];
 
       const updateObj = {
         title,
         content,
+        jobFieldId,
+        videoIdList,
       };
+
+      console.log(updateObj);
 
       this.loading = true;
       api
