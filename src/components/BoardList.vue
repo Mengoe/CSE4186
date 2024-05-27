@@ -40,7 +40,12 @@
           <q-avatar size="md" text-color="white" class="avt">{{
             getSymbol(post.jobField)
           }}</q-avatar>
-          <div class="text-weight-bold">
+          <div
+            class="text-weight-bold"
+            :class="
+              post.userId == memberStore.userId ? 'text-primary' : 'negative'
+            "
+          >
             {{ post.userName }}
           </div>
           <div class="column">
@@ -69,12 +74,15 @@ import {
   outlinedVisibility,
   outlinedChat,
 } from "@quasar/extras/material-icons-outlined";
+import { useMemberStore } from "src/stores/member";
+
 const props = defineProps({
   postLists: Array,
 });
 
 const router = useRouter();
 const boardStore = useBoardStore();
+const memberStore = useMemberStore();
 
 const jobFields = computed(() => boardStore.jobFields);
 
