@@ -103,6 +103,7 @@ import { api } from "boot/axios.js";
 import { uploadToBucket } from "src/utils/aws.js";
 import { v4 as uuidv4 } from "uuid";
 import { getToken } from "src/utils/cookies.js";
+import RecordRTC from "recordrtc";
 
 const MicDevices = ref(null);
 const CamDevices = ref(null);
@@ -130,6 +131,7 @@ const {
   saveFinished,
   title,
   count,
+  turn,
 } = storeToRefs(interviewStore);
 
 interviewStore.$reset();
@@ -143,6 +145,7 @@ const audioContext = new AudioContext();
 const questionStreamDestination = audioContext.createMediaStreamDestination();
 let audioBufferSource = null;
 let answerRecorder = null;
+let answerRecorded = [];
 
 const emit = defineEmits(["CamStreamChanged"]);
 watch(CamStream, () => {
@@ -349,8 +352,6 @@ async function init() {
 
 const handleDataAvailable = (event) => {
   if (event.data.size > 0) {
-    console.log("pushed!");
-    console.log(event.data.size);
     recorded.push(event.data);
   }
 };
@@ -359,32 +360,23 @@ const setRecorder = async () => {
   let videoTracks = CamStream.value.getVideoTracks();
   let micAudio = audioContext.createMediaStreamSource(MicStream.value);
   micAudio.connect(questionStreamDestination);
-  console.log(micAudio);
-  console.log(questionStreamDestination.stream);
   let mediaTracks = [
     ...videoTracks,
     questionStreamDestination.stream.getAudioTracks()[0],
   ];
   mediaStream = new MediaStream(mediaTracks);
-  recorder = new MediaRecorder(mediaStream, {
+  recorder = RecordRTC(mediaStream, {
     mimeType: "video/webm",
   });
-  recorder.ondataavailable = handleDataAvailable;
-  recorder.onstop = () => {
-    let finalBlob = new Blob(recorded, { mimeType: "video/webm" });
-    videoUrl.value = URL.createObjectURL(finalBlob);
-    isFinished.value = true;
-    mediaStream.getTracks().forEach(function (track) {
-      track.stop();
-    });
-    audioContext.close();
-  };
+  answerRecorder = new RecordRTC(MicStream.value, {
+    mimeType: "audio/webm",
+  });
 };
 
 const startInterview = () => {
   setRecorder()
     .then(() => {
-      recorder.start();
+      recorder.startRecording();
       isStopped.value = false;
       isStarted.value = true;
     })
@@ -395,13 +387,13 @@ const startInterview = () => {
 
 const resumeInterview = () => {
   mediaStream.getTracks().forEach((track) => (track.enabled = true));
-  recorder.resume();
+  recorder.resumeRecording();
   isStopped.value = false;
 };
 
 const pauseInterview = () => {
   mediaStream.getTracks().forEach((track) => (track.enabled = false));
-  recorder.pause();
+  recorder.pauseRecording();
   isStopped.value = true;
 };
 
@@ -410,7 +402,15 @@ const resumePauseInterview = () => {
 };
 
 const finishInterview = () => {
-  recorder.stop();
+  recorder.stopRecording(() => {
+    finalBlob = recorder.getBlob();
+    videoUrl.value = recorder.toURL();
+  });
+  isFinished.value = true;
+  mediaStream.getTracks().forEach(function (track) {
+    track.stop();
+  });
+  audioContext.close();
 };
 
 const startFinishInterview = () => {
@@ -427,28 +427,75 @@ function base64ToArrayBuffer(base64) {
   return bytes.buffer;
 }
 
-function createAudioBufferSource(audioBuffer) {
+const notRecordAnswer = () => {
+  MicStream.value.getAudioTracks()[0].enabled = true;
+};
+
+const handleAnswerDataAvailable = (event) => {
+  if (event.data.size > 0) {
+    answerRecorded.push(event.data);
+  }
+};
+
+const recordAnswer = () => {
+  MicStream.value.getAudioTracks()[0].enabled = true;
+
+  answerRecorder.startRecording();
+};
+function createAudioBufferSource(audioBuffer, isRecorded) {
   audioBufferSource = audioContext.createBufferSource();
   audioBufferSource.buffer = audioBuffer;
   audioBufferSource.connect(questionStreamDestination);
   audioBufferSource.connect(audioContext.destination);
   console.log(questionStreamDestination.stream.getAudioTracks());
-  audioBufferSource.onended = () => {
-    MicStream.value.getAudioTracks()[0].enabled = true;
-  };
+  audioBufferSource.onended = isRecorded ? recordAnswer : notRecordAnswer;
   return audioBufferSource;
+}
+
+function playQuestion(base64Data) {
+  let audioData = base64ToArrayBuffer(base64Data);
+  audioContext.decodeAudioData(audioData).then((audioBuffer) => {
+    let audioBufferSource = createAudioBufferSource(
+      audioBuffer,
+      questions.value[count.value].turn > turn.value,
+    );
+    MicStream.value.getAudioTracks()[0].enabled = false;
+    audioBufferSource.start();
+  });
 }
 
 watch((count, isStarted), () => {
   if (isStarted.value) {
-    const audioData = base64ToArrayBuffer(questions.value[count.value].audio);
-    audioContext.decodeAudioData(audioData).then((audioBuffer) => {
-      let audioBufferSource = createAudioBufferSource(audioBuffer);
-      MicStream.value.getAudioTracks()[0].enabled = false;
-      audioBufferSource.start();
-    });
+    playQuestion(questions.value[count.value].audio);
   }
 });
+
+const blobToBase64 = async (blob) => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result.split(",")[1]);
+    reader.onerror = (err) => reject(err);
+    reader.readAsDataURL(blob);
+  });
+};
+
+watch(
+  turn,
+  () => {
+    if (isStarted.value && turn.value != 0) {
+      answerRecorder.stopRecording(() => {
+        blobToBase64(answerRecorder.getBlob()).then((base64Data) => {
+          //api post해서 다음 문제 가져오기
+          //playQuestion()
+          answerRecorder.reset();
+        });
+      });
+    }
+  },
+  {
+    immediate: true,
+  },
+);
 
 defineOptions({
   name: "InterviewPage",

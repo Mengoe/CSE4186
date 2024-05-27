@@ -33,7 +33,7 @@
             icon="navigate_next"
             rounded
             label="다음 문제로 넘기기"
-            @click="bringNextQuestion"
+            @click="bringQuestion"
           />
         </div>
       </div>
@@ -42,15 +42,14 @@
           <WebCamera ref="webcamera" class="webcamera q-ma-md q-pa-sm" />
         </div>
         <div v-show="isStarted" class="col-5">
-          <!---
           <InterviewTimer
             @timerEnd="handleTimerEnd"
             ref="timer"
             class="text-pink-12 text-bold"
             style="font-size: 30px"
           />
-          --->
-          <CountDownTimer duration="120" />
+
+          <!---<CountDownTimer duration=120 />--->
         </div>
       </div>
     </div>
@@ -71,25 +70,36 @@ import CountDownTimer from "components/CountDownTimer.vue";
 const cvStore = useCvStore();
 const interviewStore = useInterviewStore();
 const { questions } = storeToRefs(cvStore);
-const { isStarted, isFinished, count } = storeToRefs(interviewStore);
+const { isStarted, isFinished, count, turn } = storeToRefs(interviewStore);
 const timer = ref(null);
 const webcamera = ref(null);
 const questionShow = ref(false);
 
+const question = computed(() => questions.value[count.value].question);
+
 const handleTimerEnd = () => {
-  bringNextQuestion();
+  bringQuestion();
+};
+
+const bringQuestion = () => {
+  questions.value[count.value].turn > turn.value
+    ? bringFollowUpQuestion()
+    : bringNextQuestion();
+  timer.value.resetTimer();
 };
 
 const bringNextQuestion = () => {
   if (count.value < questions.value.length - 1) {
+    turn.value = 0;
     count.value++;
-    timer.value.resetTimer();
   } else {
     webcamera.value.finishInterview();
   }
 };
 
-const question = computed(() => questions.value[count.value].question);
+const bringFollowUpQuestion = () => {
+  turn.value++;
+};
 </script>
 
 <style scoped>
