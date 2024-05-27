@@ -41,7 +41,9 @@
               @click="emailDuplicateCheck"
               :disable="isDoneEmailCheck"
             >
-              <div v-if="!isDoneEmailCheck">중복확인</div>
+              <div v-if="!isDoneEmailCheck" style="white-space: nowrap">
+                중복확인
+              </div>
               <div v-else><q-icon name="check"></q-icon></div>
             </q-btn>
           </div>
