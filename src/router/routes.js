@@ -7,9 +7,10 @@ const routes = [
     component: () => import("layouts/HomePageLayout.vue"), // MainPage를 위한 다른 레이아웃
     children: [{ path: "", component: () => import("pages/MainPage.vue") }],
   },
+
   {
     path: "/interview",
-    component: () => import("layouts/BasicLayout.vue"),
+    component: () => import("layouts/HomePageLayout.vue"),
     children: [
       { path: "", component: () => import("pages/InterviewPage.vue") },
       {

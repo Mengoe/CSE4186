@@ -1,74 +1,94 @@
 <template>
-  <div class="flex-center">
-    <video id="video" ref="video" width="500px">
-      Video stream not available.
-    </video>
-    <div>
-      <q-btn-group>
-        <q-btn-dropdown
-          :icon="isAccessed.mic ? 'mic' : 'mic_off'"
-          @click="handleMicButton"
-          color="grey"
-          rounded
-          split
-        >
+  <div>
+    <div class="text-wsfont" style="z-index: 1">
+      <div style="width: 100%; aspect-ratio: 16/10" class="bg-black">
+        <video id="video" ref="video" width="100%">
+          Video stream not available.
+        </video>
+      </div>
+      <div>
+        <q-btn-group flat unelevated>
           <q-btn-dropdown
-            icon="mic_none"
-            :label="isAccessed.mic ? selectedMic.label : '권한 없음'"
-            :disable="!isAccessed.mic"
-            color="grey"
+            :icon="isAccessed.mic ? 'mic' : 'mic_off'"
+            @click="handleMicButton"
+            color="indigo-12"
+            rounded
+            split
+            size="12px"
+            class="q-mr-sm q-mb-sm"
           >
-            <q-list>
-              <q-item
-                clickable
-                v-for="device in MicDevices"
-                :key="device.deviceId"
-              >
-                <q-item-section>
-                  <q-item-label>{{ device.label }}</q-item-label>
-                </q-item-section>
-              </q-item>
-            </q-list>
+            <q-btn-dropdown
+              icon="mic_none"
+              :label="isAccessed.mic ? selectedMic.label : '권한 없음'"
+              :disable="!isAccessed.mic"
+              color="grey"
+            >
+              <q-list>
+                <q-item
+                  clickable
+                  v-for="device in MicDevices"
+                  :key="device.deviceId"
+                >
+                  <q-item-section>
+                    <q-item-label>{{ device.label }}</q-item-label>
+                  </q-item-section>
+                </q-item>
+              </q-list>
+            </q-btn-dropdown>
           </q-btn-dropdown>
-        </q-btn-dropdown>
 
-        <q-btn-dropdown
-          :icon="isAccessed.camera ? 'videocam' : 'videocam_off'"
-          split
-          color="grey"
-          rounded
-          @click="handleCamButton"
-        >
           <q-btn-dropdown
-            icon="videocam"
-            :label="isAccessed.camera ? selectedCam.label : '권한 없음'"
-            :disable="!isAccessed.camera"
-            color="grey"
+            :icon="isAccessed.camera ? 'videocam' : 'videocam_off'"
+            size="12px"
+            rounded
+            split
+            color="indigo-12"
+            @click="handleCamButton"
+            class="q-mr-sm q-mb-sm"
           >
-            <q-list>
-              <q-item
-                clickable
-                v-for="device in CamDevices"
-                :key="device.deviceId"
-              >
-                <q-item-section>
-                  <q-item-label>{{ device.label }}</q-item-label>
-                </q-item-section>
-              </q-item>
-            </q-list>
+            <q-btn-dropdown
+              icon="videocam"
+              :label="isAccessed.camera ? selectedCam.label : '권한 없음'"
+              :disable="!isAccessed.camera"
+              color="grey"
+            >
+              <q-list>
+                <q-item
+                  clickable
+                  v-for="device in CamDevices"
+                  :key="device.deviceId"
+                >
+                  <q-item-section>
+                    <q-item-label>{{ device.label }}</q-item-label>
+                  </q-item-section>
+                </q-item>
+              </q-list>
+            </q-btn-dropdown>
           </q-btn-dropdown>
-        </q-btn-dropdown>
-        <q-btn
-          :label="isStarted ? '면접 종료하기' : '면접 시작하기'"
-          :icon="isStarted ? 'done_outline' : 'play_arrow'"
-          @click="startFinishInterview"
-        />
-        <q-btn
-          :label="isStopped ? '면접 계속하기' : '면접 중지하기'"
-          :icon="isStopped ? 'replay' : 'pause'"
-          @click="resumePauseInterview"
-        />
-      </q-btn-group>
+          <q-btn
+            :icon="isStopped ? 'replay' : 'pause'"
+            @click="resumePauseInterview"
+            color="red"
+            outline
+            size="10px"
+            round
+            v-if="isStarted"
+            class="q-mb-sm"
+          />
+        </q-btn-group>
+        <div class="row flex-center q-mt-xl">
+          <q-btn
+            @click="startFinishInterview"
+            size="xl"
+            color="deep-purple-14"
+            rounded
+            class="q-mr-sm q-mb-sm"
+            ><span style="text-color: white">{{
+              isStarted ? "모의 면접 종료하기" : "모의 면접 시작하기"
+            }}</span>
+          </q-btn>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -83,6 +103,7 @@ import { api } from "boot/axios.js";
 import { uploadToBucket } from "src/utils/aws.js";
 import { v4 as uuidv4 } from "uuid";
 import { getToken } from "src/utils/cookies.js";
+import RecordRTC from "recordrtc";
 
 const MicDevices = ref(null);
 const CamDevices = ref(null);
@@ -110,6 +131,7 @@ const {
   saveFinished,
   title,
   count,
+  turn,
 } = storeToRefs(interviewStore);
 
 interviewStore.$reset();
@@ -122,7 +144,8 @@ const { questions } = storeToRefs(cvStore);
 const audioContext = new AudioContext();
 const questionStreamDestination = audioContext.createMediaStreamDestination();
 let audioBufferSource = null;
-let questionRecorder = null;
+let answerRecorder = null;
+let answerRecorded = [];
 
 const emit = defineEmits(["CamStreamChanged"]);
 watch(CamStream, () => {
@@ -280,7 +303,7 @@ const handleMicPermission = (permission) => {
 const handleCamPermission = (permission) => {
   if (permission.state == "granted") {
     navigator.mediaDevices
-      .getUserMedia({ video: true })
+      .getUserMedia({ video: { aspectRatio: 16 / 10 } })
       .then((stream) => {
         setCam(stream);
       })
@@ -298,7 +321,7 @@ async function init() {
       audio: {
         echoCancellation: true,
       },
-      video: true,
+      video: { aspectRatio: 16 / 10 },
     })
     .then(setMedias)
     .catch((err) => {
@@ -329,66 +352,31 @@ async function init() {
 
 const handleDataAvailable = (event) => {
   if (event.data.size > 0) {
-    console.log("pushed!");
-    console.log(event.data.size);
     recorded.push(event.data);
   }
 };
 
 const setRecorder = async () => {
   let videoTracks = CamStream.value.getVideoTracks();
-  let audioTracks = MicStream.value.getAudioTracks();
-  let mediaTracks = [...videoTracks, ...audioTracks];
-  mediaStream = new MediaStream(mediaTracks);
-  recorder = new MediaRecorder(mediaStream, {
-    mimeType: "video/webm",
-  });
-  recorder.ondataavailable = handleDataAvailable;
-  recorder.onstop = () => {
-    combineBlobs(recorded).then((finalBlob) => {
-      videoUrl.value = URL.createObjectURL(finalBlob);
-
-      isFinished.value = true;
-      const a = document.createElement("a");
-      a.href = videoUrl.value;
-      a.download = finalBlob;
-
-      // 링크를 클릭하여 다운로드 시작
-      document.body.appendChild(a);
-      a.click();
-
-      // 링크 엘리먼트 제거
-      document.body.removeChild(a);
-      mediaStream.getTracks().forEach(function (track) {
-        track.stop();
-      });
-      audioContext.close();
-      isStarted.value = false;
-      isStopped.value = false;
-    });
-  };
-  recorder.onpause = () => {
-    recorder.requestData();
-  };
-  let questionStream = new MediaStream([
+  let micAudio = audioContext.createMediaStreamSource(MicStream.value);
+  micAudio.connect(questionStreamDestination);
+  let mediaTracks = [
+    ...videoTracks,
     questionStreamDestination.stream.getAudioTracks()[0],
-    CamStream.value.getVideoTracks()[0],
-  ]);
-  questionRecorder = new MediaRecorder(questionStream, {
+  ];
+  mediaStream = new MediaStream(mediaTracks);
+  recorder = RecordRTC(mediaStream, {
     mimeType: "video/webm",
   });
-  questionRecorder.ondataavailable = handleDataAvailable;
-  questionRecorder.onpause = () => {
-    questionRecorder.requestData();
-  };
-
-  audioContext.resume();
+  answerRecorder = new RecordRTC(MicStream.value, {
+    mimeType: "audio/webm",
+  });
 };
 
 const startInterview = () => {
   setRecorder()
     .then(() => {
-      //recorder.start();
+      recorder.startRecording();
       isStopped.value = false;
       isStarted.value = true;
     })
@@ -399,13 +387,13 @@ const startInterview = () => {
 
 const resumeInterview = () => {
   mediaStream.getTracks().forEach((track) => (track.enabled = true));
-  recorder.resume();
+  recorder.resumeRecording();
   isStopped.value = false;
 };
 
 const pauseInterview = () => {
   mediaStream.getTracks().forEach((track) => (track.enabled = false));
-  recorder.pause();
+  recorder.pauseRecording();
   isStopped.value = true;
 };
 
@@ -414,25 +402,16 @@ const resumePauseInterview = () => {
 };
 
 const finishInterview = () => {
-  recorder.stop();
-  questionRecorder.stop();
-};
-async function combineBlobs(blobs) {
-  const arrayBuffers = await Promise.all(
-    blobs.map((blob) => blob.arrayBuffer()),
-  );
-  const totalByteLength = arrayBuffers.reduce(
-    (acc, curr) => acc + curr.byteLength,
-    0,
-  );
-  const combinedArrayBuffer = new Uint8Array(totalByteLength);
-  let offset = 0;
-  arrayBuffers.forEach((buffer) => {
-    combinedArrayBuffer.set(new Uint8Array(buffer), offset);
-    offset += buffer.byteLength;
+  recorder.stopRecording(() => {
+    finalBlob = recorder.getBlob();
+    videoUrl.value = recorder.toURL();
   });
-  return new Blob([combinedArrayBuffer], { type: "video/webm" });
-}
+  isFinished.value = true;
+  mediaStream.getTracks().forEach(function (track) {
+    track.stop();
+  });
+  audioContext.close();
+};
 
 const startFinishInterview = () => {
   isStarted.value ? finishInterview() : startInterview();
@@ -448,31 +427,75 @@ function base64ToArrayBuffer(base64) {
   return bytes.buffer;
 }
 
-function createAudioBufferSource(audioBuffer) {
+const notRecordAnswer = () => {
+  MicStream.value.getAudioTracks()[0].enabled = true;
+};
+
+const handleAnswerDataAvailable = (event) => {
+  if (event.data.size > 0) {
+    answerRecorded.push(event.data);
+  }
+};
+
+const recordAnswer = () => {
+  MicStream.value.getAudioTracks()[0].enabled = true;
+
+  answerRecorder.startRecording();
+};
+function createAudioBufferSource(audioBuffer, isRecorded) {
   audioBufferSource = audioContext.createBufferSource();
   audioBufferSource.buffer = audioBuffer;
   audioBufferSource.connect(questionStreamDestination);
   audioBufferSource.connect(audioContext.destination);
-  audioBufferSource.onended = () => {
-    questionRecorder.pause();
-    recorder.state === "inactive" ? recorder.start() : recorder.resume();
-  };
+  console.log(questionStreamDestination.stream.getAudioTracks());
+  audioBufferSource.onended = isRecorded ? recordAnswer : notRecordAnswer;
   return audioBufferSource;
+}
+
+function playQuestion(base64Data) {
+  let audioData = base64ToArrayBuffer(base64Data);
+  audioContext.decodeAudioData(audioData).then((audioBuffer) => {
+    let audioBufferSource = createAudioBufferSource(
+      audioBuffer,
+      questions.value[count.value].turn > turn.value,
+    );
+    MicStream.value.getAudioTracks()[0].enabled = false;
+    audioBufferSource.start();
+  });
 }
 
 watch((count, isStarted), () => {
   if (isStarted.value) {
-    const audioData = base64ToArrayBuffer(questions.value[count.value].audio);
-    audioContext.decodeAudioData(audioData).then((audioBuffer) => {
-      let audioBufferSource = createAudioBufferSource(audioBuffer);
-      if (recorder.state != "inactive") recorder.pause();
-      questionRecorder.state === "inactive"
-        ? questionRecorder.start()
-        : questionRecorder.resume();
-      audioBufferSource.start();
-    });
+    playQuestion(questions.value[count.value].audio);
   }
 });
+
+const blobToBase64 = async (blob) => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result.split(",")[1]);
+    reader.onerror = (err) => reject(err);
+    reader.readAsDataURL(blob);
+  });
+};
+
+watch(
+  turn,
+  () => {
+    if (isStarted.value && turn.value != 0) {
+      answerRecorder.stopRecording(() => {
+        blobToBase64(answerRecorder.getBlob()).then((base64Data) => {
+          //api post해서 다음 문제 가져오기
+          //playQuestion()
+          answerRecorder.reset();
+        });
+      });
+    }
+  },
+  {
+    immediate: true,
+  },
+);
 
 defineOptions({
   name: "InterviewPage",
