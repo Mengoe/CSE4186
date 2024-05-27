@@ -34,11 +34,10 @@ export const useCvStore = defineStore(
         questionNum,
         selfIntroductionId: cvId,
         dept: job,
+        additionalQuestions,
       };
 
       console.log(cvObj);
-
-      return;
 
       loading.value = true;
       try {
@@ -56,7 +55,23 @@ export const useCvStore = defineStore(
         console.log(json);
 
         if (json.result === "success") {
-          questions.value = JSON.parse(json.body);
+          questions.value = json.body.questions.map((item) => {
+            // 각 객체에서 key와 value를 추출
+            const [key, turn] = Object.entries(item)[0];
+
+            // key 문자열에서 text와 audio 부분 추출
+            const textMatch = key.match(/text=(.*?),\s*audio=/);
+            const audioMatch = key.match(/audio=(.*?)}/);
+
+            // text와 audio 값 추출
+            const text = textMatch ? textMatch[1] : "";
+            const audio = audioMatch ? audioMatch[1] : "";
+
+            // 새 객체 생성
+            return { question: text, audio, turn };
+          });
+
+          console.log(questions.value);
         } else throw new Error("질문 생성 에러");
       } catch (error) {
         console.log(error);

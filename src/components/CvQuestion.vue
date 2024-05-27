@@ -210,7 +210,6 @@ function startCv() {
         closeBtn: true,
       });
 
-      return;
       router.push("/interview"); // 면접 보는 화면으로 넘어감.
     })
     .catch((err) => {
