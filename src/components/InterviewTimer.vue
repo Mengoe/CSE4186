@@ -12,7 +12,7 @@ const emit = defineEmits(["timerEnd"]);
 const { videoUrl, isFinished, isStarted, isStopped } =
   storeToRefs(interviewStore);
 let timer = null;
-const totalTime = ref(1800);
+const totalTime = ref(120);
 function startTimer() {
   timer = setInterval(() => countdown(), 1000);
 }
@@ -22,7 +22,7 @@ function stopTimer() {
 }
 function resetTimer() {
   clearInterval(timer);
-  totalTime.value = 1800;
+  totalTime.value = 120;
   console.log("resetTimer");
   timer = setInterval(() => countdown(), 1000);
 }
