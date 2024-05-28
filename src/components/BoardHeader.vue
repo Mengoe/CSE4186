@@ -11,8 +11,14 @@
         {{ btn.btx }}
       </q-btn>
     </div>
-    <div class="write-btn col-2 q-pl-sm">
-      <q-btn size="md" color="primary" text-color="white" to="/board/post">
+    <div class="col-2 q-pl-sm">
+      <q-btn
+        class="text-weight-bold"
+        size="md"
+        color="primary"
+        text-color="white"
+        to="/board/post"
+      >
         글쓰기
       </q-btn>
     </div>
