@@ -27,7 +27,7 @@ export const useCvStore = defineStore(
       questions.value = [];
       audios.value = [];
 
-      const questionCreateAPI = `http://ec2-3-39-165-26.ap-northeast-2.compute.amazonaws.com:8080/question/create`;
+      const questionCreateAPI = `https://jobjourney.shop/question/create`;
       const accessToken = bearerToken(getToken());
 
       const cvObj = {
