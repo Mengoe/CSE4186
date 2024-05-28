@@ -20,8 +20,7 @@ export const useMemberStore = defineStore(
 
     function duplicateCheck(params) {
       return new Promise((resolve, reject) => {
-        const joinCheckAPI =
-          "http://ec2-3-39-165-26.ap-northeast-2.compute.amazonaws.com:8080/join/check";
+        const joinCheckAPI = "https://jobjourney.shop/join/check";
 
         axios
           .post(joinCheckAPI, JSON.stringify(params), {
@@ -64,8 +63,7 @@ export const useMemberStore = defineStore(
     }
 
     async function join(joinObj) {
-      const joinAPI =
-        "http://ec2-3-39-165-26.ap-northeast-2.compute.amazonaws.com:8080/join";
+      const joinAPI = "https://jobjourney.shop/join";
 
       // second. send join request
       try {
