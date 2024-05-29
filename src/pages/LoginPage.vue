@@ -1,11 +1,11 @@
 <template>
   <q-page class="relative-position bg-grey-1">
     <div class="container row justify-around absolute-center">
-      <div class="login-form column flex-center">
+      <div class="login-form column flex-center nowrap">
         <div class="text-weight-bold text-h4">Sign In</div>
         <SocialLoginButton />
         <div class="text-grey-6">또는 이메일로 로그인</div>
-        <div class="q-pa-md q-gutter-y-md">
+        <div class="q-gutter-y-md">
           <q-input
             v-model="email"
             filled
