@@ -24,7 +24,7 @@
 </template>
 <script setup>
 import { useBoardStore } from "src/stores/board";
-import { computed, onMounted, ref } from "vue";
+import { computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { outlinedArrowBackIos } from "@quasar/extras/material-icons-outlined";
 
@@ -41,15 +41,7 @@ const boardStore = useBoardStore();
 const post = computed(() => boardStore.post); // 특정 게시글 저장
 const loading = computed(() => boardStore.loading);
 
-const like = computed(() => boardStore.prefs.like);
-const dislike = computed(() => boardStore.prefs.dislike);
-
-function reflectPrefence(pref) {
-  boardStore.reflectLikeOrDislike(post.value.id, pref);
-}
-onMounted(() => {
-  boardStore.fetchPost(route.params.id);
-});
+boardStore.fetchPost(route.params.id);
 </script>
 
 <style lang="scss" scoped>

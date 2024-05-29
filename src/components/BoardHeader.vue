@@ -5,10 +5,10 @@
         v-for="(btn, index) in jobGroups"
         :key="index"
         class="button text-weight-bold"
-        :class="{ 'selected-button': index === selectedButton }"
+        :class="{ 'selected-button': index == selectedJob }"
         @click="selectJob(index)"
       >
-        {{ btn }}
+        {{ btn.btx }}
       </q-btn>
     </div>
     <div class="search-container col-2 row q-gutter-x-sm q-pl-sm">
@@ -52,7 +52,7 @@
   </div>
 </template>
 <script setup>
-import { ref, computed } from "vue";
+import { ref, onMounted } from "vue";
 import { outlinedSearch } from "@quasar/extras/material-icons-outlined";
 import { useRouter } from "vue-router";
 const props = defineProps({
@@ -60,18 +60,18 @@ const props = defineProps({
 });
 
 const jobGroups = [
-  "모두",
-  "백엔드/서버개발",
-  "프론트엔드",
-  "앱개발",
-  "게임개발",
-  "데이터 사이언티스트",
-  "빅 데이터 개발",
-  "데브옵스 개발",
-  "임베디드 소프트웨어 개발",
-  "정보보안",
-  "인공지능 개발",
-  "기타",
+  { btx: "모두", q: "" },
+  { btx: "백엔드/서버개발", q: "BE" },
+  { btx: "프론트엔드", q: "FE" },
+  { btx: "앱개발", q: "AP" },
+  { btx: "게임개발", q: "GM" },
+  { btx: "데이터 사이언티스트", q: "DS" },
+  { btx: "빅 데이터 개발", q: "BD" },
+  { btx: "데브옵스 개발", q: "DV" },
+  { btx: "임베디드 소프트웨어 개발", q: "EM" },
+  { btx: "정보보안", q: "SE" },
+  { btx: "인공지능 개발", q: "AI" },
+  { btx: "기타", q: "ET" },
 ];
 
 const router = useRouter();
@@ -80,10 +80,36 @@ const options = ["제목", "작성자"];
 const searchBy = ref("제목");
 const searchText = ref("");
 
-const selectedButton = ref(0);
+var initJob;
+const selectedJob = ref(null);
+
+// job 상태 유지
+function getSelectedJob() {
+  const tmpJob = localStorage.getItem("selectedJob");
+  if (tmpJob) {
+    initJob = tmpJob;
+    console.log(initJob);
+  }
+}
+
+getSelectedJob();
+
+onMounted(() => (selectedJob.value = initJob));
 
 function selectJob(index) {
-  selectedButton.value = index;
+  if (selectedJob.value == index) return;
+  selectedJob.value = index;
+  console.log(selectedJob.value);
+
+  if (index !== 0) {
+    router.push({
+      path: "board",
+      query: {
+        q: jobGroups[index].q,
+        searchBy: "field",
+      },
+    });
+  } else router.push("/board");
 }
 
 function searchRequest() {
@@ -108,10 +134,6 @@ function searchRequest() {
   white-space: nowrap;
   overflow: auto;
 }
-
-// .button-container::-webkit-scrollbar {
-//   display: none;
-// }
 
 .button {
   border-radius: 7px;

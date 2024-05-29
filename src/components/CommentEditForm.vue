@@ -1,81 +1,54 @@
 <template>
   <q-card class="comment-form">
-    <q-card-section class="column">
-      <div class="row">
-        <q-img src="~assets/interview_icon.png" width="8%" height="8%" />
-        <div class="text-h4 text-dark text-weight-bolder q-ml-sm">
-          면접 리뷰
-        </div>
-      </div>
-      <div class="text-subtitle1 text-weight-medium">
-        면접 어떠셨나요? 의견을 남겨주세요 🙂
-      </div>
-    </q-card-section>
-
-    <q-separator inset />
-
-    <q-card-section class="row flex-center">
-      <div class="col-3 text-subtitle1 text-dark text-weight-bold">
-        면접 내용
-      </div>
-      <div class="q-pl-xl col-9 column q-gutter-y-lg">
+    <!-- 별점 부분 -->
+    <q-card-section horizontal class="flex-center">
+      <q-card-section class="col-6 full-height">
         <div
           class="review-content column text-weight-regular text-body2"
           v-for="(score, idx) in verbalScores"
           :key="idx"
         >
-          <div class="criteria-name text-weight-bold">
-            {{ verbalCriteria[idx] }} *
+          <div class="criteria-name text-weight-bold text-wsfont">
+            {{ verbalCriteria[idx] }}
           </div>
-          <div class="star-content row">
+          <div class="star-content row q-mb-sm">
             <q-rating
               v-model="verbalScores[idx]"
               size="2.5em"
-              color="yellow"
+              color="primary"
               icon="star_border"
               icon-selected="star"
               no-dimming
             ></q-rating>
           </div>
         </div>
-      </div>
-    </q-card-section>
-
-    <q-separator inset />
-
-    <q-card-section class="row flex-center">
-      <div class="col-3 text-subtitle1 text-dark text-weight-bold">
-        비언어적 표현
-      </div>
-      <div class="q-pl-xl col-9 column q-gutter-y-lg">
+      </q-card-section>
+      <q-card-section class="col-6 full-height">
         <div
           class="review-content column text-weight-regular text-body2"
           v-for="(score, idx) in nonVerbalScores"
           :key="idx"
         >
           <div class="criteria-name text-weight-bold">
-            {{ nonVerbalCriteria[idx] }} *
+            {{ nonVerbalCriteria[idx] }}
           </div>
-          <div class="star-content row">
+          <div class="star-content row q-mb-sm">
             <q-rating
               v-model="nonVerbalScores[idx]"
               size="2.5em"
-              color="yellow"
+              color="primary"
               icon="star_border"
               icon-selected="star"
               no-dimming
             ></q-rating>
           </div>
         </div>
-      </div>
+      </q-card-section>
     </q-card-section>
 
-    <q-separator inset />
-
-    <q-card-section class="row flex-center">
-      <div class="col-3 text-subtitle1 text-dark text-weight-bold">
-        상세 의견
-      </div>
+    <q-separator />
+    <!-- 코멘트 부분 -->
+    <q-card-section>
       <div class="col-9 text-review q-gutter-y-sm">
         <q-input
           v-model="reviewText"
@@ -90,19 +63,19 @@
       </div>
     </q-card-section>
 
-    <q-separator inset />
-
-    <q-card-section class="row">
-      <q-btn color="negative" size="md" v-close-popup>취소</q-btn>
+    <div class="row">
+      <q-btn class="q-ml-md" color="negative" size="md" v-close-popup
+        >취소</q-btn
+      >
       <q-btn
-        class="submit-button"
+        class="submit-button q-mr-md"
         color="primary"
         size="md"
         @click="updateComment"
       >
         제출하기
       </q-btn>
-    </q-card-section>
+    </div>
   </q-card>
 </template>
 <script setup>
@@ -184,8 +157,7 @@ const nonVerbalCriteria = [
 </script>
 <style lang="scss" scoped>
 .q-card {
-  height: 100%;
-  width: 80%;
+  height: 80%;
 }
 
 .submit-button {
