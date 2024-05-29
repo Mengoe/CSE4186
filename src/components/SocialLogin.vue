@@ -22,6 +22,5 @@
 </style>
 
 <script setup>
-const backendGoogleApi =
-  "http://ec2-3-39-165-26.ap-northeast-2.compute.amazonaws.com:8080/login/oauth2/google";
+const backendGoogleApi = "https://jobjourney.shop/login/oauth2/google";
 </script>

@@ -157,7 +157,7 @@ const nonVerbalCriteria = [
 </script>
 <style lang="scss" scoped>
 .q-card {
-  height: 80%;
+  height: 70%;
 }
 
 .submit-button {

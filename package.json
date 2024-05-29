@@ -2,7 +2,7 @@
   "name": "cv-interview",
   "version": "0.0.1",
   "description": "website for preparing job interview based on cv",
-  "productName": "CVInterview",
+  "productName": "JobJourney",
   "author": "sogang-capstone-undergraduates",
   "type": "module",
   "private": true,

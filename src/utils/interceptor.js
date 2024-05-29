@@ -8,7 +8,7 @@ const router = useRouter();
 const refreshURI = "./reissue";
 
 const tokenApi = axios.create({
-  baseURL: "http://ec2-3-39-165-26.ap-northeast-2.compute.amazonaws.com:8080",
+  baseURL: "https://jobjourney.shop",
   headers: {
     "Content-Type": `application/json`,
   },

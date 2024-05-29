@@ -150,7 +150,7 @@ const nonVerbalScores = ref([0, 0, 0, 0]);
 @import "../css/app.css";
 
 .q-card {
-  height: 80%;
+  height: 70%;
 }
 
 .submit-button {

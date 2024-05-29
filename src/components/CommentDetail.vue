@@ -91,7 +91,7 @@ const rev = ref(props.reviewText);
 </script>
 <style lang="scss" scoped>
 .q-card {
-  height: 70%;
+  height: 65%;
 }
 
 .submit-button {
