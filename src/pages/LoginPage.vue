@@ -1,8 +1,11 @@
 <template>
   <q-page class="relative-position bg-grey-1">
     <div class="container row justify-around absolute-center">
-      <div class="login-form column flex-center nowrap">
-        <div class="text-weight-bold text-h4">Sign In</div>
+      <div
+        class="login-form column flex-center no-wrap"
+        style="box-sizing: border-box; gap: 20px"
+      >
+        <div class="text-weight-bold text-h4 q-pb-md">Sign In</div>
         <SocialLoginButton />
         <div class="text-grey-6">또는 이메일로 로그인</div>
         <div class="q-gutter-y-md">
@@ -148,6 +151,6 @@ defineOptions({
 
 .btn {
   width: 170px;
-  height: 50px;
+  height: 30px;
 }
 </style>
