@@ -129,7 +129,7 @@ defineOptions({
 .container {
   height: 80%;
   width: 70%;
-  border-radius: 10px;
+  border-radius: 15px;
   box-shadow:
     10px 10px 10px $grey-5,
     -15px -15px 15px white;
@@ -137,6 +137,7 @@ defineOptions({
   .login-form {
     flex: 1.8;
     background-color: $grey-1;
+    max-height: 100%;
   }
 
   .signup-form {
