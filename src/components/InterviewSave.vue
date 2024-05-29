@@ -3,7 +3,8 @@
     <q-dialog v-model="showDialog" persistent>
       <q-card>
         <q-card-section>
-          <div>면접 영상 저장 및 종료</div>
+          <div class="text-wsfont text-weight-bold">면접 영상 저장 및 종료</div>
+          <div>면접 영상 다운로드</div>
         </q-card-section>
         <q-card-section>
           <q-input v-model="title" type="text" label="제목" />

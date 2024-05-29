@@ -114,12 +114,9 @@ const MicStream = ref(null);
 const CamStream = ref(null);
 let mediaStream = null;
 let recorder = null;
-let recorded = [];
 const router = useRouter();
 let finalBlob = null;
 const video = ref(null);
-const audioSrc = ref(null);
-const audio = ref(null);
 
 const interviewStore = useInterviewStore();
 const {
@@ -145,7 +142,6 @@ const audioContext = new AudioContext();
 const questionStreamDestination = audioContext.createMediaStreamDestination();
 let audioBufferSource = null;
 let answerRecorder = null;
-let answerRecorded = [];
 
 const emit = defineEmits(["CamStreamChanged"]);
 watch(CamStream, () => {
@@ -387,12 +383,16 @@ const startInterview = () => {
 
 const resumeInterview = () => {
   mediaStream.getTracks().forEach((track) => (track.enabled = true));
+  audioContext.resume();
+  if (answerRecorder.state === "paused") answerRecorder.resumeRecording();
   recorder.resumeRecording();
   isStopped.value = false;
 };
 
 const pauseInterview = () => {
   mediaStream.getTracks().forEach((track) => (track.enabled = false));
+  audioContext.pause();
+  if (answerRecorder.state === "recording") answerRecorder.pauseRecording();
   recorder.pauseRecording();
   isStopped.value = true;
 };
@@ -439,15 +439,13 @@ const handleAnswerDataAvailable = (event) => {
 
 const recordAnswer = () => {
   MicStream.value.getAudioTracks()[0].enabled = true;
-
   answerRecorder.startRecording();
 };
 function createAudioBufferSource(audioBuffer, isRecorded) {
-  audioBufferSource = audioContext.createBufferSource();
+  let audioBufferSource = audioContext.createBufferSource();
   audioBufferSource.buffer = audioBuffer;
   audioBufferSource.connect(questionStreamDestination);
   audioBufferSource.connect(audioContext.destination);
-  console.log(questionStreamDestination.stream.getAudioTracks());
   audioBufferSource.onended = isRecorded ? recordAnswer : notRecordAnswer;
   return audioBufferSource;
 }
@@ -455,7 +453,7 @@ function createAudioBufferSource(audioBuffer, isRecorded) {
 function playQuestion(base64Data) {
   let audioData = base64ToArrayBuffer(base64Data);
   audioContext.decodeAudioData(audioData).then((audioBuffer) => {
-    let audioBufferSource = createAudioBufferSource(
+    audioBufferSource = createAudioBufferSource(
       audioBuffer,
       questions.value[count.value].turn > turn.value,
     );
@@ -485,8 +483,19 @@ watch(
     if (isStarted.value && turn.value != 0) {
       answerRecorder.stopRecording(() => {
         blobToBase64(answerRecorder.getBlob()).then((base64Data) => {
-          //api post해서 다음 문제 가져오기
-          //playQuestion()
+          api
+            .post(
+              "/transcribe",
+              { audio: base64Data },
+              { headers: { authorization: "Bearer " + getToken() } },
+            )
+            .then((res) => {
+              console.log(res);
+            })
+            .catch((err) => {
+              console.log(err);
+            });
+
           answerRecorder.reset();
         });
       });
