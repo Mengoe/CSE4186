@@ -51,6 +51,7 @@
 import { useBoardStore } from "src/stores/board";
 import { ref, computed } from "vue";
 import { useRouter } from "vue-router";
+import { outlinedUploadFile } from "@quasar/extras/material-icons-outlined";
 
 import InterviewListModel from "src/components/InterviewListModal.vue";
 
@@ -86,7 +87,7 @@ const additionalToolbarOption = computed(() => {
   return !isSelectedVideo.value
     ? {
         tip: "Upload my interview",
-        icon: "cloud_upload",
+        icon: outlinedUploadFile,
         label: "면접 영상 업로드",
         handler: fetchVideos,
       }

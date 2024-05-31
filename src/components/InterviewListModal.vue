@@ -14,17 +14,16 @@
             <VideoModal :link="getSrc(interview.link)" />
           </q-dialog>
           <q-icon
-            :name="outlinedPlayArrow"
-            size="xs"
-            color="primary"
+            :name="outlinedUploadFile"
+            size="sm"
             class="cursor-pointer absolute-right"
-            style="top: 40%"
-            @click.stop="showVideos[idx] = true"
+            style="top: 30%"
+            @click="selectVideo(interview.link, interview.title, interview.id)"
           />
           <q-item-section
             class="cursor-pointer"
             id="element"
-            @click="selectVideo(interview.link, interview.title, interview.id)"
+            @click="showVideos[idx] = true"
           >
             <q-item-label class="text-weight-bold text-subtitle2">{{
               interview.title
@@ -48,7 +47,7 @@
 <script setup>
 import { useBoardStore } from "src/stores/board";
 import { computed, ref, watch } from "vue";
-import { outlinedPlayArrow } from "@quasar/extras/material-icons-outlined";
+import { outlinedUploadFile } from "@quasar/extras/material-icons-outlined";
 
 import VideoModal from "components/VideoContent.vue";
 import Pagination from "components/PaginationComponent.vue";
@@ -91,7 +90,7 @@ function getSrc(src) {
 .q-icon {
   border-radius: 5px;
   &:hover {
-    background-color: $blue-2;
+    background-color: $grey-3;
   }
 }
 </style>
