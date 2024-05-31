@@ -21,7 +21,6 @@
               size="xs"
               color="red"
               class="cursor-pointer absolute-right"
-              style="top: 40%"
               @click.stop="deleteInterview(interview.id)"
             />
             <q-item-section
