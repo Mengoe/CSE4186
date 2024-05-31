@@ -125,11 +125,12 @@ function addPost() {
   router.push("/board");
 }
 
+const INTERVIEW_PER_PAGE = 8;
+
 function fetchVideos() {
   videoFetchLoading.value = true;
-
   boardStore
-    .fetchVideos()
+    .fetchVideos(1, INTERVIEW_PER_PAGE)
     .then((res) => {
       console.log(res);
       videoFetchLoading.value = false;
