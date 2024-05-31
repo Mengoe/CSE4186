@@ -14,10 +14,6 @@ const routes = [
     children: [
       { path: "", component: () => import("pages/InterviewPage.vue") },
       {
-        path: "list",
-        component: () => import("pages/InterviewListPage.vue"),
-      },
-      {
         path: "finish",
         component: () => import("pages/FinishInterviewPage.vue"),
       },
@@ -30,24 +26,22 @@ const routes = [
       {
         path: "upload",
         component: () => import("pages/CvUpload.vue"),
-        beforeEnter: (to, from, next) => {
-          const { isLogin } = storeToRefs(useMemberStore());
-          if (!isLogin.value)
-            next({ path: "/members/login", query: { redirect: to.fullPath } });
-          else next();
-        },
       },
       {
         path: "list",
         component: () => import("pages/CvList.vue"),
-        beforeEnter: (to, from, next) => {
-          const { isLogin } = storeToRefs(useMemberStore());
-          if (!isLogin.value)
-            next({ path: "/members/login", query: { redirect: to.fullPath } });
-          else next();
-        },
+      },
+      {
+        path: "interviews",
+        component: () => import("pages/InterviewListPage.vue"),
       },
     ],
+    beforeEnter: (to, from, next) => {
+      const { isLogin } = storeToRefs(useMemberStore());
+      if (!isLogin.value)
+        next({ path: "/members/login", query: { redirect: to.fullPath } });
+      else next();
+    },
   },
   {
     path: "/members",
