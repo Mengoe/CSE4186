@@ -99,7 +99,7 @@ import { useCvStore } from "stores/cv.js";
 import { useInterviewStore } from "stores/interview.js";
 import { useMemberStore } from "stores/member.js";
 import { storeToRefs } from "pinia";
-import { api } from "boot/axios.js";
+import tokenApi from "src/utils/interceptor.js";
 import { uploadToBucket } from "src/utils/aws.js";
 import { v4 as uuidv4 } from "uuid";
 import { getToken } from "src/utils/cookies.js";
@@ -129,8 +129,10 @@ const {
   title,
   count,
   turn,
+  followUp,
 } = storeToRefs(interviewStore);
-
+const cvId = interviewStore.cvId;
+const dept = interviewStore.dept;
 interviewStore.$reset();
 
 const memberStore = useMemberStore();
@@ -142,6 +144,7 @@ const audioContext = new AudioContext();
 const questionStreamDestination = audioContext.createMediaStreamDestination();
 let audioBufferSource = null;
 let answerRecorder = null;
+let prevChat = null;
 
 const emit = defineEmits(["CamStreamChanged"]);
 watch(CamStream, () => {
@@ -167,13 +170,7 @@ const uploadVideoUrl = async (fileUrl) => {
       link: fileUrl,
       userId: userId.value,
     };
-    const accessToken = "Bearer " + getToken();
-    const res = await api.post("/video", data, {
-      headers: {
-        authorization: accessToken,
-      },
-    });
-    console.log(res);
+    const res = await tokenApi.post("/video", data);
   } catch (err) {
     return Promise.reject(err);
   }
@@ -346,12 +343,6 @@ async function init() {
     });
 }
 
-const handleDataAvailable = (event) => {
-  if (event.data.size > 0) {
-    recorded.push(event.data);
-  }
-};
-
 const setRecorder = async () => {
   let videoTracks = CamStream.value.getVideoTracks();
   let micAudio = audioContext.createMediaStreamSource(MicStream.value);
@@ -362,9 +353,12 @@ const setRecorder = async () => {
   ];
   mediaStream = new MediaStream(mediaTracks);
   recorder = RecordRTC(mediaStream, {
+    type: "video",
     mimeType: "video/webm",
+    audioBitsPerSecond: 128000,
   });
   answerRecorder = new RecordRTC(MicStream.value, {
+    type: "audio",
     mimeType: "audio/webm",
   });
 };
@@ -431,14 +425,9 @@ const notRecordAnswer = () => {
   MicStream.value.getAudioTracks()[0].enabled = true;
 };
 
-const handleAnswerDataAvailable = (event) => {
-  if (event.data.size > 0) {
-    answerRecorded.push(event.data);
-  }
-};
-
 const recordAnswer = () => {
   MicStream.value.getAudioTracks()[0].enabled = true;
+  answerRecorder.reset();
   answerRecorder.startRecording();
 };
 function createAudioBufferSource(audioBuffer, isRecorded) {
@@ -455,18 +444,24 @@ function playQuestion(base64Data) {
   audioContext.decodeAudioData(audioData).then((audioBuffer) => {
     audioBufferSource = createAudioBufferSource(
       audioBuffer,
-      questions.value[count.value].turn > turn.value,
+      questions.value[count.value].turn - 1 > turn.value,
     );
     MicStream.value.getAudioTracks()[0].enabled = false;
     audioBufferSource.start();
   });
 }
 
-watch((count, isStarted), () => {
-  if (isStarted.value) {
-    playQuestion(questions.value[count.value].audio);
-  }
-});
+watch(
+  [count, isStarted],
+  () => {
+    if (isStarted.value) {
+      if (count.value < questions.value.length) {
+        playQuestion(questions.value[count.value].audio);
+      } else finishInterview();
+    }
+  },
+  { immediate: true },
+);
 
 const blobToBase64 = async (blob) => {
   return new Promise((resolve, reject) => {
@@ -477,28 +472,55 @@ const blobToBase64 = async (blob) => {
   });
 };
 
+const setPrevChat = () => {
+  prevChat = [
+    {
+      role: "system",
+      content: questions.value[count.value].question,
+    },
+  ];
+};
+
+const getNextQuestion = () => {
+  followUp.value =
+    "답변을 듣고 꼬리 질문을 생성 중입니다. 잠시 후 질문이 나타납니다.";
+  answerRecorder.stopRecording(() => {
+    blobToBase64(answerRecorder.getBlob()).then((base64Data) => {
+      if (turn.value == 1) setPrevChat();
+      const body = {
+        turn: turn.value - 1,
+        selfIntroductionId: cvId,
+        deptNum: dept,
+        questions: prevChat,
+        userAudio: base64Data,
+      };
+
+      tokenApi
+        .post("/question/followUp", body)
+        .then((res) => {
+          console.log(res);
+          let followUpQuestion = res.data.body.followUps[0];
+          followUp.value = followUpQuestion[0].Text;
+          prevChat = res.data.body.messages;
+          prevChat.push({ role: "system", content: followUp.value });
+          playQuestion(followUpQuestion[1].Audio);
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    });
+  });
+};
+
 watch(
   turn,
   () => {
     if (isStarted.value && turn.value != 0) {
-      answerRecorder.stopRecording(() => {
-        blobToBase64(answerRecorder.getBlob()).then((base64Data) => {
-          api
-            .post(
-              "/transcribe",
-              { audio: base64Data },
-              { headers: { authorization: "Bearer " + getToken() } },
-            )
-            .then((res) => {
-              console.log(res);
-            })
-            .catch((err) => {
-              console.log(err);
-            });
-
-          answerRecorder.reset();
-        });
-      });
+      if (answerRecorder.getState() != "inactive") getNextQuestion();
+      else {
+        turn.value = 0;
+        count.value++;
+      }
     }
   },
   {

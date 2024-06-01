@@ -66,37 +66,39 @@ import WebCamera from "components/WebCamera.vue";
 import { useCvStore } from "stores/cv.js";
 import { useInterviewStore } from "stores/interview.js";
 import { storeToRefs } from "pinia";
-import { computed, ref, watch } from "vue";
+import { computed, ref } from "vue";
 import CountDownTimer from "components/CountDownTimer.vue";
 
 const cvStore = useCvStore();
 const interviewStore = useInterviewStore();
 const { questions } = storeToRefs(cvStore);
-const { isStarted, isFinished, count, turn } = storeToRefs(interviewStore);
+const { count, turn, followUp, isStarted } = storeToRefs(interviewStore);
 const timer = ref(null);
 const webcamera = ref(null);
 const questionShow = ref(false);
 
-const question = computed(() => questions.value[count.value].question);
+const question = computed(() =>
+  turn.value == 0
+    ? questions.value.length > count.value
+      ? questions.value[count.value].question
+      : "면접이 종료되었습니다."
+    : followUp.value,
+);
 
 const handleTimerEnd = () => {
   bringQuestion();
 };
 
 const bringQuestion = () => {
-  questions.value[count.value].turn > turn.value
+  turn.value < questions.value[count.value].turn - 1
     ? bringFollowUpQuestion()
     : bringNextQuestion();
   timer.value.resetTimer();
 };
 
 const bringNextQuestion = () => {
-  if (count.value < questions.value.length - 1) {
-    turn.value = 0;
-    count.value++;
-  } else {
-    webcamera.value.finishInterview();
-  }
+  turn.value = 0;
+  count.value++;
 };
 
 const bringFollowUpQuestion = () => {

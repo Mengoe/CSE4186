@@ -22,11 +22,8 @@ const getAuthCode = () => {
 async function requestAccessToken(code) {
   try {
     const res = await api.post("/oauth2/google", { code: code });
-    const data = {
-      email: "googleUser",
-      password: null,
-    };
-    await useMemberStore().addLoginInfo(res, data);
+
+    await useMemberStore().addLoginInfo(res);
     router.push("/");
   } catch (error) {
     console.log(error);

@@ -1,11 +1,23 @@
 import { useMemberStore } from "stores/member.js";
 import { storeToRefs } from "pinia";
-
 const routes = [
   {
     path: "/",
     component: () => import("layouts/HomePageLayout.vue"), // MainPage를 위한 다른 레이아웃
     children: [{ path: "", component: () => import("pages/MainPage.vue") }],
+    beforeEnter: (to, from, next) => {
+      const memberStore = useMemberStore();
+      const { isLogin } = storeToRefs(memberStore);
+      if (isLogin.value) next();
+      else {
+        memberStore
+          .verifyTokenExpiration()
+          .then(() => {
+            next("/");
+          })
+          .catch(() => next());
+      }
+    },
   },
 
   {
@@ -22,6 +34,21 @@ const routes = [
         component: () => import("pages/FinishInterviewPage.vue"),
       },
     ],
+    beforeEnter: (to, from, next) => {
+      const memberStore = useMemberStore();
+      const { isLogin } = storeToRefs(memberStore);
+      if (isLogin.value) next();
+      else {
+        memberStore
+          .verifyTokenExpiration()
+          .then(() => {
+            next();
+          })
+          .catch(() =>
+            next({ path: "/members/login", query: { redirect: to.fullPath } }),
+          );
+      }
+    },
   },
   {
     path: "/cv",
@@ -30,24 +57,28 @@ const routes = [
       {
         path: "upload",
         component: () => import("pages/CvUpload.vue"),
-        beforeEnter: (to, from, next) => {
-          const { isLogin } = storeToRefs(useMemberStore());
-          if (!isLogin.value)
-            next({ path: "/members/login", query: { redirect: to.fullPath } });
-          else next();
-        },
       },
       {
         path: "list",
         component: () => import("pages/CvList.vue"),
-        beforeEnter: (to, from, next) => {
-          const { isLogin } = storeToRefs(useMemberStore());
-          if (!isLogin.value)
-            next({ path: "/members/login", query: { redirect: to.fullPath } });
-          else next();
-        },
       },
     ],
+
+    beforeEnter: (to, from, next) => {
+      const memberStore = useMemberStore();
+      const { isLogin } = storeToRefs(memberStore);
+      if (isLogin.value) next();
+      else {
+        memberStore
+          .verifyTokenExpiration()
+          .then(() => {
+            next();
+          })
+          .catch(() =>
+            next({ path: "/members/login", query: { redirect: to.fullPath } }),
+          );
+      }
+    },
   },
   {
     path: "/members",
@@ -64,9 +95,17 @@ const routes = [
       },
     ],
     beforeEnter: (to, from, next) => {
-      const { isLogin } = storeToRefs(useMemberStore());
-      if (!isLogin.value) next();
-      else next("/");
+      const memberStore = useMemberStore();
+      const { isLogin } = storeToRefs(memberStore);
+      if (isLogin.value) next("/");
+      else {
+        memberStore
+          .verifyTokenExpiration()
+          .then(() => {
+            next("/");
+          })
+          .catch(() => next());
+      }
     },
   },
   {
@@ -91,10 +130,19 @@ const routes = [
       },
     ],
     beforeEnter: (to, from, next) => {
-      const { isLogin } = storeToRefs(useMemberStore());
-      if (!isLogin.value)
-        next({ path: "/members/login", query: { redirect: to.fullPath } });
-      else next();
+      const memberStore = useMemberStore();
+      const { isLogin } = storeToRefs(memberStore);
+      if (isLogin.value) next();
+      else {
+        memberStore
+          .verifyTokenExpiration()
+          .then(() => {
+            next();
+          })
+          .catch(() =>
+            next({ path: "/members/login", query: { redirect: to.fullPath } }),
+          );
+      }
     },
   },
   // Always leave this as last one,

@@ -95,7 +95,7 @@ function logOut() {
   useMemberStore()
     .logout()
     .then(() => {
-      router.go(0);
+      router.replace("/");
     });
 }
 </script>
