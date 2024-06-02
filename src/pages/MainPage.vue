@@ -6,7 +6,7 @@
         <GradientBackground class="gradient-background" />
       </div>
       <div class="whole-content">
-        <div class="main-logo">
+        <div class="main-logo-home">
           <a href="/">
             <img
               src="../assets/main-logo.png"
@@ -227,7 +227,7 @@ function handleFocus(index) {
   }
 }
 
-.main-logo {
+.main-logo-home {
   position: absolute;
   top: 10px;
   left: 10px;

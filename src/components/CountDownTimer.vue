@@ -1,103 +1,126 @@
 <template>
-  <div class="countdown" style="width: 300px; height: 300px">
-    <div class="timer">
-      <svg class="progress-ring" width="300" height="300">
-        <defs>
-          <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" :stop-color="startColor" />
-            <stop offset="100%" :stop-color="endColor" />
-          </linearGradient>
-        </defs>
-        <circle
-          :stroke="`url(#gradient)`"
-          :stroke-dasharray="circumference"
-          :stroke-dashoffset="dashOffset"
-          :r="radius"
-          cx="150"
-          cy="150"
-          fill="transparent"
-          :style="{ transition: `stroke-dashoffset ${duration}ms linear` }"
-          stroke-width="20"
-        />
-      </svg>
-      <div class="time" style="font-size: 20px">{{ formattedTime }}</div>
-    </div>
-  </div>
+  <svg width="400px" height="400px">
+    <text
+      x="50%"
+      y="50%"
+      dominant-baseline="middle"
+      text-anchor="middle"
+      class="text-wsfont"
+      fill="white"
+      style="font-size: 20px"
+    >
+      {{ minutes }}:{{ seconds }}
+    </text>
+    <circle ref="path" class="path" cx="50%" cy="50%" r="35%"></circle>
+  </svg>
+  <span id="base-timer-label" class="base-timer__label"></span>
 </template>
+<script setup>
+import { storeToRefs } from "pinia";
+import { useInterviewStore } from "src/stores/interview";
+import { ref, onMounted, watch } from "vue";
+const TIME_LIMIT = 90;
+let timeLeft = TIME_LIMIT;
+let timerInterval = null;
 
-<script>
-import { ref, computed, watch, onMounted } from "vue";
-
-export default {
-  name: "CountdownTimer",
-  props: {
-    duration: {
-      type: Number,
-      required: true,
-    },
-  },
-  setup(props) {
-    const elapsedTime = ref(0);
-
-    const radius = 140;
-    const circumference = 2 * Math.PI * radius;
-    const dashOffset = computed(() => {
-      return circumference * (1 - elapsedTime.value / (props.duration * 1000));
-    });
-
-    const formattedTime = computed(() => {
-      const remainingSeconds = Math.ceil(
-        props.duration - elapsedTime.value / 1000,
-      );
-      const minutes = Math.floor(remainingSeconds / 60);
-      const seconds = remainingSeconds % 60;
-      return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
-    });
-
-    const endColor = "#5a5aff"; // 퍼플
-    const startColor = "#e91e63"; // 핑크
-
-    const timer = setInterval(() => {
-      elapsedTime.value += 100;
-    }, 100);
-
-    onMounted(() => {
-      watch(elapsedTime, (newValue) => {
-        if (newValue >= props.duration * 1000) {
-          clearInterval(timer);
-        }
-      });
-    });
-
-    return {
-      radius,
-      circumference,
-      dashOffset,
-      formattedTime,
-      startColor,
-      endColor,
-    };
-  },
+const path = ref(null);
+const minutes = ref(null);
+const seconds = ref(null);
+let circum = 0;
+let keyframes = null;
+let options = {
+  duration: TIME_LIMIT * 1000,
+  easing: "linear",
+  fill: "forwards",
 };
+let animation = null;
+
+const interviewStore = useInterviewStore();
+const { isStopped, isStarted, isFinished } = storeToRefs(interviewStore);
+
+const emit = defineEmits(["endTimer"]);
+
+function reset() {
+  if (animation) animation.finish();
+  animation = null;
+  if (timerInterval) clearInterval(timerInterval);
+  timerInterval = null;
+  timeLeft = TIME_LIMIT;
+  formatTime(TIME_LIMIT);
+  path.value.style.strokeDashoffset = 0;
+}
+
+function start() {
+  timerInterval = setInterval(() => {
+    timeLeft--;
+    formatTime(timeLeft);
+    if (timeLeft === 0) {
+      reset();
+      emit("endTimer");
+    }
+  }, 1000);
+  animation = path.value.animate(keyframes, options);
+}
+
+function stop() {
+  if (animation) animation.pause();
+  if (timerInterval) clearInterval(timerInterval);
+}
+
+function resume() {
+  if (animation) animation.play();
+  timerInterval = setInterval(() => {
+    timeLeft--;
+    formatTime(timeLeft);
+    if (timeLeft === 0) {
+      reset();
+      emit("endTimer");
+    }
+  }, 1000);
+}
+
+function formatTime(time) {
+  let sec = time % 60;
+  seconds.value = sec < 10 ? "0" + sec : sec;
+  let min = Math.floor(time / 60);
+  minutes.value = "0" + min;
+}
+
+onMounted(() => {
+  circum = path.value.r.baseVal.value * 2 * Math.PI;
+  path.value.style.strokeDasharray = circum;
+  path.value.style.strokeDashoffset = 0;
+  keyframes = [{ strokeDashoffset: 0 }, { strokeDashoffset: circum }];
+  formatTime(TIME_LIMIT);
+});
+
+watch(
+  isStopped,
+  () => {
+    if (isStarted.value) {
+      isStopped.value ? stop() : resume();
+    }
+  },
+  { immediate: true },
+);
+watch(
+  isFinished,
+  () => {
+    if (isFinished.value) reset();
+  },
+  { immediate: true },
+);
+defineExpose({ reset, start });
 </script>
 
 <style scoped>
-.timer {
-  position: relative;
-  width: 300px;
-  height: 300px;
-}
-
-.progress-ring {
+.path {
+  stroke-width: 10px;
+  stroke-linecap: round;
   transform: rotate(-90deg);
-}
-
-.time {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  font-size: 20px;
-  color: #fff; /* 핑크 색상으로 설정 */
+  transform-origin: center;
+  fill: none;
+  stroke: #ff4162;
+  stroke-dashoffset: 0;
 }
 </style>

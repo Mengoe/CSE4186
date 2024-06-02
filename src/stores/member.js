@@ -115,6 +115,7 @@ export const useMemberStore = defineStore(
             return;
           }
         }
+        logout();
         throw new Error("failed validate token");
       }
     }

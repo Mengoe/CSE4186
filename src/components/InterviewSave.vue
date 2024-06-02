@@ -1,9 +1,9 @@
 <template>
   <div>
     <q-dialog v-model="showDialog" persistent>
-      <q-card>
+      <q-card class="text-wsfont">
         <q-card-section>
-          <div class="text-wsfont text-weight-bold">면접 영상 저장 및 종료</div>
+          <div class="text-weight-bold">면접 영상 저장 및 종료</div>
           <div>면접 영상 다운로드</div>
         </q-card-section>
         <q-card-section>
@@ -33,6 +33,10 @@
         </q-card-actions>
       </q-card>
     </q-dialog>
+    <div v-if="isSaved">
+      <q-spinner-hourglass color="primary" size="3rem" :thickness="5" />
+      면접 영상 저장 중입니다...
+    </div>
   </div>
 </template>
 
@@ -63,10 +67,16 @@ const saveFinishInterview = () => {
   isSaved.value = true;
 };
 
-watch(saveFinished, () => {
-  if (saveFinished.value) {
-    if (videoUrl.value) URL.revokeObjectURL(videoUrl.value);
-    router.push("/interview/finish");
-  }
-});
+watch(
+  saveFinished,
+  () => {
+    if (saveFinished.value) {
+      if (videoUrl.value) URL.revokeObjectURL(videoUrl.value);
+      isSaved.value
+        ? router.replace("/interview/list")
+        : router.replace("/cv/list");
+    }
+  },
+  { immediate: true },
+);
 </script>

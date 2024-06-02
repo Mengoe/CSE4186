@@ -14,7 +14,7 @@
               name="cancel"
               color="negative"
               class="absolute-top-right cursor-pointer"
-              @click="deleteInterview(interview.id)"
+              @click="deleteInterview(interview.id, interview.link)"
             />
             <q-item-section>
               <q-item-label>{{ interview.title }}</q-item-label>
@@ -41,6 +41,7 @@ import { useBoardStore } from "src/stores/board";
 import { useRouter } from "vue-router";
 import LoaderComponent from "components/LoaderComponent.vue";
 import Pagination from "components/PaginationComponent.vue";
+import { deleteVideo } from "src/utils/aws.js";
 
 const boardStore = useBoardStore();
 const router = useRouter();
@@ -49,7 +50,7 @@ const pageLoading = computed(() => boardStore.loading);
 const pageCount = computed(() => boardStore.pageCount);
 const interviews = computed(() => boardStore.videos);
 
-function deleteInterview(videoId) {
+function deleteInterview(videoId, videoKey) {
   if (!confirm("삭제하시겠습니까?")) return;
 
   const accessToken = "Bearer " + getToken();
@@ -61,12 +62,19 @@ function deleteInterview(videoId) {
       },
     })
     .then((res) => {
-      console.log(res);
-      alert("삭제되었습니다.");
-      router.go(0); // reload page after deletion
+      deleteVideo(videoKey)
+        .then((res) => {
+          alert("삭제되었습니다.");
+          router.go(0);
+        })
+        .catch((err) => {
+          alert("삭제에 실패했습니다.");
+          router.go(0);
+        });
     })
     .catch((err) => {
-      console.log(err);
+      alert("삭제에 실패했습니다.");
+      router.go(0);
     });
 }
 

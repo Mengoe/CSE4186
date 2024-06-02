@@ -25,15 +25,36 @@ const routes = [
     component: () => import("layouts/HomePageLayout.vue"),
     children: [
       { path: "", component: () => import("pages/InterviewPage.vue") },
+    ],
+    props: true,
+    beforeEnter: (to, from, next) => {
+      const memberStore = useMemberStore();
+      const { isLogin, verifyTokenExpiration } = storeToRefs(memberStore);
+      if (
+        isLogin.value &&
+        (from.path === "/cv/list" || from.matched.length === 0)
+      ) {
+        memberStore
+          .verifyTokenExpiration()
+          .then(() => {
+            next();
+          })
+          .catch(() =>
+            next({ path: "/members/login", query: { redirect: "/cv/list" } }),
+          );
+      } else next("/");
+    },
+  },
+  {
+    path: "/interview/list",
+    component: () => import("layouts/BasicLayout.vue"),
+    children: [
       {
-        path: "list",
+        path: "",
         component: () => import("pages/InterviewListPage.vue"),
       },
-      {
-        path: "finish",
-        component: () => import("pages/FinishInterviewPage.vue"),
-      },
     ],
+
     beforeEnter: (to, from, next) => {
       const memberStore = useMemberStore();
       const { isLogin } = storeToRefs(memberStore);
@@ -110,7 +131,7 @@ const routes = [
   },
   {
     path: "/board",
-    component: () => import("layouts/BoardLayout.vue"),
+    component: () => import("layouts/BasicLayout.vue"),
     children: [
       {
         path: "",

@@ -212,10 +212,12 @@ function startCv() {
         timeout: 300,
         closeBtn: true,
       });
-      interviewStore.dept = selectedJob.value.value;
-      console.log(interviewStore.dept);
-      interviewStore.cvId = props.cvId;
-      router.push("/interview"); // 면접 보는 화면으로 넘어감.
+      let dept = selectedJob.value.value;
+      let cvId = props.cvId;
+      router.push({
+        path: "/interview",
+        state: { dataObj: { cvId: cvId, dept: dept } },
+      });
     })
     .catch((err) => {
       console.log(err);

@@ -60,6 +60,7 @@ export const useCvStore = defineStore(
         },
       ];
     }
+
     /*
     async function generateQuestions(
       questionNum,
@@ -115,8 +116,8 @@ export const useCvStore = defineStore(
         loading.value = false;
       }
     }
-    */
 
+    */
     async function fetchAllCv(page, size) {
       cvLists.value = [];
       const accessToken = bearerToken(getToken());
@@ -201,6 +202,6 @@ export const useCvStore = defineStore(
     };
   },
   {
-    persist: true,
+    persist: { enabled: true, storage: localStorage },
   },
 );

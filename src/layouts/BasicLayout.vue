@@ -1,6 +1,6 @@
 <template>
   <q-layout view="hhh LpR fff">
-    <q-header bordered class="header-class">
+    <q-header bordered class="header-class text-wsfont">
       <div class="top-menu">
         <a href="/">
           <img
@@ -11,52 +11,49 @@
           />
         </a>
         <q-toolbar>
-          <q-btn-group class="l70" flat>
-            <q-tabs
-              indicator-color="transparent"
-              active-color="white"
-              class="tab-menu"
-              align="left"
+          <q-tabs
+            indicator-color="transparent"
+            active-color="white"
+            class="tab-menu l70"
+            align="left"
+          >
+            <q-btn-dropdown
+              v-for="item in dropdownMenus"
+              :label="item.label"
+              :key="item.label"
+              text-color="black"
+              flat
+              no-hover
             >
-              <q-btn-dropdown
-                v-for="item in dropdownMenus"
-                :label="item.label"
-                :key="item.label"
-                text-color="black"
-                flat
-                no-hover
-                class=""
-              >
-                <q-list>
-                  <q-item
-                    v-for="subitem in item.subMenus"
-                    :key="subitem.label"
-                    :to="subitem.to"
-                  >
-                    <q-item-section>
-                      {{ subitem.label }}
-                    </q-item-section>
-                  </q-item>
-                </q-list>
-              </q-btn-dropdown>
+              <q-list>
+                <q-item
+                  v-for="subitem in item.subMenus"
+                  :key="subitem.label"
+                  :to="subitem.to"
+                >
+                  <q-item-section>
+                    {{ subitem.label }}
+                  </q-item-section>
+                </q-item>
+              </q-list>
+            </q-btn-dropdown>
 
-              <q-route-tab
-                v-for="item in tabMenus"
-                :to="item.to"
-                text-color="black"
-                :label="item.label"
-                :key="item.label"
-                class="text-black"
-              />
-            </q-tabs>
-            <q-btn
-              v-if="isLogin == false"
-              label="login/join"
+            <q-route-tab
+              v-for="item in tabMenus"
+              :to="item.to"
+              text-color="black"
+              :label="item.label"
+              :key="item.label"
               class="text-black"
-              to="/members/login"
             />
-            <q-btn v-else label="logout" class="text-black" @click="logOut()" />
-          </q-btn-group>
+          </q-tabs>
+
+          <q-btn
+            label="로그아웃"
+            rounded
+            class="text-black login-button"
+            @click="logOut()"
+          />
         </q-toolbar>
       </div>
     </q-header>
@@ -101,15 +98,16 @@ function logOut() {
 </script>
 
 <style scoped>
-.main-logo {
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  width: 55px;
-  height: auto;
-}
 .l70 {
   position: absolute;
   left: 70px;
+}
+
+.login-button {
+  width: 125px;
+  height: 36px;
+  position: absolute;
+  top: 10px;
+  right: 10px;
 }
 </style>

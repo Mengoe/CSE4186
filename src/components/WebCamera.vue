@@ -1,7 +1,10 @@
 <template>
   <div>
     <div class="text-wsfont" style="z-index: 1">
-      <div style="width: 100%; aspect-ratio: 16/10" class="bg-black">
+      <div
+        style="width: 30vw; aspect-ratio: 16/10; min-width: 350px"
+        class="bg-black"
+      >
         <video id="video" ref="video" width="100%">
           Video stream not available.
         </video>
@@ -74,7 +77,12 @@
             round
             v-if="isStarted"
             class="q-mb-sm"
-          />
+            :disable="!isAnswer"
+          >
+            <q-tooltip anchor="top middle" v-if="!isAnswer">
+              답변 시간에 일시정지를 다시 시도해주세요.
+            </q-tooltip>
+          </q-btn>
         </q-btn-group>
         <div class="row flex-center q-mt-xl">
           <q-btn
@@ -83,9 +91,16 @@
             color="deep-purple-14"
             rounded
             class="q-mr-sm q-mb-sm"
+            :disable="!isStarted && (!isAccessed.mic || !isAccessed.camera)"
             ><span style="text-color: white">{{
               isStarted ? "모의 면접 종료하기" : "모의 면접 시작하기"
             }}</span>
+            <q-tooltip
+              anchor="top middle"
+              v-if="!isStarted && (!isAccessed.mic || !isAccessed.camera)"
+            >
+              마이크 및 카메라 권한을 허용해주세요
+            </q-tooltip>
           </q-btn>
         </div>
       </div>
@@ -94,7 +109,7 @@
 </template>
 <script setup>
 import { ref, watch, onUnmounted } from "vue";
-import { useRouter } from "vue-router";
+import { useRouter, useRoute } from "vue-router";
 import { useCvStore } from "stores/cv.js";
 import { useInterviewStore } from "stores/interview.js";
 import { useMemberStore } from "stores/member.js";
@@ -115,6 +130,7 @@ const CamStream = ref(null);
 let mediaStream = null;
 let recorder = null;
 const router = useRouter();
+const route = useRoute();
 let finalBlob = null;
 const video = ref(null);
 
@@ -130,9 +146,11 @@ const {
   count,
   turn,
   followUp,
+  isAnswer,
 } = storeToRefs(interviewStore);
-const cvId = interviewStore.cvId;
-const dept = interviewStore.dept;
+const { dataObj } = history.state;
+const dept = dataObj.dept;
+const cvId = dataObj.cvId;
 interviewStore.$reset();
 
 const memberStore = useMemberStore();
@@ -140,13 +158,13 @@ const { userId } = storeToRefs(memberStore);
 
 const cvStore = useCvStore();
 const { questions } = storeToRefs(cvStore);
-const audioContext = new AudioContext();
-const questionStreamDestination = audioContext.createMediaStreamDestination();
+let audioContext = null;
+let questionStreamDestination = null;
 let audioBufferSource = null;
 let answerRecorder = null;
 let prevChat = null;
 
-const emit = defineEmits(["CamStreamChanged"]);
+const emit = defineEmits(["startTimer"]);
 watch(CamStream, () => {
   if (CamStream.value) {
     if (!video.value.paused) video.value.pause();
@@ -176,22 +194,26 @@ const uploadVideoUrl = async (fileUrl) => {
   }
 };
 
-watch(isSaved, async () => {
-  if (isSaved.value) {
-    try {
-      const filename =
-        "video_" + userId.value + "/" + generateRandomString() + ".webm";
-      const file = new File([finalBlob], filename, { type: "video/webm" });
-      const keyString = await uploadToBucket(file, filename);
-      await uploadVideoUrl(keyString);
-      saveFinished.value = true;
-    } catch (err) {
-      console.log(err);
-      alert("동영상 저장에 실패했습니다.");
-      saveFinished.value = true;
+watch(
+  isSaved,
+  async () => {
+    if (isSaved.value) {
+      try {
+        const filename =
+          "video_" + userId.value + "/" + generateRandomString() + ".webm";
+        const file = new File([finalBlob], filename, { type: "video/webm" });
+        const keyString = await uploadToBucket(file, filename);
+        await uploadVideoUrl(keyString);
+        saveFinished.value = true;
+      } catch (err) {
+        console.log(err);
+        alert("동영상 저장에 실패했습니다.");
+        saveFinished.value = true;
+      }
     }
-  }
-});
+  },
+  { immediate: true },
+);
 
 const handleMicButton = () => {
   if (!isAccessed.value.mic) {
@@ -364,6 +386,8 @@ const setRecorder = async () => {
 };
 
 const startInterview = () => {
+  audioContext = new AudioContext();
+  questionStreamDestination = audioContext.createMediaStreamDestination();
   setRecorder()
     .then(() => {
       recorder.startRecording();
@@ -377,7 +401,6 @@ const startInterview = () => {
 
 const resumeInterview = () => {
   mediaStream.getTracks().forEach((track) => (track.enabled = true));
-  audioContext.resume();
   if (answerRecorder.state === "paused") answerRecorder.resumeRecording();
   recorder.resumeRecording();
   isStopped.value = false;
@@ -385,7 +408,6 @@ const resumeInterview = () => {
 
 const pauseInterview = () => {
   mediaStream.getTracks().forEach((track) => (track.enabled = false));
-  audioContext.pause();
   if (answerRecorder.state === "recording") answerRecorder.pauseRecording();
   recorder.pauseRecording();
   isStopped.value = true;
@@ -423,10 +445,12 @@ function base64ToArrayBuffer(base64) {
 
 const notRecordAnswer = () => {
   MicStream.value.getAudioTracks()[0].enabled = true;
+  isAnswer.value = true;
 };
 
 const recordAnswer = () => {
   MicStream.value.getAudioTracks()[0].enabled = true;
+  isAnswer.value = true;
   answerRecorder.reset();
   answerRecorder.startRecording();
 };
@@ -448,6 +472,7 @@ function playQuestion(base64Data) {
     );
     MicStream.value.getAudioTracks()[0].enabled = false;
     audioBufferSource.start();
+    emit("startTimer");
   });
 }
 
