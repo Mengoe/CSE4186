@@ -21,10 +21,8 @@ export const useMemberStore = defineStore(
 
     function duplicateCheck(params) {
       return new Promise((resolve, reject) => {
-        const joinCheckAPI = "https://jobjourney.shop/join/check";
-
-        axios
-          .post(joinCheckAPI, JSON.stringify(params), {
+        api
+          .post("/join/check", JSON.stringify(params), {
             headers: {
               "Content-Type": `application/json`,
             },
@@ -63,19 +61,13 @@ export const useMemberStore = defineStore(
     };
 
     async function join(joinObj) {
-      const joinAPI = "https://jobjourney.shop/join";
-
       // second. send join request
       try {
-        const joinResponse = await axios.post(
-          joinAPI,
-          JSON.stringify(joinObj),
-          {
-            headers: {
-              "Content-Type": `application/json`,
-            },
+        const joinResponse = await api.post("/join", JSON.stringify(joinObj), {
+          headers: {
+            "Content-Type": `application/json`,
           },
-        );
+        });
 
         if (joinResponse.data.result == "fail")
           throw new Error(response.data.message);
