@@ -15,7 +15,7 @@
               width="55px"
             />
           </a>
-          <div class="mkr">your interview journey</div>
+          <div class="mkr">JobJourney</div>
         </div>
         <q-btn
           v-if="!isLogin"

@@ -1,6 +1,8 @@
 <template>
   <q-page class="q-gutter-y-md column flex-center text-wsfont">
-    <div class="cv-title text-h6 q-pt-xl text-blue">자기소개서 등록하기</div>
+    <div class="cv-title text-h5 text-weight-bold q-pt-xl text-primary">
+      자기소개서 등록하기
+    </div>
     <q-form
       @submit="onSubmit"
       class="q-gutter-y-md column flex-center items-stretch q-pb-xl"
@@ -85,7 +87,7 @@
         v-if="!isDoneRegister"
         :loading="loading"
         type="submit"
-        color="blue"
+        color="primary"
         label="등록"
         icon="chevron_right"
         outline

@@ -5,7 +5,7 @@
         class="login-form column flex-center no-wrap"
         style="box-sizing: border-box; gap: 20px"
       >
-        <div class="text-weight-bold text-h4 q-pb-md">Sign In</div>
+        <div class="text-weight-bold text-h4 q-pb-md">로그인</div>
         <SocialLoginButton />
         <div class="text-grey-6">또는 이메일로 로그인</div>
         <div class="q-gutter-y-md">

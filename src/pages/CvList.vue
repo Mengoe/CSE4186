@@ -6,7 +6,7 @@
       style="width: 50%; height: 80%"
       class="column q-gutter-y-xl q-mt-md"
     >
-      <div class="text-h4 text-blue-8 text-weight-bold text-center">
+      <div class="text-h5 text-primary text-weight-bold text-center">
         나의 자기소개서
       </div>
       <div class="shadow-14">

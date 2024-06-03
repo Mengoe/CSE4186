@@ -4,7 +4,9 @@
 
     <div v-else class="q-pa-md">
       <q-card-section>
-        <h2 class="text-h5 text-center text-weight-bold">지난 면접 기록</h2>
+        <h2 class="text-h5 text-primary text-center text-weight-bold">
+          지난 면접 기록
+        </h2>
         <q-separator />
 
         <q-list separator>
@@ -23,7 +25,7 @@
               class="cursor-pointer absolute-right"
               @click="deleteInterview(interview.id, interview.link)"
             />
-             
+
             <q-item-section
               @click="showVideos[idx] = true"
               class="cursor-pointer"

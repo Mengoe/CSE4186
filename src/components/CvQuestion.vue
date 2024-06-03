@@ -118,6 +118,7 @@
         outline
         @click="startCv"
         icon="double_arrow"
+        :disable="blockSubmit"
       >
       </q-btn>
     </div>
@@ -165,6 +166,7 @@ const jobGroups = [
 ];
 
 const selectedJob = ref(jobGroups[0]);
+const blockSubmit = ref(false);
 
 // 질문 추가 함수. 최대 10개까지 등록 가능
 function addQuestion() {
@@ -205,6 +207,7 @@ function startCv() {
   const deptNum = jobGroups.findIndex((job) => job === selectedJob.value);
 
   emit("blockClosing", true);
+  blockSubmit.value = true;
 
   cvStore
     .generateQuestions(

@@ -9,7 +9,9 @@
             class="main-logo"
           />
         </a>
-        <p class="text-black l70t20 font-weight-bold">Members</p>
+        <p class="text-black l70t20 font-weight-bold text-weight-bold">
+          JobJourney
+        </p>
       </div>
     </q-header>
 
