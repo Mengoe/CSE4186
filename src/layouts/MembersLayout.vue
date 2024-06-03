@@ -9,7 +9,7 @@
             class="main-logo"
           />
         </a>
-        <p style="color: black">Members</p>
+        <p class="text-black l70t20 font-weight-bold">Members</p>
       </div>
     </q-header>
 
@@ -18,3 +18,11 @@
     </q-page-container>
   </q-layout>
 </template>
+
+<style scoped>
+.l70t20 {
+  position: absolute;
+  left: 70px;
+  top: 20px;
+}
+</style>

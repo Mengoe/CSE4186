@@ -157,6 +157,6 @@ export const useCvStore = defineStore(
     };
   },
   {
-    persist: true,
+    persist: { enabled: true, storage: localStorage },
   },
 );

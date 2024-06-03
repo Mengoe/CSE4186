@@ -1,7 +1,10 @@
 <template>
   <div>
     <div class="text-wsfont" style="z-index: 1">
-      <div style="width: 100%; aspect-ratio: 16/10" class="bg-black">
+      <div
+        style="width: 30vw; aspect-ratio: 16/10; min-width: 350px"
+        class="bg-black"
+      >
         <video id="video" ref="video" width="100%">
           Video stream not available.
         </video>
@@ -74,7 +77,12 @@
             round
             v-if="isStarted"
             class="q-mb-sm"
-          />
+            :disable="!isAnswer"
+          >
+            <q-tooltip anchor="top middle" v-if="!isAnswer">
+              답변 시간에 일시정지를 다시 시도해주세요.
+            </q-tooltip>
+          </q-btn>
         </q-btn-group>
         <div class="row flex-center q-mt-xl">
           <q-btn
@@ -83,9 +91,16 @@
             color="deep-purple-14"
             rounded
             class="q-mr-sm q-mb-sm"
+            :disable="!isStarted && (!isAccessed.mic || !isAccessed.camera)"
             ><span style="text-color: white">{{
               isStarted ? "모의 면접 종료하기" : "모의 면접 시작하기"
             }}</span>
+            <q-tooltip
+              anchor="top middle"
+              v-if="!isStarted && (!isAccessed.mic || !isAccessed.camera)"
+            >
+              마이크 및 카메라 권한을 허용해주세요
+            </q-tooltip>
           </q-btn>
         </div>
       </div>
@@ -94,12 +109,12 @@
 </template>
 <script setup>
 import { ref, watch, onUnmounted } from "vue";
-import { useRouter } from "vue-router";
+import { useRouter, useRoute } from "vue-router";
 import { useCvStore } from "stores/cv.js";
 import { useInterviewStore } from "stores/interview.js";
 import { useMemberStore } from "stores/member.js";
 import { storeToRefs } from "pinia";
-import { api } from "boot/axios.js";
+import tokenApi from "src/utils/interceptor.js";
 import { uploadToBucket } from "src/utils/aws.js";
 import { v4 as uuidv4 } from "uuid";
 import { getToken } from "src/utils/cookies.js";
@@ -114,12 +129,10 @@ const MicStream = ref(null);
 const CamStream = ref(null);
 let mediaStream = null;
 let recorder = null;
-let recorded = [];
 const router = useRouter();
+const route = useRoute();
 let finalBlob = null;
 const video = ref(null);
-const audioSrc = ref(null);
-const audio = ref(null);
 
 const interviewStore = useInterviewStore();
 const {
@@ -132,8 +145,12 @@ const {
   title,
   count,
   turn,
+  followUp,
+  isAnswer,
 } = storeToRefs(interviewStore);
-
+const { dataObj } = history.state;
+const dept = dataObj.dept;
+const cvId = dataObj.cvId;
 interviewStore.$reset();
 
 const memberStore = useMemberStore();
@@ -141,13 +158,13 @@ const { userId } = storeToRefs(memberStore);
 
 const cvStore = useCvStore();
 const { questions } = storeToRefs(cvStore);
-const audioContext = new AudioContext();
-const questionStreamDestination = audioContext.createMediaStreamDestination();
+let audioContext = null;
+let questionStreamDestination = null;
 let audioBufferSource = null;
 let answerRecorder = null;
-let answerRecorded = [];
+let prevChat = null;
 
-const emit = defineEmits(["CamStreamChanged"]);
+const emit = defineEmits(["startTimer"]);
 watch(CamStream, () => {
   if (CamStream.value) {
     if (!video.value.paused) video.value.pause();
@@ -171,34 +188,32 @@ const uploadVideoUrl = async (fileUrl) => {
       link: fileUrl,
       userId: userId.value,
     };
-    const accessToken = "Bearer " + getToken();
-    const res = await api.post("/video", data, {
-      headers: {
-        authorization: accessToken,
-      },
-    });
-    console.log(res);
+    const res = await tokenApi.post("/video", data);
   } catch (err) {
     return Promise.reject(err);
   }
 };
 
-watch(isSaved, async () => {
-  if (isSaved.value) {
-    try {
-      const filename =
-        "video_" + userId.value + "/" + generateRandomString() + ".webm";
-      const file = new File([finalBlob], filename, { type: "video/webm" });
-      const keyString = await uploadToBucket(file, filename);
-      await uploadVideoUrl(keyString);
-      saveFinished.value = true;
-    } catch (err) {
-      console.log(err);
-      alert("동영상 저장에 실패했습니다.");
-      saveFinished.value = true;
+watch(
+  isSaved,
+  async () => {
+    if (isSaved.value) {
+      try {
+        const filename =
+          "video_" + userId.value + "/" + generateRandomString() + ".webm";
+        const file = new File([finalBlob], filename, { type: "video/webm" });
+        const keyString = await uploadToBucket(file, filename);
+        await uploadVideoUrl(keyString);
+        saveFinished.value = true;
+      } catch (err) {
+        console.log(err);
+        alert("동영상 저장에 실패했습니다.");
+        saveFinished.value = true;
+      }
     }
-  }
-});
+  },
+  { immediate: true },
+);
 
 const handleMicButton = () => {
   if (!isAccessed.value.mic) {
@@ -350,12 +365,6 @@ async function init() {
     });
 }
 
-const handleDataAvailable = (event) => {
-  if (event.data.size > 0) {
-    recorded.push(event.data);
-  }
-};
-
 const setRecorder = async () => {
   let videoTracks = CamStream.value.getVideoTracks();
   let micAudio = audioContext.createMediaStreamSource(MicStream.value);
@@ -366,14 +375,19 @@ const setRecorder = async () => {
   ];
   mediaStream = new MediaStream(mediaTracks);
   recorder = RecordRTC(mediaStream, {
+    type: "video",
     mimeType: "video/webm",
+    audioBitsPerSecond: 128000,
   });
   answerRecorder = new RecordRTC(MicStream.value, {
+    type: "audio",
     mimeType: "audio/webm",
   });
 };
 
 const startInterview = () => {
+  audioContext = new AudioContext();
+  questionStreamDestination = audioContext.createMediaStreamDestination();
   setRecorder()
     .then(() => {
       recorder.startRecording();
@@ -387,12 +401,14 @@ const startInterview = () => {
 
 const resumeInterview = () => {
   mediaStream.getTracks().forEach((track) => (track.enabled = true));
+  if (answerRecorder.state === "paused") answerRecorder.resumeRecording();
   recorder.resumeRecording();
   isStopped.value = false;
 };
 
 const pauseInterview = () => {
   mediaStream.getTracks().forEach((track) => (track.enabled = false));
+  if (answerRecorder.state === "recording") answerRecorder.pauseRecording();
   recorder.pauseRecording();
   isStopped.value = true;
 };
@@ -429,25 +445,20 @@ function base64ToArrayBuffer(base64) {
 
 const notRecordAnswer = () => {
   MicStream.value.getAudioTracks()[0].enabled = true;
-};
-
-const handleAnswerDataAvailable = (event) => {
-  if (event.data.size > 0) {
-    answerRecorded.push(event.data);
-  }
+  isAnswer.value = true;
 };
 
 const recordAnswer = () => {
   MicStream.value.getAudioTracks()[0].enabled = true;
-
+  isAnswer.value = true;
+  answerRecorder.reset();
   answerRecorder.startRecording();
 };
 function createAudioBufferSource(audioBuffer, isRecorded) {
-  audioBufferSource = audioContext.createBufferSource();
+  let audioBufferSource = audioContext.createBufferSource();
   audioBufferSource.buffer = audioBuffer;
   audioBufferSource.connect(questionStreamDestination);
   audioBufferSource.connect(audioContext.destination);
-  console.log(questionStreamDestination.stream.getAudioTracks());
   audioBufferSource.onended = isRecorded ? recordAnswer : notRecordAnswer;
   return audioBufferSource;
 }
@@ -455,20 +466,27 @@ function createAudioBufferSource(audioBuffer, isRecorded) {
 function playQuestion(base64Data) {
   let audioData = base64ToArrayBuffer(base64Data);
   audioContext.decodeAudioData(audioData).then((audioBuffer) => {
-    let audioBufferSource = createAudioBufferSource(
+    audioBufferSource = createAudioBufferSource(
       audioBuffer,
-      questions.value[count.value].turn > turn.value,
+      questions.value[count.value].turn - 1 > turn.value,
     );
     MicStream.value.getAudioTracks()[0].enabled = false;
     audioBufferSource.start();
+    emit("startTimer");
   });
 }
 
-watch((count, isStarted), () => {
-  if (isStarted.value) {
-    playQuestion(questions.value[count.value].audio);
-  }
-});
+watch(
+  [count, isStarted],
+  () => {
+    if (isStarted.value) {
+      if (count.value < questions.value.length) {
+        playQuestion(questions.value[count.value].audio);
+      } else finishInterview();
+    }
+  },
+  { immediate: true },
+);
 
 const blobToBase64 = async (blob) => {
   return new Promise((resolve, reject) => {
@@ -479,17 +497,55 @@ const blobToBase64 = async (blob) => {
   });
 };
 
+const setPrevChat = () => {
+  prevChat = [
+    {
+      role: "system",
+      content: questions.value[count.value].question,
+    },
+  ];
+};
+
+const getNextQuestion = () => {
+  followUp.value =
+    "답변을 듣고 꼬리 질문을 생성 중입니다. 잠시 후 질문이 나타납니다.";
+  answerRecorder.stopRecording(() => {
+    blobToBase64(answerRecorder.getBlob()).then((base64Data) => {
+      if (turn.value == 1) setPrevChat();
+      const body = {
+        turn: turn.value - 1,
+        selfIntroductionId: cvId,
+        deptNum: dept,
+        questions: prevChat,
+        userAudio: base64Data,
+      };
+
+      tokenApi
+        .post("/question/followUp", body)
+        .then((res) => {
+          console.log(res);
+          let followUpQuestion = res.data.body.followUps[0];
+          followUp.value = followUpQuestion[0].Text;
+          prevChat = res.data.body.messages;
+          prevChat.push({ role: "system", content: followUp.value });
+          playQuestion(followUpQuestion[1].Audio);
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    });
+  });
+};
+
 watch(
   turn,
   () => {
     if (isStarted.value && turn.value != 0) {
-      answerRecorder.stopRecording(() => {
-        blobToBase64(answerRecorder.getBlob()).then((base64Data) => {
-          //api post해서 다음 문제 가져오기
-          //playQuestion()
-          answerRecorder.reset();
-        });
-      });
+      if (answerRecorder.getState() != "inactive") getNextQuestion();
+      else {
+        turn.value = 0;
+        count.value++;
+      }
     }
   },
   {

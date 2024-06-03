@@ -117,10 +117,7 @@ async function onSubmit() {
       router.push(route.query.redirect || "/");
     })
     .catch((err) => {
-      console.log("here");
       alert("로그인에 실패하셨습니다.다시 시도해주세요.");
-      console.log(err);
-      router.push("/members/login");
     });
 }
 

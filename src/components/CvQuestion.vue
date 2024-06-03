@@ -15,6 +15,7 @@
           class="q-ml-xl q-mt-sm col-4"
           :options="jobGroups"
           v-model="selectedJob"
+          val="value"
           outlined
         ></q-select>
       </div>
@@ -124,6 +125,8 @@ import { useQuasar, QSpinnerGrid } from "quasar";
 import { useRouter } from "vue-router";
 
 import LoaderComponent from "./LoaderComponent.vue";
+import { useInterviewStore } from "stores/interview.js";
+import { storeToRefs } from "pinia";
 
 const props = defineProps({
   detailList: Array, // 예상 질문 생성 위한 자기소개서의 내용
@@ -139,22 +142,23 @@ const newQuestion = ref("");
 const questions = ref([]);
 const questionCount = ref(10);
 const cvLoading = computed(() => cvStore.loading);
+const interviewStore = useInterviewStore();
 
 const jobGroups = [
-  "백엔드/서버개발",
-  "프론트엔드",
-  "앱개발",
-  "게임개발",
-  "데이터 사이언티스트",
-  "빅 데이터 개발",
-  "데브옵스 개발",
-  "임베디드 소프트웨어 개발",
-  "정보보안",
-  "인공지능 개발",
-  "기타",
+  { label: "백엔드/서버개발", value: 0 },
+  { label: "프론트엔드", value: 1 },
+  { label: "앱개발", value: 2 },
+  { label: "게임개발", value: 3 },
+  { label: "데이터 사이언티스트", value: 4 },
+  { label: "빅 데이터 개발", value: 5 },
+  { label: "데브옵스 개발", value: 6 },
+  { label: "임베디드 소프트웨어 개발", value: 7 },
+  { label: "정보보안", value: 8 },
+  { label: "인공지능 개발", value: 9 },
+  { label: "기타", value: 10 },
 ];
 
-const selectedJob = ref("백엔드/서버개발");
+const selectedJob = ref(jobGroups[0]);
 
 // 질문 추가 함수. 최대 10개까지 등록 가능
 function addQuestion() {
@@ -167,7 +171,6 @@ function addQuestion() {
       message: "추가 질문은 최대 10개 입니다!",
       timeout: 300,
     });
-
     return;
   }
 
@@ -199,7 +202,7 @@ function startCv() {
     .generateQuestions(
       questionCount.value,
       props.cvId,
-      deptNum,
+      selectedJob.value.value,
       questions.value,
     )
     .then(() => {
@@ -211,8 +214,12 @@ function startCv() {
         timeout: 300,
         closeBtn: true,
       });
-
-      router.push("/interview"); // 면접 보는 화면으로 넘어감.
+      let dept = selectedJob.value.value;
+      let cvId = props.cvId;
+      router.push({
+        path: "/interview",
+        state: { dataObj: { cvId: cvId, dept: dept } },
+      });
     })
     .catch((err) => {
       console.log(err);

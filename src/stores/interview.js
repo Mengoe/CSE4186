@@ -11,7 +11,8 @@ export const useInterviewStore = defineStore("interview", () => {
   const title = ref("");
   const count = ref(0);
   const turn = ref(0);
-  const followUp = ref(null);
+  const followUp = ref("");
+  const isAnswer = ref(false);
 
   function $reset() {
     videoUrl.value = null;
@@ -23,7 +24,7 @@ export const useInterviewStore = defineStore("interview", () => {
     title.value = "";
     count.value = 0;
     turn.value = 0;
-    followUp.value = null;
+    isAnswer.value = false;
     DeleteBucketIntelligentTieringConfigurationCommand.value = 0;
   }
 
@@ -38,5 +39,7 @@ export const useInterviewStore = defineStore("interview", () => {
     title,
     count,
     turn,
+    followUp,
+    isAnswer,
   };
 });

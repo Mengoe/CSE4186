@@ -1,19 +1,26 @@
 <template>
   <q-page class="gradient-bg text-wsfont">
-    <img
-      src="../assets/main-logo.png"
-      alt="메인 로고"
-      style="
-        height: auto;
-        width: 60px;
-        position: absolute;
-        top: 20px;
-        left: 20px;
-      "
-    />
+    <a href="/">
+      <img
+        src="../assets/main-logo.png"
+        alt="메인 로고"
+        style="
+          height: auto;
+          width: 55px;
+          position: absolute;
+          top: 10px;
+          left: 10px;
+        "
+      />
+    </a>
     <div
-      style="position: absolute; top: 100px; left: 60px"
-      class="col justify-around flex-center"
+      style="
+        position: absolute;
+        top: 70px;
+        left: 60px;
+
+        height: 90%;
+      "
     >
       <q-checkbox
         v-model="questionShow"
@@ -34,67 +41,85 @@
             rounded
             label="다음 문제로 넘기기"
             @click="bringQuestion"
-          />
+            :disable="!isAnswer"
+          >
+            <q-tooltip anchor="top middle" v-if="!isAnswer">
+              답변 시간에 다음 문제로 넘길 수 있습니다.
+            </q-tooltip>
+          </q-btn>
         </div>
       </div>
-      <div class="row justify-start">
-        <div class="col-7">
-          <WebCamera ref="webcamera" class="webcamera q-ma-md q-pa-sm" />
-        </div>
-        <div v-show="isStarted" class="col-5">
-          <InterviewTimer
-            @timerEnd="handleTimerEnd"
-            ref="timer"
-            class="text-pink-12 text-bold"
-            style="font-size: 30px"
-          />
+    </div>
 
-          <!---<CountDownTimer duration=120 />--->
-        </div>
-      </div>
+    <div
+      style="
+        position: absolute;
+        top: 25%;
+        left: 60px;
+        flex-wrap: nowrap;
+        width: 90%;
+      "
+      class="row"
+    >
+      <WebCamera
+        ref="webcamera"
+        class="webcamera q-ma-md q-pa-sm"
+        @startTimer="handleStartTimer"
+      />
+      <span class="col-1"></span>
+      <CountDownTimer ref="countdown" @endTimer="handleTimerEnd" />
     </div>
     <InterviewSave />
   </q-page>
 </template>
 
 <script setup>
-import InterviewTimer from "components/InterviewTimer.vue";
 import InterviewSave from "components/InterviewSave.vue";
 import WebCamera from "components/WebCamera.vue";
 import { useCvStore } from "stores/cv.js";
 import { useInterviewStore } from "stores/interview.js";
 import { storeToRefs } from "pinia";
-import { computed, ref, watch } from "vue";
+import { computed, ref } from "vue";
 import CountDownTimer from "components/CountDownTimer.vue";
 
 const cvStore = useCvStore();
 const interviewStore = useInterviewStore();
 const { questions } = storeToRefs(cvStore);
-const { isStarted, isFinished, count, turn } = storeToRefs(interviewStore);
+const { count, turn, followUp, isStarted, isAnswer } =
+  storeToRefs(interviewStore);
 const timer = ref(null);
+const countdown = ref(null);
 const webcamera = ref(null);
 const questionShow = ref(false);
 
-const question = computed(() => questions.value[count.value].question);
-
-const handleTimerEnd = () => {
-  bringQuestion();
-};
+const question = computed(() =>
+  turn.value == 0
+    ? questions.value.length > count.value
+      ? questions.value[count.value].question
+      : "면접이 종료되었습니다."
+    : followUp.value,
+);
 
 const bringQuestion = () => {
-  questions.value[count.value].turn > turn.value
+  isAnswer.value = false;
+  countdown.value.reset();
+  handleTimerEnd();
+};
+
+const handleStartTimer = () => {
+  countdown.value.start();
+};
+
+const handleTimerEnd = () => {
+  isAnswer.value = false;
+  turn.value < questions.value[count.value].turn - 1
     ? bringFollowUpQuestion()
     : bringNextQuestion();
-  timer.value.resetTimer();
 };
 
 const bringNextQuestion = () => {
-  if (count.value < questions.value.length - 1) {
-    turn.value = 0;
-    count.value++;
-  } else {
-    webcamera.value.finishInterview();
-  }
+  turn.value = 0;
+  count.value++;
 };
 
 const bringFollowUpQuestion = () => {

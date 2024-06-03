@@ -21,7 +21,7 @@
               size="xs"
               color="red"
               class="cursor-pointer absolute-right"
-              @click.stop="deleteInterview(interview.id)"
+              @click="deleteInterview(interview.id, interview.link)"
             />
             <q-item-section
               @click="showVideos[idx] = true"
@@ -57,8 +57,8 @@ import { outlinedDelete } from "@quasar/extras/material-icons-outlined";
 
 import LoaderComponent from "components/LoaderComponent.vue";
 import Pagination from "components/PaginationComponent.vue";
+import { deleteVideo } from "src/utils/aws.js";
 import VideoModal from "components/VideoContent.vue";
-
 const boardStore = useBoardStore();
 const router = useRouter();
 
@@ -67,7 +67,7 @@ const pageCount = computed(() => boardStore.pageCount);
 const interviews = computed(() => boardStore.videos);
 const showVideos = ref([]);
 
-function deleteInterview(videoId) {
+function deleteInterview(videoId, videoKey) {
   if (!confirm("삭제하시겠습니까?")) return;
 
   const accessToken = "Bearer " + getToken();
@@ -79,12 +79,19 @@ function deleteInterview(videoId) {
       },
     })
     .then((res) => {
-      console.log(res);
-      alert("삭제되었습니다.");
-      router.go(0); // reload page after deletion
+      deleteVideo(videoKey)
+        .then((res) => {
+          alert("삭제되었습니다.");
+          router.go(0);
+        })
+        .catch((err) => {
+          alert("삭제에 실패했습니다.");
+          router.go(0);
+        });
     })
     .catch((err) => {
-      console.log(err);
+      alert("삭제에 실패했습니다.");
+      router.go(0);
     });
 }
 
