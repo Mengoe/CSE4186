@@ -126,23 +126,19 @@
 
 <script setup>
 import { useCvStore } from "src/stores/cv";
-import {
-  outlinedEdit,
-  outlinedInfo,
-} from "@quasar/extras/material-icons-outlined";
 import { computed, ref } from "vue";
 import { useQuasar, QSpinnerGrid } from "quasar";
 import { useRouter } from "vue-router";
 
-import LoaderComponent from "./LoaderComponent.vue";
 import { useInterviewStore } from "stores/interview.js";
-import { storeToRefs } from "pinia";
 
 const props = defineProps({
   detailList: Array, // 예상 질문 생성 위한 자기소개서의 내용
   cvId: Number,
   cvTitle: String,
 });
+
+const emit = defineEmits(["blockClosing"]);
 
 const cvStore = useCvStore();
 const $q = useQuasar();
@@ -208,6 +204,8 @@ function startCv() {
 
   const deptNum = jobGroups.findIndex((job) => job === selectedJob.value);
 
+  emit("blockClosing", true);
+
   cvStore
     .generateQuestions(
       questionCount.value,
@@ -237,4 +235,5 @@ function startCv() {
 }
 
 cvStore.initLoading();
+emit("blockClosing", false);
 </script>

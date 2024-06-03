@@ -48,8 +48,10 @@
               <q-dialog
                 v-model="showDialog[index]"
                 backdrop-filter="blur(4px);"
+                :persistent="blockClosingModal"
               >
                 <CvQuestion
+                  @blockClosing="(flag) => (blockClosingModal = flag)"
                   :cvId="cv.id"
                   :detailList="cv.detailList"
                   :cvTitle="cv.title"
@@ -70,7 +72,7 @@
 </template>
 
 <script setup>
-import { onMounted, ref, computed, watch } from "vue";
+import { ref, computed, watch } from "vue";
 import { useCvStore } from "src/stores/cv";
 import {
   outlinedFindInPage,
@@ -90,6 +92,8 @@ const pageCount = computed(() => cvStore.pageCount);
 
 const showDialog = ref([]); // 특정 자소서에 대해 예상 질문 생성 dialog 띄워줌
 const showDetails = ref([]); // 특정 자소서 내용 dialog로 띄워줌
+
+const blockClosingModal = ref(false);
 
 const currentPageNumber = ref(1);
 const CV_PER_PAGE = 8;
