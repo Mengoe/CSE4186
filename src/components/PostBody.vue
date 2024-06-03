@@ -25,7 +25,7 @@
           outline
           @click="togglePlayPause"
           color="primary"
-          class="absolute-bottom-right hidden"
+          class="absolute-bottom-right"
           >{{ playButtonText }}</q-btn
         >
       </div>
