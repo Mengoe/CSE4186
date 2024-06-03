@@ -196,6 +196,8 @@ function startCv() {
     return;
   }
 
+  const deptNum = jobGroups.findIndex((job) => job === selectedJob.value);
+
   cvStore
     .generateQuestions(
       questionCount.value,

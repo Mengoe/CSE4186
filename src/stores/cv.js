@@ -21,7 +21,7 @@ export const useCvStore = defineStore(
     async function generateQuestions(
       questionNum,
       cvId,
-      job,
+      deptNum,
       additionalQuestions,
     ) {
       questions.value = [];
@@ -33,7 +33,7 @@ export const useCvStore = defineStore(
       const cvObj = {
         questionNum,
         selfIntroductionId: cvId,
-        dept: job,
+        deptNum,
         additionalQuestions,
       };
 
