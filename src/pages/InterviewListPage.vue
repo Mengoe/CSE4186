@@ -66,6 +66,7 @@ const pageLoading = computed(() => boardStore.loading);
 const pageCount = computed(() => boardStore.pageCount);
 const interviews = computed(() => boardStore.videos);
 const showVideos = ref([]);
+boardStore.initLoading();
 
 function deleteInterview(videoId, videoKey) {
   if (!confirm("삭제하시겠습니까?")) return;

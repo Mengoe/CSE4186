@@ -111,7 +111,6 @@ const videoId = ref(null);
 
 let postId;
 let post;
-const loading = computed(() => boardStore.loading);
 
 function fetchVideos() {
   videoFetchLoading.value = true;

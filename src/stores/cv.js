@@ -1,7 +1,6 @@
 import { defineStore } from "pinia";
-import { useMemberStore } from "./member";
 import { getToken } from "src/utils/cookies";
-import { api } from "boot/axios.js";
+import tokenApi from "src/utils/interceptor.js";
 import { ref } from "vue";
 
 export const useCvStore = defineStore(
@@ -16,6 +15,11 @@ export const useCvStore = defineStore(
 
     function bearerToken(token) {
       return "Bearer " + token;
+    }
+
+    function initLoading() {
+      loading.value = false;
+      pageLoading.value = false;
     }
 
     async function generateQuestions(
@@ -75,17 +79,11 @@ export const useCvStore = defineStore(
 
     async function fetchAllCv(page, size) {
       cvLists.value = [];
-      const accessToken = bearerToken(getToken());
 
       pageLoading.value = true;
       try {
-        const res = await api.get(
+        const res = await tokenApi.get(
           `/selfIntroduction/list?page=${page}&size=${size}`,
-          {
-            headers: {
-              Authorization: accessToken,
-            },
-          },
         );
 
         pageLoading.value = false;
@@ -103,13 +101,9 @@ export const useCvStore = defineStore(
 
     function addCv(params) {
       return new Promise((resolve, reject) => {
-        const accessToken = bearerToken(getToken());
-
         loading.value = true;
-        api
-          .post("/selfIntroduction/save", JSON.stringify(params), {
-            headers: { Authorization: accessToken },
-          })
+        tokenApi
+          .post("/selfIntroduction/save", JSON.stringify(params))
           .then((res) => {
             console.log(res);
             resolve(true);
@@ -125,13 +119,8 @@ export const useCvStore = defineStore(
     }
 
     function deleteCv(cvId) {
-      const accessToken = bearerToken(getToken());
-
-      api
+      tokenApi
         .delete(`/selfIntroduction/${cvId}`, {
-          headers: {
-            Authorization: accessToken,
-          },
           data: { id: cvId },
         })
         .then((res) => {
@@ -154,6 +143,7 @@ export const useCvStore = defineStore(
       fetchAllCv,
       addCv,
       deleteCv,
+      initLoading,
     };
   },
   {

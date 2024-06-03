@@ -5,6 +5,7 @@
     color="primary"
     style="width: 150px"
     class="fixed-center z-max"
+    size=""
   >
     <template v-slot:loading>
       <q-spinner-gears class="on-left" />
@@ -12,7 +13,7 @@
     </template>
   </q-btn>
   <q-card
-    class="column flex-center items-stretch no-wrap text-wsfont shadow-11"
+    class="column flex-center items-stretch no-wrap text-wsfont shadow-11 relative-position"
     style="height: 100%; width: 100%"
   >
     <q-card-section class="text-black text-h6 text-center q-mt-sm">
@@ -108,19 +109,17 @@
       </q-card-section>
     </q-scroll-area>
 
-    <div class="buttons">
-      <q-page-sticky position="bottom-right" :offset="[150, 80]">
-        <q-btn
-          size="xl"
-          fab
-          color="primary"
-          label="AI에게 넘겨 면접 시작하기"
-          outline
-          @click="startCv"
-          icon="double_arrow"
-        >
-        </q-btn>
-      </q-page-sticky>
+    <div class="buttons absolute-bottom-right q-pa-sm">
+      <q-btn
+        size="sm"
+        fab
+        color="primary"
+        label="AI에게 넘겨 면접 시작하기"
+        outline
+        @click="startCv"
+        icon="double_arrow"
+      >
+      </q-btn>
     </div>
   </q-card>
 </template>
@@ -236,4 +235,6 @@ function startCv() {
       console.log(err);
     });
 }
+
+cvStore.initLoading();
 </script>

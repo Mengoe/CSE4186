@@ -41,6 +41,7 @@ const boardStore = useBoardStore();
 const post = computed(() => boardStore.post); // 특정 게시글 저장
 const loading = computed(() => boardStore.loading);
 
+boardStore.initLoading();
 boardStore.fetchPost(route.params.id);
 </script>
 
