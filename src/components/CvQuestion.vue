@@ -1,112 +1,113 @@
 <template>
   <LoaderComponent v-if="cvLoading" fixed :zIndex="999" :size="5" />
   <q-card
-    class="column flex-center items-stretch no-wrap"
+    class="column flex-center items-stretch no-wrap text-wsfont shadow-11"
     style="height: 100%; width: 100%"
   >
-    <q-card-section class="column flex-center">
-      <div class="text-h5 text-primary text-center text-weight-bold">
-        어떤 직무이신가요?
-      </div>
-      <div class="row flex-center">
+    <q-card-section class="text-black text-h6 text-center q-mt-sm">
+      모의면접 추가 요구사항
+    </q-card-section>
+    <q-card-section>
+      <q-icon name="check" color="primary" size="sm" class="q-ml-sm" left />
+      <span class="text-primary" style="font-size: 15px"> 직무 </span>
+      <div class="row justify-start">
         <q-select
+          class="q-ml-xl q-mt-sm col-4"
           :options="jobGroups"
           v-model="selectedJob"
+          val="value"
           outlined
         ></q-select>
       </div>
     </q-card-section>
-
     <q-separator inset />
-
-    <q-card-section class="column flex-center q-gutter-y-md">
-      <div class="text-primary text-h5 text-weight-bold">
-        몇 개의 예상 질문을 생성할까요?
+    <q-card-section>
+      <q-icon name="check" color="primary" size="sm" class="q-ml-sm" left />
+      <span class="text-primary" style="font-size: 15px">
+        AI가 생성할 질문 개수
+      </span>
+      <div class="row justify-start">
+        <q-input
+          v-model.number="questionCount"
+          class="q-ml-xl q-mt-sm q-mb-none col-4"
+          type="number"
+          outlined
+          label="5~20까지 입력"
+          input-style="width: 200px"
+          :rules="[(val) => 5 <= val && val <= 20]"
+        />
       </div>
-      <q-input
-        v-model.number="questionCount"
-        type="number"
-        outlined
-        label="5부터 20사이의 숫자를 입력하세요."
-        input-style="width: 200px"
-        :rules="[
-          (val) =>
-            (5 <= val && val <= 20) || '5 ~ 20까지의 숫자만 입력 가능합니다.',
-        ]"
-      />
     </q-card-section>
 
     <q-separator inset />
-
-    <q-card-section class="text-h5 text-primary text-center text-weight-bold">
-      추가로 받고 싶으신<br />
-      질문이 있으시면 등록해주세요!
-    </q-card-section>
-
-    <q-card-section class="input-container row q-gutter-x-md no-wrap">
-      <div class="sub-title column">
-        <div class="text-h6 text-primary">Question</div>
-        <div class="text-subtitle2 text-primary">Question</div>
-      </div>
-      <div class="input-form row q-gutter-x-sm no-wrap">
-        <q-form @submit="addQuestion" class="row no-wrap q-gutter-x-sm">
+    <q-card-section>
+      <q-icon name="check" color="primary" size="sm" class="q-ml-sm" left />
+      <span class="text-primary" style="font-size: 15px">
+        모의 면접에서 추가로 받고 싶은 질문이 있다면?
+      </span>
+      <div class="text-subtitle text-primary q-ml-lg q-mt-sm">Q.</div>
+      <div class="input-form row no-wrap column">
+        <q-form
+          @submit="addQuestion"
+          class="row no-wrap q-gutter-x-sm justify-start"
+        >
           <q-input
             v-model="newQuestion"
-            outlined
             label="질문을 입력해주세요"
-            input-style="width: 200px;"
             autofocus
+            class="q-ml-xl col-8"
           >
-            <template v-slot:prepend>
-              <q-icon :name="outlinedEdit" />
-            </template>
           </q-input>
           <q-btn
             push
             no-wrap
-            color="primary"
-            text-color="white"
-            type="submit"
             size="md"
-            style="height: 56px"
-            >+ Add New</q-btn
-          >
+            type="submit"
+            rounded
+            flat
+            class="text-primary"
+            icon="add"
+          />
         </q-form>
       </div>
     </q-card-section>
+
     <q-scroll-area style="height: 50%">
-      <q-card-section class="question-list column q-gutter-y-sm">
-        <q-toolbar class="bg-primary text-white text-center">
-          <q-toolbar-title>추가 질문 리스트</q-toolbar-title>
-        </q-toolbar>
-        <q-list bordered separator>
+      <q-card-section class="question-list q-ml-xl">
+        <q-icon name="list" size="sm" class="q-ml-sm" left />
+        <span>추가된 질문 목록</span>
+        <q-list separator dense>
           <q-item
             class="row"
             v-for="(question, index) in questions"
             :key="index"
           >
-            <q-item-section avatar>
-              <q-icon color="primary" :name="outlinedInfo" />
-            </q-item-section>
-            <q-item-section class="text-weight-medium text-body1">{{
-              question
-            }}</q-item-section>
+            <q-item-section class="col-8"
+              >{{ index + 1 }}.{{ " " + question }}</q-item-section
+            >
             <q-btn
               color="negative"
-              text-color="white"
               filled
+              icon="remove"
+              flat
               @click="removeQuestion(index)"
-            >
-              Delete
-            </q-btn>
+            />
           </q-item>
         </q-list>
       </q-card-section>
     </q-scroll-area>
+
     <div class="buttons">
       <q-page-sticky position="bottom-right" :offset="[150, 80]">
-        <q-btn size="xl" fab color="primary" @click="startCv">
-          모의면접 시작
+        <q-btn
+          size="xl"
+          fab
+          color="primary"
+          label="AI에게 넘겨 면접 시작하기"
+          outline
+          @click="startCv"
+          icon="double_arrow"
+        >
         </q-btn>
       </q-page-sticky>
     </div>
@@ -124,10 +125,13 @@ import { useQuasar, QSpinnerGrid } from "quasar";
 import { useRouter } from "vue-router";
 
 import LoaderComponent from "./LoaderComponent.vue";
+import { useInterviewStore } from "stores/interview.js";
+import { storeToRefs } from "pinia";
 
 const props = defineProps({
   detailList: Array, // 예상 질문 생성 위한 자기소개서의 내용
   cvId: Number,
+  cvTitle: String,
 });
 
 const cvStore = useCvStore();
@@ -136,24 +140,25 @@ const router = useRouter();
 
 const newQuestion = ref("");
 const questions = ref([]);
-const questionCount = ref(null);
+const questionCount = ref(10);
 const cvLoading = computed(() => cvStore.loading);
+const interviewStore = useInterviewStore();
 
 const jobGroups = [
-  "백엔드/서버개발",
-  "프론트엔드",
-  "앱개발",
-  "게임개발",
-  "데이터 사이언티스트",
-  "빅 데이터 개발",
-  "데브옵스 개발",
-  "임베디드 소프트웨어 개발",
-  "정보보안",
-  "인공지능 개발",
-  "기타",
+  { label: "백엔드/서버개발", value: 0 },
+  { label: "프론트엔드", value: 1 },
+  { label: "앱개발", value: 2 },
+  { label: "게임개발", value: 3 },
+  { label: "데이터 사이언티스트", value: 4 },
+  { label: "빅 데이터 개발", value: 5 },
+  { label: "데브옵스 개발", value: 6 },
+  { label: "임베디드 소프트웨어 개발", value: 7 },
+  { label: "정보보안", value: 8 },
+  { label: "인공지능 개발", value: 9 },
+  { label: "기타", value: 10 },
 ];
 
-const selectedJob = ref("백엔드/서버개발");
+const selectedJob = ref(jobGroups[0]);
 
 // 질문 추가 함수. 최대 10개까지 등록 가능
 function addQuestion() {
@@ -166,7 +171,6 @@ function addQuestion() {
       message: "추가 질문은 최대 10개 입니다!",
       timeout: 300,
     });
-
     return;
   }
 
@@ -192,18 +196,11 @@ function startCv() {
     return;
   }
 
-  // 백엔드 /question/create 수정 전까진 content 만들어서 보냄, 자소서 id 받도록 수정되면 제거
-  const content = props.detailList
-    .map((elem) => `${elem.title} ${elem.content}`)
-    .join(" ");
-  // console.log(content);
-  console.log(props.cvId);
-
   cvStore
     .generateQuestions(
       questionCount.value,
-      content,
-      selectedJob.value,
+      props.cvId,
+      selectedJob.value.value,
       questions.value,
     )
     .then(() => {
@@ -215,8 +212,12 @@ function startCv() {
         timeout: 300,
         closeBtn: true,
       });
-
-      router.push("/interview"); // 면접 보는 화면으로 넘어감.
+      let dept = selectedJob.value.value;
+      let cvId = props.cvId;
+      router.push({
+        path: "/interview",
+        state: { dataObj: { cvId: cvId, dept: dept } },
+      });
     })
     .catch((err) => {
       console.log(err);

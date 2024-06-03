@@ -1,53 +1,85 @@
 <template>
   <q-card
-    class="q-mt-sm column flex-center items-stretch no-wrap relative-position"
+    class="column flex-center items-stretch no-wrap relative-position"
     style="height: 100%; width: 100%"
   >
     <q-icon
-      color="negative"
+      color="red"
       size="sm"
-      class="cursor-pointer absolute-top-right"
+      class="cursor-pointer absolute-top-left z-max"
       :name="outlinedDelete"
       @click="deleteCv"
     />
-    <q-card-section>
-      <div class="text-dark text-h4 text-center text-weight-bolder">
-        {{ props.title }}
-      </div>
-    </q-card-section>
-
-    <q-separator inset />
-
-    <q-scroll-area style="height: 80%">
-      <q-card-section
-        class="relative-position q-mt-sm"
-        v-for="(detail, idx) in detailList"
-        :key="idx"
-      >
-        <div class="text-subtitle2 text-primary absolute-top-left q-ml-md">
-          {{ detail.type }}
-        </div>
-        <div class="text-weight-bold text-h6">
-          {{ detail.title }}
-        </div>
+    <q-scroll-area style="height: 100%">
+      <div class="q-pb-xl q-pl-xl q-pr-xl q-mt-md custom-paper">
+        <q-input
+          :model-value="props.title"
+          input-class="text-weight-bold text-h5 text-center"
+          readonly
+        />
         <div
-          class="text-start text-dark text-body1"
-          style="white-space: pre-wrap"
-          v-html="detail.content"
-        ></div>
-        <q-separator />
-      </q-card-section>
+          v-for="(pair, index) in props.detailList"
+          :key="index"
+          :class="{
+            'relative-position': true,
+          }"
+        >
+          <q-expansion-item
+            default-opened
+            dense
+            dense-toggle
+            expand-icon-toggle
+            class="expansion-items"
+          >
+            <template v-slot:header>
+              <div class="q-gutter-x-none no-wrap full-width row">
+                <q-input
+                  class="col-11"
+                  :model-value="pair.title"
+                  :label="'문항' + (index + 1)"
+                  readonly
+                  input-class="text-weight-bold"
+                />
+              </div>
+            </template>
+            <span class="text-field">
+              <q-input
+                type="textarea"
+                :model-value="pair.content"
+                outlined
+                counter
+                readonly
+              />
+            </span>
+            <q-option-group
+              :model-value="pair.type"
+              :options="questionOptions"
+              inline
+              disable
+              size="xs"
+            />
+          </q-expansion-item>
+        </div>
+      </div>
     </q-scroll-area>
   </q-card>
 </template>
+
 <script setup>
-import { outlinedDelete } from "@quasar/extras/material-icons-outlined";
 import { useCvStore } from "src/stores/cv";
+import { outlinedDelete } from "@quasar/extras/material-icons-outlined";
+
 const props = defineProps({
   title: String,
   detailList: Array, // 예상 질문 생성 위한 자기소개서의 내용
   cvId: Number,
 });
+
+const questionOptions = [
+  { label: "인성 항목", value: "인성 항목" },
+  { label: "기술 항목", value: "기술 항목" },
+  { label: "기타", value: "기타" },
+];
 
 function deleteCv() {
   if (!confirm("삭제하시겠습니까?")) return;
@@ -55,3 +87,10 @@ function deleteCv() {
   useCvStore().deleteCv(props.cvId);
 }
 </script>
+
+<style lang="scss" scoped>
+.pair-form {
+  border-radius: 10px;
+  padding: 10px;
+}
+</style>

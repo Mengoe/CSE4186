@@ -49,7 +49,11 @@
                 v-model="showDialog[index]"
                 backdrop-filter="blur(4px);"
               >
-                <CvQuestion :cvId="cv.id" :detailList="cv.detailList" />
+                <CvQuestion
+                  :cvId="cv.id"
+                  :detailList="cv.detailList"
+                  :cvTitle="cv.title"
+                />
               </q-dialog>
             </q-item-section>
           </q-item>
@@ -93,9 +97,7 @@ const CV_PER_PAGE = 8;
 watch(currentPageNumber, fetchCvs);
 
 // get user's cv lists
-onMounted(() => {
-  fetchCvs();
-});
+fetchCvs();
 
 function fetchCvs() {
   cvStore.fetchAllCv(currentPageNumber.value, CV_PER_PAGE);

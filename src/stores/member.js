@@ -1,15 +1,15 @@
 import { defineStore } from "pinia";
 import { Cookies } from "quasar";
 import { ref } from "vue";
-import axios from "axios";
 import { api } from "boot/axios.js";
-import { setToken, removeToken } from "src/utils/cookies.js";
-
-const options = {
-  expires: "3d",
-  path: "/",
-  sameSite: "Lax",
-};
+import {
+  setToken,
+  removeToken,
+  getToken,
+  setUserId,
+  getUserId,
+} from "src/utils/cookies.js";
+import { useRouter } from "vue-router";
 
 export const useMemberStore = defineStore(
   "member",
@@ -17,11 +17,11 @@ export const useMemberStore = defineStore(
     const userId = ref(null);
     const loading = ref(false);
     const isLogin = ref(false);
+    const router = useRouter();
 
     function duplicateCheck(params) {
       return new Promise((resolve, reject) => {
-        const joinCheckAPI =
-          "http://ec2-3-39-165-26.ap-northeast-2.compute.amazonaws.com:8080/join/check";
+        const joinCheckAPI = "https://jobjourney.shop/join/check";
 
         axios
           .post(joinCheckAPI, JSON.stringify(params), {
@@ -36,36 +36,34 @@ export const useMemberStore = defineStore(
       });
     }
 
-    const addLoginInfo = async (res, loginObj) => {
+    const addLoginInfo = async (res) => {
       if (res.status == 200) {
         if (res.data.result === "success") {
-          const token = res.headers["authorization"].split(" ")[1];
-          setToken(loginObj.email, token);
+          if (res.headers.hasOwnProperty("authorization")) {
+            const token = res.headers["authorization"].split(" ")[1];
+            setToken(token);
+          }
           userId.value = res.data.body.userId;
+          setUserId(userId.value);
           isLogin.value = true;
-          console.log(userId.value);
         } else if (res.data.result === "fail") {
-          return Promise.reject("wrong info");
+          return Promise.reject("유효하지 않은 회원 정보입니다.");
         } else return Promise.reject("invalid resposne");
       } else return Promise.reject("invalid resposne");
     };
 
     const login = async (loginObj) => {
       const res = await api.post("/login", JSON.stringify(loginObj));
-      await addLoginInfo(res, loginObj);
+      await addLoginInfo(res);
     };
 
-    async function logout() {
+    const logout = async () => {
       removeToken();
       isLogin.value = false;
-    }
-    function autoLogin() {
-      if (verifyTokenExpiration()) isLogin.value = true;
-    }
+    };
 
     async function join(joinObj) {
-      const joinAPI =
-        "http://ec2-3-39-165-26.ap-northeast-2.compute.amazonaws.com:8080/join";
+      const joinAPI = "https://jobjourney.shop/join";
 
       // second. send join request
       try {
@@ -91,12 +89,37 @@ export const useMemberStore = defineStore(
       }
     }
 
-    const verifyTokenExpiration = () => {
-      const token = Cookies.has("access_token")
-        ? Cookies.get("access_token").userToken
-        : null;
-      return token != null;
-    };
+    async function verifyTokenExpiration() {
+      const userid = getUserId();
+      if (!userid) throw new Error("no userid info");
+      const accessToken = getToken();
+      if (accessToken) {
+        const res = await api.get("/token/check", {
+          headers: {
+            authorization: "Bearer " + accessToken,
+          },
+        });
+        console.log(res);
+        if (res.data.result === "success") {
+          if (res.headers.hasOwnProperty("authorization")) {
+            const auth = res.headers.authorization.split(" ");
+            if (auth[0] === "Bearer" && auth[1]) {
+              setToken(auth[1]);
+              userId.value = userid;
+              isLogin.value = true;
+              return;
+            }
+          } else {
+            userId.value = userid;
+            isLogin.value = true;
+            return;
+          }
+        }
+        logout();
+        throw new Error("failed validate token");
+      }
+    }
+
     return {
       addLoginInfo,
       login,
@@ -104,11 +127,11 @@ export const useMemberStore = defineStore(
       join,
       duplicateCheck,
       isLogin,
-      autoLogin,
+      verifyTokenExpiration,
       userId,
     };
   },
   {
-    persist: true,
+    persist: { enabled: true },
   },
 );

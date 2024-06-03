@@ -114,7 +114,7 @@ function getCommentsLength() {
 }
 
 #video {
-  filter: blur(5px);
+  filter: blur(10px);
 }
 
 .q-icon {

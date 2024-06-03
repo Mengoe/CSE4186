@@ -1,88 +1,124 @@
 <template>
-  <div class="flex-center">
-    <video id="video" ref="video" width="500px">
-      Video stream not available.
-    </video>
-    <div>
-      <q-btn-group>
-        <q-btn-dropdown
-          :icon="isAccessed.mic ? 'mic' : 'mic_off'"
-          @click="handleMicButton"
-          color="grey"
-          rounded
-          split
-        >
+  <div>
+    <div class="text-wsfont" style="z-index: 1">
+      <div
+        style="width: 30vw; aspect-ratio: 16/10; min-width: 350px"
+        class="bg-black"
+      >
+        <video id="video" ref="video" width="100%">
+          Video stream not available.
+        </video>
+      </div>
+      <div>
+        <q-btn-group flat unelevated>
           <q-btn-dropdown
-            icon="mic_none"
-            :label="isAccessed.mic ? selectedMic.label : '권한 없음'"
-            :disable="!isAccessed.mic"
-            color="grey"
+            :icon="isAccessed.mic ? 'mic' : 'mic_off'"
+            @click="handleMicButton"
+            color="indigo-12"
+            rounded
+            split
+            size="12px"
+            class="q-mr-sm q-mb-sm"
           >
-            <q-list>
-              <q-item
-                clickable
-                v-for="device in MicDevices"
-                :key="device.deviceId"
-              >
-                <q-item-section>
-                  <q-item-label>{{ device.label }}</q-item-label>
-                </q-item-section>
-              </q-item>
-            </q-list>
+            <q-btn-dropdown
+              icon="mic_none"
+              :label="isAccessed.mic ? selectedMic.label : '권한 없음'"
+              :disable="!isAccessed.mic"
+              color="grey"
+            >
+              <q-list>
+                <q-item
+                  clickable
+                  v-for="device in MicDevices"
+                  :key="device.deviceId"
+                >
+                  <q-item-section>
+                    <q-item-label>{{ device.label }}</q-item-label>
+                  </q-item-section>
+                </q-item>
+              </q-list>
+            </q-btn-dropdown>
           </q-btn-dropdown>
-        </q-btn-dropdown>
 
-        <q-btn-dropdown
-          :icon="isAccessed.camera ? 'videocam' : 'videocam_off'"
-          split
-          color="grey"
-          rounded
-          @click="handleCamButton"
-        >
           <q-btn-dropdown
-            icon="videocam"
-            :label="isAccessed.camera ? selectedCam.label : '권한 없음'"
-            :disable="!isAccessed.camera"
-            color="grey"
+            :icon="isAccessed.camera ? 'videocam' : 'videocam_off'"
+            size="12px"
+            rounded
+            split
+            color="indigo-12"
+            @click="handleCamButton"
+            class="q-mr-sm q-mb-sm"
           >
-            <q-list>
-              <q-item
-                clickable
-                v-for="device in CamDevices"
-                :key="device.deviceId"
-              >
-                <q-item-section>
-                  <q-item-label>{{ device.label }}</q-item-label>
-                </q-item-section>
-              </q-item>
-            </q-list>
+            <q-btn-dropdown
+              icon="videocam"
+              :label="isAccessed.camera ? selectedCam.label : '권한 없음'"
+              :disable="!isAccessed.camera"
+              color="grey"
+            >
+              <q-list>
+                <q-item
+                  clickable
+                  v-for="device in CamDevices"
+                  :key="device.deviceId"
+                >
+                  <q-item-section>
+                    <q-item-label>{{ device.label }}</q-item-label>
+                  </q-item-section>
+                </q-item>
+              </q-list>
+            </q-btn-dropdown>
           </q-btn-dropdown>
-        </q-btn-dropdown>
-        <q-btn
-          :label="isStarted ? '면접 종료하기' : '면접 시작하기'"
-          :icon="isStarted ? 'done_outline' : 'play_arrow'"
-          @click="startFinishInterview"
-        />
-        <q-btn
-          :label="isStopped ? '면접 계속하기' : '면접 중지하기'"
-          :icon="isStopped ? 'replay' : 'pause'"
-          @click="resumePauseInterview"
-        />
-      </q-btn-group>
+          <q-btn
+            :icon="isStopped ? 'replay' : 'pause'"
+            @click="resumePauseInterview"
+            color="red"
+            outline
+            size="10px"
+            round
+            v-if="isStarted"
+            class="q-mb-sm"
+            :disable="!isAnswer"
+          >
+            <q-tooltip anchor="top middle" v-if="!isAnswer">
+              답변 시간에 일시정지를 다시 시도해주세요.
+            </q-tooltip>
+          </q-btn>
+        </q-btn-group>
+        <div class="row flex-center q-mt-xl">
+          <q-btn
+            @click="startFinishInterview"
+            size="xl"
+            color="deep-purple-14"
+            rounded
+            class="q-mr-sm q-mb-sm"
+            :disable="!isStarted && (!isAccessed.mic || !isAccessed.camera)"
+            ><span style="text-color: white">{{
+              isStarted ? "모의 면접 종료하기" : "모의 면접 시작하기"
+            }}</span>
+            <q-tooltip
+              anchor="top middle"
+              v-if="!isStarted && (!isAccessed.mic || !isAccessed.camera)"
+            >
+              마이크 및 카메라 권한을 허용해주세요
+            </q-tooltip>
+          </q-btn>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 <script setup>
 import { ref, watch, onUnmounted } from "vue";
-import { useRouter } from "vue-router";
+import { useRouter, useRoute } from "vue-router";
 import { useCvStore } from "stores/cv.js";
 import { useInterviewStore } from "stores/interview.js";
 import { useMemberStore } from "stores/member.js";
 import { storeToRefs } from "pinia";
-import { api } from "boot/axios.js";
+import tokenApi from "src/utils/interceptor.js";
 import { uploadToBucket } from "src/utils/aws.js";
 import { v4 as uuidv4 } from "uuid";
 import { getToken } from "src/utils/cookies.js";
+import RecordRTC from "recordrtc";
 
 const MicDevices = ref(null);
 const CamDevices = ref(null);
@@ -93,12 +129,10 @@ const MicStream = ref(null);
 const CamStream = ref(null);
 let mediaStream = null;
 let recorder = null;
-let recorded = [];
 const router = useRouter();
+const route = useRoute();
 let finalBlob = null;
 const video = ref(null);
-const audioSrc = ref(null);
-const audio = ref(null);
 
 const interviewStore = useInterviewStore();
 const {
@@ -110,8 +144,13 @@ const {
   saveFinished,
   title,
   count,
+  turn,
+  followUp,
+  isAnswer,
 } = storeToRefs(interviewStore);
-
+const { dataObj } = history.state;
+const dept = dataObj.dept;
+const cvId = dataObj.cvId;
 interviewStore.$reset();
 
 const memberStore = useMemberStore();
@@ -119,12 +158,13 @@ const { userId } = storeToRefs(memberStore);
 
 const cvStore = useCvStore();
 const { questions } = storeToRefs(cvStore);
-const audioContext = new AudioContext();
-const questionStreamDestination = audioContext.createMediaStreamDestination();
+let audioContext = null;
+let questionStreamDestination = null;
 let audioBufferSource = null;
-let questionRecorder = null;
+let answerRecorder = null;
+let prevChat = null;
 
-const emit = defineEmits(["CamStreamChanged"]);
+const emit = defineEmits(["startTimer"]);
 watch(CamStream, () => {
   if (CamStream.value) {
     if (!video.value.paused) video.value.pause();
@@ -148,34 +188,32 @@ const uploadVideoUrl = async (fileUrl) => {
       link: fileUrl,
       userId: userId.value,
     };
-    const accessToken = "Bearer " + getToken();
-    const res = await api.post("/video", data, {
-      headers: {
-        authorization: accessToken,
-      },
-    });
-    console.log(res);
+    const res = await tokenApi.post("/video", data);
   } catch (err) {
     return Promise.reject(err);
   }
 };
 
-watch(isSaved, async () => {
-  if (isSaved.value) {
-    try {
-      const filename =
-        "video_" + userId.value + "/" + generateRandomString() + ".webm";
-      const file = new File([finalBlob], filename, { type: "video/webm" });
-      const keyString = await uploadToBucket(file, filename);
-      await uploadVideoUrl(keyString);
-      saveFinished.value = true;
-    } catch (err) {
-      console.log(err);
-      alert("동영상 저장에 실패했습니다.");
-      saveFinished.value = true;
+watch(
+  isSaved,
+  async () => {
+    if (isSaved.value) {
+      try {
+        const filename =
+          "video_" + userId.value + "/" + generateRandomString() + ".webm";
+        const file = new File([finalBlob], filename, { type: "video/webm" });
+        const keyString = await uploadToBucket(file, filename);
+        await uploadVideoUrl(keyString);
+        saveFinished.value = true;
+      } catch (err) {
+        console.log(err);
+        alert("동영상 저장에 실패했습니다.");
+        saveFinished.value = true;
+      }
     }
-  }
-});
+  },
+  { immediate: true },
+);
 
 const handleMicButton = () => {
   if (!isAccessed.value.mic) {
@@ -280,7 +318,7 @@ const handleMicPermission = (permission) => {
 const handleCamPermission = (permission) => {
   if (permission.state == "granted") {
     navigator.mediaDevices
-      .getUserMedia({ video: true })
+      .getUserMedia({ video: { aspectRatio: 16 / 10 } })
       .then((stream) => {
         setCam(stream);
       })
@@ -298,7 +336,7 @@ async function init() {
       audio: {
         echoCancellation: true,
       },
-      video: true,
+      video: { aspectRatio: 16 / 10 },
     })
     .then(setMedias)
     .catch((err) => {
@@ -327,68 +365,32 @@ async function init() {
     });
 }
 
-const handleDataAvailable = (event) => {
-  if (event.data.size > 0) {
-    console.log("pushed!");
-    console.log(event.data.size);
-    recorded.push(event.data);
-  }
-};
-
 const setRecorder = async () => {
   let videoTracks = CamStream.value.getVideoTracks();
-  let audioTracks = MicStream.value.getAudioTracks();
-  let mediaTracks = [...videoTracks, ...audioTracks];
-  mediaStream = new MediaStream(mediaTracks);
-  recorder = new MediaRecorder(mediaStream, {
-    mimeType: "video/webm",
-  });
-  recorder.ondataavailable = handleDataAvailable;
-  recorder.onstop = () => {
-    combineBlobs(recorded).then((finalBlob) => {
-      videoUrl.value = URL.createObjectURL(finalBlob);
-
-      isFinished.value = true;
-      const a = document.createElement("a");
-      a.href = videoUrl.value;
-      a.download = finalBlob;
-
-      // 링크를 클릭하여 다운로드 시작
-      document.body.appendChild(a);
-      a.click();
-
-      // 링크 엘리먼트 제거
-      document.body.removeChild(a);
-      mediaStream.getTracks().forEach(function (track) {
-        track.stop();
-      });
-      audioContext.close();
-      isStarted.value = false;
-      isStopped.value = false;
-    });
-  };
-  recorder.onpause = () => {
-    recorder.requestData();
-  };
-  let questionStream = new MediaStream([
+  let micAudio = audioContext.createMediaStreamSource(MicStream.value);
+  micAudio.connect(questionStreamDestination);
+  let mediaTracks = [
+    ...videoTracks,
     questionStreamDestination.stream.getAudioTracks()[0],
-    CamStream.value.getVideoTracks()[0],
-  ]);
-  questionRecorder = new MediaRecorder(questionStream, {
+  ];
+  mediaStream = new MediaStream(mediaTracks);
+  recorder = RecordRTC(mediaStream, {
+    type: "video",
     mimeType: "video/webm",
+    audioBitsPerSecond: 128000,
   });
-  questionRecorder.ondataavailable = handleDataAvailable;
-  questionRecorder.onpause = () => {
-    questionRecorder.requestData();
-  };
-
-  audioContext.resume();
+  answerRecorder = new RecordRTC(MicStream.value, {
+    type: "audio",
+    mimeType: "audio/webm",
+  });
 };
 
 const startInterview = () => {
+  audioContext = new AudioContext();
+  questionStreamDestination = audioContext.createMediaStreamDestination();
   setRecorder()
     .then(() => {
-      //recorder.start();
+      recorder.startRecording();
       isStopped.value = false;
       isStarted.value = true;
     })
@@ -399,13 +401,15 @@ const startInterview = () => {
 
 const resumeInterview = () => {
   mediaStream.getTracks().forEach((track) => (track.enabled = true));
-  recorder.resume();
+  if (answerRecorder.state === "paused") answerRecorder.resumeRecording();
+  recorder.resumeRecording();
   isStopped.value = false;
 };
 
 const pauseInterview = () => {
   mediaStream.getTracks().forEach((track) => (track.enabled = false));
-  recorder.pause();
+  if (answerRecorder.state === "recording") answerRecorder.pauseRecording();
+  recorder.pauseRecording();
   isStopped.value = true;
 };
 
@@ -414,25 +418,16 @@ const resumePauseInterview = () => {
 };
 
 const finishInterview = () => {
-  recorder.stop();
-  questionRecorder.stop();
-};
-async function combineBlobs(blobs) {
-  const arrayBuffers = await Promise.all(
-    blobs.map((blob) => blob.arrayBuffer()),
-  );
-  const totalByteLength = arrayBuffers.reduce(
-    (acc, curr) => acc + curr.byteLength,
-    0,
-  );
-  const combinedArrayBuffer = new Uint8Array(totalByteLength);
-  let offset = 0;
-  arrayBuffers.forEach((buffer) => {
-    combinedArrayBuffer.set(new Uint8Array(buffer), offset);
-    offset += buffer.byteLength;
+  recorder.stopRecording(() => {
+    finalBlob = recorder.getBlob();
+    videoUrl.value = recorder.toURL();
   });
-  return new Blob([combinedArrayBuffer], { type: "video/webm" });
-}
+  isFinished.value = true;
+  mediaStream.getTracks().forEach(function (track) {
+    track.stop();
+  });
+  audioContext.close();
+};
 
 const startFinishInterview = () => {
   isStarted.value ? finishInterview() : startInterview();
@@ -448,31 +443,115 @@ function base64ToArrayBuffer(base64) {
   return bytes.buffer;
 }
 
-function createAudioBufferSource(audioBuffer) {
-  audioBufferSource = audioContext.createBufferSource();
+const notRecordAnswer = () => {
+  MicStream.value.getAudioTracks()[0].enabled = true;
+  isAnswer.value = true;
+};
+
+const recordAnswer = () => {
+  MicStream.value.getAudioTracks()[0].enabled = true;
+  isAnswer.value = true;
+  answerRecorder.reset();
+  answerRecorder.startRecording();
+};
+function createAudioBufferSource(audioBuffer, isRecorded) {
+  let audioBufferSource = audioContext.createBufferSource();
   audioBufferSource.buffer = audioBuffer;
   audioBufferSource.connect(questionStreamDestination);
   audioBufferSource.connect(audioContext.destination);
-  audioBufferSource.onended = () => {
-    questionRecorder.pause();
-    recorder.state === "inactive" ? recorder.start() : recorder.resume();
-  };
+  audioBufferSource.onended = isRecorded ? recordAnswer : notRecordAnswer;
   return audioBufferSource;
 }
 
-watch((count, isStarted), () => {
-  if (isStarted.value) {
-    const audioData = base64ToArrayBuffer(questions.value[count.value].audio);
-    audioContext.decodeAudioData(audioData).then((audioBuffer) => {
-      let audioBufferSource = createAudioBufferSource(audioBuffer);
-      if (recorder.state != "inactive") recorder.pause();
-      questionRecorder.state === "inactive"
-        ? questionRecorder.start()
-        : questionRecorder.resume();
-      audioBufferSource.start();
+function playQuestion(base64Data) {
+  let audioData = base64ToArrayBuffer(base64Data);
+  audioContext.decodeAudioData(audioData).then((audioBuffer) => {
+    audioBufferSource = createAudioBufferSource(
+      audioBuffer,
+      questions.value[count.value].turn - 1 > turn.value,
+    );
+    MicStream.value.getAudioTracks()[0].enabled = false;
+    audioBufferSource.start();
+    emit("startTimer");
+  });
+}
+
+watch(
+  [count, isStarted],
+  () => {
+    if (isStarted.value) {
+      if (count.value < questions.value.length) {
+        playQuestion(questions.value[count.value].audio);
+      } else finishInterview();
+    }
+  },
+  { immediate: true },
+);
+
+const blobToBase64 = async (blob) => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result.split(",")[1]);
+    reader.onerror = (err) => reject(err);
+    reader.readAsDataURL(blob);
+  });
+};
+
+const setPrevChat = () => {
+  prevChat = [
+    {
+      role: "system",
+      content: questions.value[count.value].question,
+    },
+  ];
+};
+
+const getNextQuestion = () => {
+  followUp.value =
+    "답변을 듣고 꼬리 질문을 생성 중입니다. 잠시 후 질문이 나타납니다.";
+  answerRecorder.stopRecording(() => {
+    blobToBase64(answerRecorder.getBlob()).then((base64Data) => {
+      if (turn.value == 1) setPrevChat();
+      const body = {
+        turn: turn.value - 1,
+        selfIntroductionId: cvId,
+        deptNum: dept,
+        questions: prevChat,
+        userAudio: base64Data,
+      };
+
+      tokenApi
+        .post("/question/followUp", body)
+        .then((res) => {
+          console.log(res);
+          let followUpQuestion = res.data.body.followUps[0];
+          followUp.value = followUpQuestion[0].Text;
+          prevChat = res.data.body.messages;
+          prevChat.push({ role: "system", content: followUp.value });
+          playQuestion(followUpQuestion[1].Audio);
+        })
+        .catch((err) => {
+          console.log(err);
+        });
     });
-  }
-});
+  });
+};
+
+watch(
+  turn,
+  () => {
+    if (isStarted.value && turn.value != 0) {
+      if (answerRecorder.getState() != "inactive") getNextQuestion();
+      else {
+        turn.value = 0;
+        count.value++;
+      }
+    }
+  },
+  {
+    immediate: true,
+  },
+);
 
 defineOptions({
   name: "InterviewPage",

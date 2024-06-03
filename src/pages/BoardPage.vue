@@ -13,7 +13,7 @@
   </q-page>
 </template>
 <script setup>
-import { ref, onMounted, computed, watch } from "vue";
+import { ref, computed, watch } from "vue";
 import { useBoardStore } from "stores/board.js";
 import { useRoute, useRouter } from "vue-router";
 import BoardHeader from "components/BoardHeader.vue";
@@ -48,11 +48,31 @@ watch(
   },
 );
 
+const jobGroups = [
+  "",
+  "BE",
+  "FE",
+  "AP",
+  "GM",
+  "DS",
+  "BD",
+  "DV",
+  "EM",
+  "SE",
+  "AI",
+  "ET",
+];
+
 // mount시 현재 페이지에 해당하는 게시글 조회
-onMounted(() => {
+function setPosts() {
   let params = { page: currentPageNumber.value, size: POST_PER_PAGE };
+  let fieldIndex = 0;
 
   if (route.query.searchBy || route.query.q) {
+    let tmp = jobGroups.indexOf(route.query.q);
+
+    fieldIndex = tmp > 0 ? tmp : 0;
+
     isSearchRequested = true;
     searchBy = route.query.searchBy;
     q = route.query.q;
@@ -61,8 +81,12 @@ onMounted(() => {
     params.q = q;
   }
 
+  localStorage.setItem("selectedJob", fieldIndex);
+
   boardStore.fetchPosts(params);
-});
+}
+
+setPosts();
 
 function fetchPosts() {
   let params = { page: currentPageNumber.value, size: POST_PER_PAGE };

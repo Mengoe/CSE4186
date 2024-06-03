@@ -6,13 +6,13 @@
         <GradientBackground class="gradient-background" />
       </div>
       <div class="whole-content">
-        <div class="main-logo">
+        <div class="main-logo-home">
           <a href="/">
             <img
               src="../assets/main-logo.png"
               alt="Main Logo"
               height="auto"
-              width="60px"
+              width="55px"
             />
           </a>
           <div class="mkr">your interview journey</div>
@@ -227,12 +227,10 @@ function handleFocus(index) {
   }
 }
 
-.main-logo {
+.main-logo-home {
   position: absolute;
-  top: 20px;
-  left: 20px;
-  width: 400px;
-  height: 60px;
+  top: 10px;
+  left: 10px;
   display: flex;
 }
 

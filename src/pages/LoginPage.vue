@@ -1,9 +1,7 @@
 <template>
   <q-page class="relative-position bg-grey-1">
-    <div
-      class="container row justify-around items-center items-stretch absolute-center"
-    >
-      <div class="login-form flex flex-center">
+    <div class="container row justify-around absolute-center">
+      <div class="login-form flex flex-center" style="flex-shrink: 1">
         <div class="text-weight-bold text-h4">Sign In</div>
         <SocialLoginButton />
         <div class="text-grey-6">또는 이메일로 로그인</div>
@@ -107,8 +105,8 @@ const emailError = computed(() => {
 });
 async function onSubmit() {
   const loginObj = {
-    email: this.email,
-    password: this.password,
+    email: email.value,
+    password: password.value,
   };
   useMemberStore()
     .login(loginObj)
@@ -116,10 +114,7 @@ async function onSubmit() {
       router.push(route.query.redirect || "/");
     })
     .catch((err) => {
-      console.log("here");
       alert("로그인에 실패하셨습니다.다시 시도해주세요.");
-      console.log(err);
-      router.push("/members/login");
     });
 }
 

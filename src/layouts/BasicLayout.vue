@@ -1,19 +1,20 @@
 <template>
   <q-layout view="hhh LpR fff">
-    <q-header bordered class="header-class">
+    <q-header bordered class="header-class text-wsfont">
       <div class="top-menu">
         <a href="/">
           <img
             src="../assets/main-logo.png"
             alt="AI Interview Logo"
             class="main-logo"
+            style="z-index: 1"
           />
         </a>
         <q-toolbar>
           <q-tabs
             indicator-color="transparent"
             active-color="white"
-            class="tab-menu"
+            class="tab-menu l70"
             align="left"
           >
             <q-btn-dropdown
@@ -46,13 +47,13 @@
               class="text-black"
             />
           </q-tabs>
+
           <q-btn
-            v-if="isLogin == false"
-            label="login/join"
-            class="text-black"
-            to="/members/login"
+            label="로그아웃"
+            rounded
+            class="text-black login-button"
+            @click="logOut()"
           />
-          <q-btn v-else label="logout" class="text-black" @click="logOut()" />
         </q-toolbar>
       </div>
     </q-header>
@@ -91,7 +92,22 @@ function logOut() {
   useMemberStore()
     .logout()
     .then(() => {
-      router.go(0);
+      router.replace("/");
     });
 }
 </script>
+
+<style scoped>
+.l70 {
+  position: absolute;
+  left: 70px;
+}
+
+.login-button {
+  width: 125px;
+  height: 36px;
+  position: absolute;
+  top: 10px;
+  right: 10px;
+}
+</style>

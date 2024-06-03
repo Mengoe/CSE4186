@@ -1,6 +1,8 @@
 import {
   PutObjectCommand,
   GetObjectCommand,
+  DeleteObjectCommand,
+  ListObjectsV2Command,
   S3Client,
 } from "@aws-sdk/client-s3";
 const bucketName = process.env.AWS_BUCKET_NAME;
@@ -26,6 +28,16 @@ const uploadToBucket = async (body, keyname) => {
   return keyname;
 };
 
+const deleteVideo = async (keyname) => {
+  const command = new DeleteObjectCommand({
+    Bucket: bucketName,
+    Key: keyname,
+  });
+
+  const data = await client.send(command);
+  return data; // For unit tests.
+};
+
 const getVideo = async (keyname) => {
   const command = new GetObjectCommand({
     Bucket: bucketName,
@@ -33,9 +45,8 @@ const getVideo = async (keyname) => {
     ContentType: "video/webm",
   });
   const response = await client.send(command);
-  console.log(response);
   return response.Body;
   //var videoBlob = new Blob([data.Body], { type: 'video/mp4' }); video 틀 때 blob으로 변경 후 src에 넣어야 함
 };
 
-export { uploadToBucket, getVideo };
+export { uploadToBucket, getVideo, deleteVideo };

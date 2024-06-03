@@ -2,7 +2,7 @@
   "name": "cv-interview",
   "version": "0.0.1",
   "description": "website for preparing job interview based on cv",
-  "productName": "CVInterview",
+  "productName": "JobJourney",
   "author": "sogang-capstone-undergraduates",
   "type": "module",
   "private": true,
@@ -16,12 +16,15 @@
   "dependencies": {
     "@aws-sdk/client-s3": "^3.574.0",
     "@quasar/extras": "^1.16.4",
+    "@types/recordrtc": "^5.6.14",
     "axios": "^1.2.1",
     "pinia": "^2.0.11",
-    "pinia-plugin-persistedstate": "^3.2.1",
+    "pinia-plugin-persist": "^1.0.0",
     "quasar": "^2.6.0",
+    "recordrtc": "^5.6.2",
     "uuid": "^9.0.1",
     "vue": "^3.4.18",
+    "vue-circular-count-down-timer": "^2.0.0",
     "vue-router": "^4.0.0"
   },
   "devDependencies": {

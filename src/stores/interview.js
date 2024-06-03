@@ -1,3 +1,4 @@
+import { DeleteBucketIntelligentTieringConfigurationCommand } from "@aws-sdk/client-s3";
 import { defineStore } from "pinia";
 import { ref } from "vue";
 export const useInterviewStore = defineStore("interview", () => {
@@ -9,6 +10,9 @@ export const useInterviewStore = defineStore("interview", () => {
   const saveFinished = ref(false);
   const title = ref("");
   const count = ref(0);
+  const turn = ref(0);
+  const followUp = ref("");
+  const isAnswer = ref(false);
 
   function $reset() {
     videoUrl.value = null;
@@ -19,6 +23,9 @@ export const useInterviewStore = defineStore("interview", () => {
     saveFinished.value = false;
     title.value = "";
     count.value = 0;
+    turn.value = 0;
+    isAnswer.value = false;
+    DeleteBucketIntelligentTieringConfigurationCommand.value = 0;
   }
 
   return {
@@ -31,5 +38,8 @@ export const useInterviewStore = defineStore("interview", () => {
     $reset,
     title,
     count,
+    turn,
+    followUp,
+    isAnswer,
   };
 });
