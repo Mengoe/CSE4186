@@ -17,7 +17,9 @@
               @click="deleteInterview(interview.id, interview.link)"
             />
             <q-item-section>
-              <q-item-label>{{ interview.title }}</q-item-label>
+              <q-btn color="tansparent" flat @click="onClick">
+                {{ interview.title }}
+              </q-btn>
               <q-item-label caption>{{ interview.createdAt }}</q-item-label>
             </q-item-section>
           </q-item>
@@ -62,18 +64,13 @@ function deleteInterview(videoId, videoKey) {
       },
     })
     .then((res) => {
-      deleteVideo(videoKey)
-        .then((res) => {
-          alert("삭제되었습니다.");
-          router.go(0);
-        })
-        .catch((err) => {
-          alert("삭제에 실패했습니다.");
-          router.go(0);
-        });
+      deleteVideo(videoKey);
+    })
+    .then((res) => {
+      router.go(0);
     })
     .catch((err) => {
-      alert("삭제에 실패했습니다.");
+      alert("삭제 중 문제가 발생했습니다.");
       router.go(0);
     });
 }

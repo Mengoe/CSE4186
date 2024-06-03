@@ -108,7 +108,7 @@
   </div>
 </template>
 <script setup>
-import { ref, watch, onUnmounted } from "vue";
+import { ref, watch, onBeforeUnmount } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { useCvStore } from "stores/cv.js";
 import { useInterviewStore } from "stores/interview.js";
@@ -133,6 +133,7 @@ const router = useRouter();
 const route = useRoute();
 let finalBlob = null;
 const video = ref(null);
+let micAudio = null;
 
 const interviewStore = useInterviewStore();
 const {
@@ -367,7 +368,7 @@ async function init() {
 
 const setRecorder = async () => {
   let videoTracks = CamStream.value.getVideoTracks();
-  let micAudio = audioContext.createMediaStreamSource(MicStream.value);
+  micAudio = audioContext.createMediaStreamSource(MicStream.value);
   micAudio.connect(questionStreamDestination);
   let mediaTracks = [
     ...videoTracks,
@@ -379,6 +380,7 @@ const setRecorder = async () => {
     mimeType: "video/webm",
     audioBitsPerSecond: 128000,
   });
+  recorder.onstop;
   answerRecorder = new RecordRTC(MicStream.value, {
     type: "audio",
     mimeType: "audio/webm",
@@ -423,7 +425,14 @@ const finishInterview = () => {
     videoUrl.value = recorder.toURL();
   });
   isFinished.value = true;
+  if (micAudio) micAudio.disconnect();
   mediaStream.getTracks().forEach(function (track) {
+    track.stop();
+  });
+  MicStream.value.getTracks().forEach(function (track) {
+    track.stop();
+  });
+  CamStream.value.getTracks().forEach(function (track) {
     track.stop();
   });
   audioContext.close();
@@ -552,7 +561,9 @@ watch(
     immediate: true,
   },
 );
-
+onBeforeUnmount(() => {
+  if (videoUrl.value) URL.revokeObjectURL(videoUrl.value);
+});
 defineOptions({
   name: "InterviewPage",
 });
