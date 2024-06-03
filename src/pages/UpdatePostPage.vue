@@ -51,7 +51,7 @@
 import { ref, computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { useBoardStore } from "src/stores/board";
-import { outlinedTitle } from "@quasar/extras/material-icons-outlined";
+import { outlinedUploadFile } from "@quasar/extras/material-icons-outlined";
 import InterviewListModel from "src/components/InterviewListModal.vue";
 
 const boardStore = useBoardStore();
@@ -80,7 +80,7 @@ const additionalToolbarOption = computed(() => {
   return !isSelectedVideo.value
     ? {
         tip: "Upload my interview",
-        icon: "cloud_upload",
+        icon: outlinedUploadFile,
         label: "면접 영상 업로드",
         handler: fetchVideos,
       }
@@ -111,7 +111,6 @@ const videoId = ref(null);
 
 let postId;
 let post;
-const loading = computed(() => boardStore.loading);
 
 function fetchVideos() {
   videoFetchLoading.value = true;
