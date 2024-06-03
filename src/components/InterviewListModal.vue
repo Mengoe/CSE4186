@@ -1,7 +1,7 @@
 <template>
   <q-card class="q-pa-md" style="height: 100%; width: 100%">
     <q-card-section>
-      <h2 class="text-h5 text-center text-weight-bold">Interview List</h2>
+      <h2 class="text-h5 text-center text-weight-bold">지난 면접 기록</h2>
       <q-separator />
 
       <q-list separator>

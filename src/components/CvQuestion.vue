@@ -1,5 +1,16 @@
 <template>
-  <LoaderComponent v-if="cvLoading" fixed :zIndex="999" :size="5" />
+  <q-btn
+    v-if="cvLoading"
+    :loading="cvLoading"
+    color="primary"
+    style="width: 150px"
+    class="fixed-center z-max"
+  >
+    <template v-slot:loading>
+      <q-spinner-gears class="on-left" />
+      면접질문 생성중...
+    </template>
+  </q-btn>
   <q-card
     class="column flex-center items-stretch no-wrap text-wsfont shadow-11"
     style="height: 100%; width: 100%"
