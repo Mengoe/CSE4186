@@ -3,9 +3,9 @@
     v-if="cvLoading"
     :loading="cvLoading"
     color="primary"
-    style="width: 150px"
     class="fixed-center z-max"
-    size=""
+    size="lg"
+    style="width: 250px"
   >
     <template v-slot:loading>
       <q-spinner-gears class="on-left" />
@@ -237,3 +237,8 @@ function startCv() {
 cvStore.initLoading();
 emit("blockClosing", false);
 </script>
+<style lang="scss" scoped>
+.q-btn {
+  border-radius: 10px;
+}
+</style>
