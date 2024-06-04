@@ -119,6 +119,7 @@ const questionAnswerPairs = ref([{ title: "", content: "", type: "기타" }]);
 
 const loading = computed(() => cvStore.loading);
 const isDoneRegister = ref(false); // 자기소개서 등록 완료 됐는지를 나타내는 flag
+cvStore.initLoading();
 
 const questionOptions = [
   { label: "인성 항목", value: "인성 항목" },

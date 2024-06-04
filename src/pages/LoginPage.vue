@@ -1,11 +1,14 @@
 <template>
   <q-page class="relative-position bg-grey-1">
     <div class="container row justify-around absolute-center">
-      <div class="login-form flex flex-center" style="flex-shrink: 1">
-        <div class="text-weight-bold text-h4">Sign In</div>
+      <div
+        class="login-form column flex-center no-wrap"
+        style="box-sizing: border-box; gap: 20px"
+      >
+        <div class="text-weight-bold text-h4 q-pb-md">Sign In</div>
         <SocialLoginButton />
         <div class="text-grey-6">또는 이메일로 로그인</div>
-        <div class="q-pa-md q-gutter-y-md">
+        <div class="q-gutter-y-md">
           <q-input
             v-model="email"
             filled
@@ -126,7 +129,7 @@ defineOptions({
 .container {
   height: 80%;
   width: 70%;
-  border-radius: 10px;
+  border-radius: 15px;
   box-shadow:
     10px 10px 10px $grey-5,
     -15px -15px 15px white;
@@ -134,6 +137,7 @@ defineOptions({
   .login-form {
     flex: 1.8;
     background-color: $grey-1;
+    max-height: 100%;
   }
 
   .signup-form {
@@ -144,6 +148,6 @@ defineOptions({
 
 .btn {
   width: 170px;
-  height: 50px;
+  height: 30px;
 }
 </style>
