@@ -75,7 +75,6 @@ export const useCvStore = defineStore(
       }
     }
 
-    */
     async function fetchAllCv(page, size) {
       cvLists.value = [];
 

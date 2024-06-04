@@ -434,7 +434,10 @@ const finishInterview = () => {
     CamStream.value.getTracks().forEach(function (track) {
       track.stop();
     });
-    audioContext.close();
+    if (audioContext) {
+      audioContext.close();
+      audioContext = null;
+    }
     isFinished.value = true;
   });
 };
@@ -564,6 +567,20 @@ watch(
 );
 onBeforeUnmount(() => {
   if (videoUrl.value) URL.revokeObjectURL(videoUrl.value);
+  if (micAudio) micAudio.disconnect();
+  mediaStream.getTracks().forEach(function (track) {
+    track.stop();
+  });
+  MicStream.value.getTracks().forEach(function (track) {
+    track.stop();
+  });
+  CamStream.value.getTracks().forEach(function (track) {
+    track.stop();
+  });
+  if (audioContext) {
+    audioContext.close();
+    audioContext = null;
+  }
 });
 defineOptions({
   name: "InterviewPage",
