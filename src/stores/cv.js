@@ -41,8 +41,6 @@ export const useCvStore = defineStore(
         additionalQuestions,
       };
 
-      console.log(cvObj);
-
       loading.value = true;
       try {
         const response = await fetch(questionCreateAPI, {

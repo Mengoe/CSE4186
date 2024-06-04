@@ -119,6 +119,7 @@ import { uploadToBucket } from "src/utils/aws.js";
 import { v4 as uuidv4 } from "uuid";
 import { getToken } from "src/utils/cookies.js";
 import RecordRTC from "recordrtc";
+import fixWebmDuration from "webm-duration-fix";
 
 const MicDevices = ref(null);
 const CamDevices = ref(null);
@@ -420,22 +421,25 @@ const resumePauseInterview = () => {
 };
 
 const finishInterview = () => {
-  recorder.stopRecording(() => {
-    finalBlob = recorder.getBlob();
-    videoUrl.value = recorder.toURL();
+  recorder.stopRecording(async () => {
+    finalBlob = await fixWebmDuration(recorder.getBlob());
+    videoUrl.value = URL.createObjectURL(finalBlob);
+    if (micAudio) micAudio.disconnect();
+    mediaStream.getTracks().forEach(function (track) {
+      track.stop();
+    });
+    MicStream.value.getTracks().forEach(function (track) {
+      track.stop();
+    });
+    CamStream.value.getTracks().forEach(function (track) {
+      track.stop();
+    });
+    if (audioContext) {
+      audioContext.close();
+      audioContext = null;
+    }
+    isFinished.value = true;
   });
-  isFinished.value = true;
-  if (micAudio) micAudio.disconnect();
-  mediaStream.getTracks().forEach(function (track) {
-    track.stop();
-  });
-  MicStream.value.getTracks().forEach(function (track) {
-    track.stop();
-  });
-  CamStream.value.getTracks().forEach(function (track) {
-    track.stop();
-  });
-  audioContext.close();
 };
 
 const startFinishInterview = () => {
@@ -563,6 +567,20 @@ watch(
 );
 onBeforeUnmount(() => {
   if (videoUrl.value) URL.revokeObjectURL(videoUrl.value);
+  if (micAudio) micAudio.disconnect();
+  mediaStream.getTracks().forEach(function (track) {
+    track.stop();
+  });
+  MicStream.value.getTracks().forEach(function (track) {
+    track.stop();
+  });
+  CamStream.value.getTracks().forEach(function (track) {
+    track.stop();
+  });
+  if (audioContext) {
+    audioContext.close();
+    audioContext = null;
+  }
 });
 defineOptions({
   name: "InterviewPage",
