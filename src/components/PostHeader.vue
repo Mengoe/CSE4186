@@ -113,8 +113,6 @@ function deletePost() {
 }
 
 function submitReport() {
-  if (!confirm("신고하시겠습니까?")) return;
-
   boardStore.submitReport({
     reportType: "post",
     userId,
