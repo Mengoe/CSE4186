@@ -110,7 +110,7 @@ const videoLink = ref(null); // 사용자가 선택한 비디오의 링크
 const videoTitle = ref(null);
 const videoId = ref(null);
 
-function addPost() {
+async function addPost() {
   const jobId =
     jobFields.value.findIndex((ele) => ele.field == selectedJob.value) + 1;
 
@@ -123,7 +123,8 @@ function addPost() {
   console.log(title.value, content.value, videoId.value);
   boardStore.addPost(title.value, content.value, videoId.value, jobId);
   alert("등록되었습니다. 게시글 목록으로 이동합니다.");
-  router.push("/board");
+  await router.push("/board");
+  router.go(0);
 }
 
 const INTERVIEW_PER_PAGE = 8;
