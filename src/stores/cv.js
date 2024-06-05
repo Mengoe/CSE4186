@@ -120,9 +120,7 @@ export const useCvStore = defineStore(
 
     function deleteCv(cvId) {
       tokenApi
-        .delete(`/selfIntroduction/${cvId}`, {
-          data: { id: cvId },
-        })
+        .delete(`/selfIntroduction/${cvId}`)
         .then((res) => {
           console.log(res);
           alert("삭제되었습니다."); // reload page

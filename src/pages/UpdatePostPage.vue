@@ -141,7 +141,7 @@ function selectedVideo(meta) {
   console.log(videoLink.value);
 }
 
-function updatePost() {
+async function updatePost() {
   const jobId =
     jobFields.value.findIndex((ele) => ele.field == selectedJob.value) + 1;
 
@@ -159,7 +159,8 @@ function updatePost() {
     jobId,
   );
   alert("수정되었습니다.");
-  router.push(`./${postId}`);
+  await router.push(`./${postId}`);
+  router.go(0);
 }
 
 function getPost() {

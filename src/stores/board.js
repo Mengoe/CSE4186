@@ -142,7 +142,7 @@ export const useBoardStore = defineStore("board", {
 
       this.loading = true;
       tokenApi
-        .put(`/post/${postId}`)
+        .put(`/post/${postId}`, JSON.stringify(updateObj))
         .then((res) => {
           console.log(res);
         })
