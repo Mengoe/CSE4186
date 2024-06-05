@@ -91,6 +91,7 @@ const additionalToolbarOption = computed(() => {
         label: videoTitle.value,
         handler: () => {
           isSelectedVideo.value = false;
+          videoId.value = null;
         },
       };
 });
